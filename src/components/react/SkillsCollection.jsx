@@ -90,6 +90,7 @@ export function SkillsCollection() {
 flex
 justify-center
 items-center
+flex-wrap
 `}
       style={{
         top: `0%`,
