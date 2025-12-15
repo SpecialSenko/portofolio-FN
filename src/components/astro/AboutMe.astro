@@ -4,103 +4,65 @@ import GridGen from "../../components/react/GridGen.jsx";
 ---
 
 <section
-	class="relative w-screen h-screen flex justify-center items-center-safe flex-col pointer-events-none"
+  id="hero"
+  class="relative w-screen h-screen flex justify-center items-center overflow-hidden"
 >
-	<div
-		id="background"
-		class="absolute w-full h-full flex justify-between z-[-10] pointer-events-auto overflow-x-hidden"
-	>
-		<div id="bg-left" class="background w-[50vw] h-full"></div>
-		<div id="bg-right" class="background w-[50vw] h-full"></div>
-		<div
-			id="bg-grid"
-			class="absolute w-full h-full grid grid-cols-10 overflow-hidden"
-		>
-			<GridGen client:only />
-		</div>
-	</div>
+  <!-- Background -->
+  <div
+    class="absolute inset-0 z-[-10] pointer-events-auto"
+  >
+    <div class="absolute inset-0 background"></div>
 
-	<div
-		id="content"
-		class="absolute w-screen h-screen flex justify-center items-center px-6 pointer-events-none"
-	>
-		<div
-			class="flex flex-col md:flex-row items-center gap-12 max-w-6xl w-full pointer-events-auto"
-		>
-			<!-- Left side: text -->
-			<div class="flex-1 space-y-4 pointer-events-auto">
-				<header class="pointer-events-auto pb-10 h-20">
-					<h1
-						class="text-4xl md:text-5xl font-bold mb-[-30px]"
-						data-cursor-style="line-text"
-					>
-						I’m
-						<span
-							class="bebas-neue-regular md:text-6xl text-8xl text-cyan-300 drop-shadow-[0_0_10px_#22d3ee] drop-shadow-[0_0_20px_#38bdf8] transition-all duration-300 ease-in-out hover:scale-110 hover:text-cyan-400 hover:drop-shadow-[0_0_15px_#22d3ee] hover:drop-shadow-[0_0_30px_#38bdf8]"
-							data-cursor-style="line-text"
-						>
-							Daffa
-						</span>
-					</h1>
+    <div
+      class="absolute inset-0 grid grid-cols-10 opacity-40"
+    >
+      <GridGen client:load />
+    </div>
+  </div>
 
-					<p
-						class="text-base md:text-lg text-gray-400 leading-snug mt-0"
-						data-cursor-style="line-text"
-					>
-						Developer from
-						<span
-							class="bebas-neue-regular bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent"
-							data-cursor-style="line-text"
-						>
-							Indonesia
-						</span> 🇮🇩
-					</p>
-				</header>
+  <!-- Hero Content -->
+  <div
+    id="hero-content"
+    class="relative flex flex-col items-center text-center px-6"
+  >
+    <h1
+      class="bebas-neue-regular text-[4rem] md:text-[7rem] tracking-widest uppercase
+             text-cyan-300 drop-shadow-[0_0_20px_#22d3ee]"
+      data-cursor-style="line-text"
+    >
+      Daffa
+    </h1>
 
-				<p
-					class="text-base md:text-lg leading-relaxed pointer-events-auto"
-					data-cursor-style="line-text"
-				>
-					I turn <span class="highlight">caffeine</span> into code, occasional bugs
-					into
-					<span class="highlight">features</span> (totally on purpose), and random
-					ideas into
-					<span class="highlight">full-stack projects</span>. From crafting
-					smooth UIs to building solid backends, I enjoy working across the
-					stack.
-				</p>
+    <p
+      class="mt-4 text-lg md:text-xl text-gray-300 tracking-wide opacity-80"
+      data-cursor-style="line-text"
+    >
+      Creative Web Developer • Interactive Experiences
+    </p>
 
-				<p
-					class="text-base md:text-lg leading-relaxed pointer-events-auto"
-					data-cursor-style="line-text"
-				>
-					This <span class="highlight">portfolio</span> was built from scratch with
-					<span class="highlight">Astro</span>, <span class="highlight"
-						>React</span
-					>,
-					<span class="highlight">Tailwind CSS</span>, <span class="highlight"
-						>Anime.js</span
-					>, and <span class="highlight">Lenis.js</span>. When I’m not coding,
-					I’m usually
-					<span class="highlight">gaming</span>, watching movies, or exploring
-					new tech.
-				</p>
-			</div>
+    <div class="mt-10 flex gap-6">
+      <a
+        href="#about"
+        class="px-8 py-3 border border-white/30 hover:border-cyan-300 transition uppercase tracking-wider"
+      >
+        Enter
+      </a>
 
-			<!-- Right side: image -->
-			<div
-				class="flex-1 flex justify-center md:justify-end pointer-events-auto"
-			>
-				<img
-					src="/my-icon.webp"
-					alt="Portrait of Daffa"
-					data-cursor-style="image"
-					class="rounded-xl shadow-lg max-w-xs pointer-events-auto"
-				/>
-			</div>
-		</div>
-	</div>
+      <a
+        href="#projects"
+        class="px-8 py-3 bg-white text-black hover:bg-opacity-80 transition uppercase tracking-wider"
+      >
+        Projects
+      </a>
+    </div>
+  </div>
+
+  <!-- Scroll Hint -->
+  <div class="absolute bottom-10 text-sm tracking-widest opacity-50">
+    Scroll
+  </div>
 </section>
+
 
 <!-- animation for the background -->
 <script>
