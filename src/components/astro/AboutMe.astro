@@ -104,48 +104,34 @@ import GridGen from "../../components/react/GridGen.jsx";
 
 <!-- animation for the background -->
 <script>
-	import { animate, onScroll, stagger } from "animejs";
-	import { GRID_HEIGHT, GRID_WIDTH } from "../react/GridGen";
+  import { animate, stagger, onScroll } from "animejs";
 
-	animate(".background", {
-		translate: "0 0",
-		duration: 500,
-		ease: "inOutBounce",
-		autoplay: onScroll({
-			onEnterForward: () => {
-				animate("#content header, #content p", {
-					opacity: 1,
-					translateY: 0,
-					filter: "blur(0px)",
-					delay: stagger(100, {
-						start: 400,
-					}),
-					duration: 500,
-					easing: "easeOutExpo",
+  // Initial state
+  animate("#hero-content > *", {
+    opacity: [0, 1],
+    translateY: [40, 0],
+    delay: stagger(200),
+    duration: 1200,
+    easing: "easeOutExpo",
+  });
 
-					onComplete: () => {
-						animate(".bg-cell", {
-							border: ["50px solid red", "1px solid rgba(96, 96, 96, 0.1)"],
-							backgroundColor: [
-								"rgba(255, 255, 255, 0.1)",
-								"rgba(255, 0, 0, 0.5)",
-								"rgba(255, 255, 255, 0)",
-							],
-							delay: stagger(65, {
-								grid: [GRID_WIDTH, GRID_HEIGHT],
-								from: "center",
-							}),
-							duration: 350,
-							easing: "inBounce",
-							autoplay: onScroll({
-								enter: "enter+=80 bottom-=80",
-							}),
-						});
-					},
-				});
-			},
+  // Background motion
+  animate(".background", {
+    scale: [1.1, 1],
+    opacity: [0, 1],
+    duration: 2000,
+    easing: "easeOutExpo",
+  });
 
-			enter: "enter+=600",
-		}),
-	});
+  // Grid subtle pulse on scroll
+  animate(".bg-cell", {
+    opacity: [0, 0.15],
+    delay: stagger(40),
+    duration: 800,
+    easing: "easeOutSine",
+    autoplay: onScroll({
+      enter: "enter bottom",
+    }),
+  });
 </script>
+
