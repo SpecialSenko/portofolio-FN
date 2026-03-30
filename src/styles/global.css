@@ -1,9 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bitcount:wght@100..900&family=Edu+NSW+ACT+Cursive:wght@400..700&family=Playwrite+AU+QLD:wght@100..400&family=Roboto+Flex:opsz,wght@8..144,100..1000&family=Special+Gothic+Expanded+One&display=swap");
-@import "tailwindcss";
+/* Removed problematic Google Fonts import - using local fonts instead */
 
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind base;
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind components;
+/* stylelint-disable-next-line at-rule-no-unknown */
+@tailwind utilities;
 * {
 	box-sizing: border-box;
 	transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+/* 🚫 REMOVE SCROLL — ONLY CHANGE */
+html,
+body {
+	height: 100%;
+	overflow: hidden;
+	touch-action: manipulation;
 }
 
 html {
@@ -12,7 +25,6 @@ html {
 
 body {
 	position: relative;
-	/* background-color: white; */
 	margin: 0;
 	padding: 0;
 	-webkit-font-smoothing: antialiased;
@@ -21,11 +33,6 @@ body {
 	background: linear-gradient(270deg, #0f0e1a, #0a0a23, #000000);
 	background-size: 600% 600%;
 	animation: gradientShift 20s ease infinite;
-}
-
-html,
-body {
-	touch-action: manipulation;
 }
 
 button,
@@ -134,29 +141,67 @@ html.lenis body {
 }
 
 @keyframes gradientShift {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
 }
 
 /* Tooltip animations */
 @keyframes tooltipOpen {
-	from { 
-		transform: scale(0.95); 
-		opacity: 0; 
-	}
-	to { 
-		transform: scale(1); 
-		opacity: 1; 
-	}
+	from { transform: scale(0.95); opacity: 0; }
+	to { transform: scale(1); opacity: 1; }
 }
 
 .animate-tooltipOpen {
 	animation: tooltipOpen 0.2s ease-out;
+}
+@layer utilities {
+    .animate-card-entry {
+        animation: cardPeek 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+}
+
+@keyframes cardPeek {
+    0% {
+        transform: rotate(0deg) translate(0, 0);
+        opacity: 0;
+    }
+    100% {
+        /* This matches the tilt and offset in your sketch */
+        transform: rotate(-15deg) translate(-12px, -10px);
+        opacity: 1;
+    }
+}
+
+/* Optional: Smooth floating animation after it enters */
+@keyframes cardFloat {
+    0%, 100% { transform: rotate(-15deg) translate(-12px, -10px); }
+    50% { transform: rotate(-18deg) translate(-14px, -14px); }
+}
+
+.floating-card {
+    animation: cardFloat 4s ease-in-out infinite;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  /* Add padding to the container so scaled cards don't cut off */
+  .gallery-padding {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  html, body {
+    overflow: hidden;
+  }
+  
+  .slide {
+    min-height: 100svh;
+    height: 100svh;
+  }
 }

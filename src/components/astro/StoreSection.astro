@@ -1,0 +1,753 @@
+---
+import {
+  PHYSICAL_ORDER_REDIRECT_PATH,
+  storeItems,
+  storeTabs,
+} from "../../data/storeConfig";
+---
+
+<section data-store-section class="store-showcase">
+  <div class="store-shell">
+    <div class="store-topbar">
+      <div class="store-search" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+        <span>Browse FN's collection</span>
+      </div>
+    </div>
+
+    <div class="store-nav" role="tablist" aria-label="Store categories">
+      {storeTabs.map((tab, index) => (
+        <button
+          type="button"
+          class={`store-chip ${index === 0 ? "is-active" : ""}`}
+          data-store-tab={tab.id}
+          role="tab"
+          aria-selected={index === 0 ? "true" : "false"}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+
+    <div class="store-panels">
+      {storeTabs.map((tab, index) => (
+        <div
+          class={`store-panel ${index === 0 ? "is-active" : ""}`}
+          data-store-panel={tab.id}
+          role="tabpanel"
+        >
+          <div class="store-grid">
+            {storeItems[tab.id].map((item) => (
+              item.kind === "external" ? (
+                <a class="store-card" href={item.href} target="_blank" rel="noreferrer">
+                  <div class="store-card__head">
+                    <span class="store-card__eyebrow">{item.meta}</span>
+                    <span class="store-card__status">{item.badge}</span>
+                  </div>
+
+                  <div class="store-card__media">
+                    <div class="store-card__glow"></div>
+                    <div class="store-card__icon-wrap">
+                      <span class="store-card__fallback">{item.iconText ?? "EX"}</span>
+                      <img
+                        src={item.icon}
+                        alt={`${item.title} icon`}
+                        loading="lazy"
+                        referrerpolicy="no-referrer"
+                        onerror="this.style.display='none'"
+                      />
+                    </div>
+                    <span class="store-card__domain">{item.domain}</span>
+                  </div>
+
+                  <div class="store-card__body">
+                    <p class="store-card__label">{item.title}</p>
+                    <p class="store-card__copy">{item.description}</p>
+                  </div>
+
+                  <div class="store-card__footer">
+                    <span class="store-pill">{item.badge}</span>
+                    <span class="store-card__cta">{item.action}</span>
+                  </div>
+                </a>
+              ) : item.kind === "physical" ? (
+                <button
+                  type="button"
+                  class="store-card store-card--button"
+                  data-open-checkout
+                  data-item-title={item.title}
+                  data-redirect={item.redirect}
+                >
+                  <div class="store-card__head">
+                    <span class="store-card__eyebrow">{item.meta}</span>
+                    <span class="store-card__status">{item.badge}</span>
+                  </div>
+
+                  <div class="store-card__media">
+                    <div class="store-card__glow"></div>
+                    <div class="store-card__icon-wrap store-card__icon-wrap--dark">
+                      <span class="store-card__fallback">{item.iconText}</span>
+                    </div>
+                    <span class="store-card__domain">address first</span>
+                  </div>
+
+                  <div class="store-card__body">
+                    <p class="store-card__label">{item.title}</p>
+                    <p class="store-card__copy">{item.description}</p>
+                  </div>
+
+                  <div class="store-card__footer">
+                    <span class="store-pill">{item.badge}</span>
+                    <span class="store-card__cta">{item.action}</span>
+                  </div>
+                </button>
+              ) : (
+                <div class="store-card store-card--static">
+                  <div class="store-card__head">
+                    <span class="store-card__eyebrow">{item.meta}</span>
+                    <span class="store-card__status">{item.badge}</span>
+                  </div>
+
+                  <div class="store-card__media">
+                    <div class="store-card__glow"></div>
+                    <div class="store-card__icon-wrap store-card__icon-wrap--dark">
+                      <span class="store-card__fallback">{item.iconText}</span>
+                    </div>
+                    <span class="store-card__domain">editable in Astro</span>
+                  </div>
+
+                  <div class="store-card__body">
+                    <p class="store-card__label">{item.title}</p>
+                    <p class="store-card__copy">{item.description}</p>
+                  </div>
+
+                  <div class="store-card__footer">
+                    <span class="store-pill">{item.badge}</span>
+                    <span class="store-card__cta store-card__cta--muted">{item.action}</span>
+                  </div>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="checkout-modal" data-checkout-modal hidden>
+    <div class="checkout-modal__backdrop" data-close-checkout></div>
+
+    <div class="checkout-modal__panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <div class="checkout-modal__head">
+        <div>
+          <p class="checkout-modal__eyebrow">Physical Item</p>
+          <h2 id="checkout-title">Shipping address required</h2>
+        </div>
+        <button type="button" class="checkout-modal__close" data-close-checkout aria-label="Close checkout">
+          x
+        </button>
+      </div>
+
+      <p class="checkout-modal__copy">
+        Fill the shipping details first. After you press buy, the address is sent to your Discord webhook and then the page redirects to your editable follow-up screen.
+      </p>
+
+      <form class="checkout-form" data-checkout-form>
+        <input type="hidden" name="itemTitle" value="" />
+        <input type="hidden" name="redirectPath" value={PHYSICAL_ORDER_REDIRECT_PATH} />
+
+        <label class="checkout-field">
+          <span>Full name</span>
+          <input type="text" name="fullName" autocomplete="name" required />
+        </label>
+
+        <label class="checkout-field">
+          <span>Address line 1</span>
+          <input type="text" name="addressLine1" autocomplete="address-line1" required />
+        </label>
+
+        <label class="checkout-field">
+          <span>Address line 2</span>
+          <input type="text" name="addressLine2" autocomplete="address-line2" />
+        </label>
+
+        <div class="checkout-grid">
+          <label class="checkout-field">
+            <span>City</span>
+            <input type="text" name="city" autocomplete="address-level2" required />
+          </label>
+
+          <label class="checkout-field">
+            <span>State / Region</span>
+            <input type="text" name="state" autocomplete="address-level1" required />
+          </label>
+        </div>
+
+        <div class="checkout-grid">
+          <label class="checkout-field">
+            <span>Postal code</span>
+            <input type="text" name="postalCode" autocomplete="postal-code" required />
+          </label>
+
+          <label class="checkout-field">
+            <span>Country</span>
+            <input type="text" name="country" autocomplete="country-name" required />
+          </label>
+        </div>
+
+        <label class="checkout-field">
+          <span>Discord username</span>
+          <input type="text" name="discordHandle" placeholder="@yourname" />
+        </label>
+
+        <p class="checkout-form__status" data-checkout-status></p>
+
+        <button type="submit" class="checkout-form__submit">Buy and continue</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .store-showcase {
+    position: relative;
+    display: flex;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: transparent;
+    color: #f8fafc;
+  }
+
+  .store-shell {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 80rem);
+    padding: 2.25rem clamp(1rem, 2vw, 2rem);
+  }
+
+  .store-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .store-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    background: rgba(15, 23, 42, 0.8);
+    color: rgba(191, 219, 254, 0.58);
+    padding: 0.9rem 1.2rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .store-search svg {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+  }
+
+  .store-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .store-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: rgba(15, 23, 42, 0.66);
+    color: rgba(241, 245, 249, 0.82);
+    padding: 0 1rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+  }
+
+  .store-chip:hover,
+  .store-chip.is-active {
+    transform: translateY(-1px);
+    border-color: rgba(96, 165, 250, 0.3);
+    background: rgba(30, 41, 59, 0.84);
+    color: #ffffff;
+  }
+
+  .store-panel {
+    display: none;
+  }
+
+  .store-panel.is-active {
+    display: block;
+  }
+
+  .store-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 18rem));
+  }
+
+  .store-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 20rem;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.84));
+    padding: 1rem;
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 24px 55px rgba(2, 6, 23, 0.32);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .store-card:hover,
+  .store-card--button:hover {
+    transform: translateY(-3px);
+    border-color: rgba(96, 165, 250, 0.26);
+    box-shadow: 0 30px 65px rgba(2, 6, 23, 0.42);
+  }
+
+  .store-card--button {
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .store-card--button,
+  .store-card--static {
+    width: 100%;
+  }
+
+  .store-card__head,
+  .store-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .store-card__eyebrow,
+  .store-card__status,
+  .store-card__label,
+  .store-card__domain,
+  .store-pill,
+  .checkout-modal__eyebrow {
+    text-transform: uppercase;
+  }
+
+  .store-card__eyebrow,
+  .checkout-modal__eyebrow {
+    color: rgba(148, 163, 184, 0.72);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .store-card__status {
+    color: #c4b5fd;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .store-card__media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 11.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at top, rgba(96, 165, 250, 0.16), transparent 34%),
+      linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 1));
+  }
+
+  .store-card__glow {
+    position: absolute;
+    width: 8rem;
+    height: 8rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.28), rgba(59, 130, 246, 0));
+    filter: blur(8px);
+  }
+
+  .store-card__icon-wrap {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 18px 40px rgba(2, 6, 23, 0.32);
+  }
+
+  .store-card__icon-wrap--dark {
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(96, 165, 250, 0.14);
+  }
+
+  .store-card__icon-wrap img,
+  .store-card__fallback {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .store-card__icon-wrap img {
+    position: relative;
+    z-index: 1;
+    border-radius: 0.85rem;
+  }
+
+  .store-card__fallback {
+    display: grid;
+    place-items: center;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .store-card__icon-wrap--dark .store-card__fallback {
+    color: #dbeafe;
+  }
+
+  .store-card__domain {
+    position: absolute;
+    left: 1rem;
+    bottom: 0.9rem;
+    z-index: 1;
+    color: rgba(226, 232, 240, 0.9);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+  }
+
+  .store-card__body {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .store-card__label {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+  }
+
+  .store-card__copy {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.7);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .store-pill,
+  .store-card__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    border-radius: 9999px;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+  }
+
+  .store-pill {
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    padding: 0 0.72rem;
+    color: rgba(226, 232, 240, 0.72);
+  }
+
+  .store-card__cta {
+    min-width: 5rem;
+    background: rgba(248, 250, 252, 0.1);
+    color: rgba(255, 255, 255, 0.92);
+    padding: 0 0.95rem;
+  }
+
+  .store-card__cta--muted {
+    background: rgba(148, 163, 184, 0.08);
+    color: rgba(226, 232, 240, 0.54);
+  }
+
+  .checkout-modal[hidden] {
+    display: none;
+  }
+
+  .checkout-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+  }
+
+  .checkout-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(6px);
+  }
+
+  .checkout-modal__panel {
+    position: relative;
+    z-index: 1;
+    width: min(92vw, 34rem);
+    margin: min(8vh, 4rem) auto;
+    border-radius: 1.4rem;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(2, 6, 23, 0.98));
+    padding: 1.35rem;
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.56);
+  }
+
+  .checkout-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .checkout-modal__head h2 {
+    margin: 0.4rem 0 0;
+    font-size: 1.65rem;
+    line-height: 1.05;
+  }
+
+  .checkout-modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(15, 23, 42, 0.76);
+    color: rgba(226, 232, 240, 0.8);
+    font-size: 0.92rem;
+  }
+
+  .checkout-modal__copy {
+    margin: 1rem 0 1.15rem;
+    color: rgba(226, 232, 240, 0.68);
+    line-height: 1.7;
+  }
+
+  .checkout-form {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .checkout-grid {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkout-field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .checkout-field span {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(148, 163, 184, 0.68);
+  }
+
+  .checkout-field input {
+    width: 100%;
+    min-height: 3rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(15, 23, 42, 0.74);
+    color: #f8fafc;
+    padding: 0 0.95rem;
+  }
+
+  .checkout-form__status {
+    min-height: 1.2rem;
+    margin: 0;
+    color: rgba(191, 219, 254, 0.76);
+    font-size: 0.82rem;
+  }
+
+  .checkout-form__status.is-error {
+    color: #fca5a5;
+  }
+
+  .checkout-form__submit {
+    min-height: 3.1rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(96, 165, 250, 0.24);
+    background: rgba(37, 99, 235, 0.2);
+    color: #dbeafe;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .checkout-form__submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+
+  @media (max-width: 720px) {
+    .store-shell {
+      padding-top: 1.8rem;
+      padding-bottom: 1.8rem;
+    }
+
+    .store-topbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .store-search {
+      width: 100%;
+    }
+
+    .store-grid,
+    .checkout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script is:inline>
+  const storeRoot = document.querySelector("[data-store-section]");
+
+  if (storeRoot instanceof HTMLElement && storeRoot.dataset.initialized !== "true") {
+    storeRoot.dataset.initialized = "true";
+
+    const tabs = Array.from(storeRoot.querySelectorAll("[data-store-tab]"));
+    const panels = Array.from(storeRoot.querySelectorAll("[data-store-panel]"));
+    const modal = storeRoot.querySelector("[data-checkout-modal]");
+    const form = storeRoot.querySelector("[data-checkout-form]");
+    const status = storeRoot.querySelector("[data-checkout-status]");
+    const hiddenTitle = form?.querySelector('input[name="itemTitle"]');
+    const hiddenRedirect = form?.querySelector('input[name="redirectPath"]');
+    const openButtons = Array.from(storeRoot.querySelectorAll("[data-open-checkout]"));
+    const closeButtons = Array.from(storeRoot.querySelectorAll("[data-close-checkout]"));
+
+    const setActiveTab = (nextTab) => {
+      tabs.forEach((tab) => {
+        const active = tab.getAttribute("data-store-tab") === nextTab;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.getAttribute("data-store-panel") === nextTab);
+      });
+    };
+
+    const openCheckout = (button) => {
+      if (!(modal instanceof HTMLElement) || !(form instanceof HTMLFormElement)) return;
+      if (hiddenTitle instanceof HTMLInputElement) {
+        hiddenTitle.value = button.getAttribute("data-item-title") || "Physical Package";
+      }
+      if (hiddenRedirect instanceof HTMLInputElement) {
+        hiddenRedirect.value = button.getAttribute("data-redirect") || "/store/physical-order";
+      }
+      if (status instanceof HTMLElement) {
+        status.textContent = "";
+        status.classList.remove("is-error");
+      }
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+
+    const closeCheckout = () => {
+      if (!(modal instanceof HTMLElement)) return;
+      modal.hidden = true;
+      document.body.style.overflow = "";
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const nextTab = tab.getAttribute("data-store-tab");
+        if (nextTab) setActiveTab(nextTab);
+      });
+    });
+
+    openButtons.forEach((button) => {
+      button.addEventListener("click", () => openCheckout(button));
+    });
+
+    closeButtons.forEach((button) => {
+      button.addEventListener("click", closeCheckout);
+    });
+
+    if (form instanceof HTMLFormElement) {
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const submitter = form.querySelector(".checkout-form__submit");
+        const data = new FormData(form);
+        const payload = Object.fromEntries(data.entries());
+
+        if (submitter instanceof HTMLButtonElement) {
+          submitter.disabled = true;
+          submitter.textContent = "Sending...";
+        }
+
+        if (status instanceof HTMLElement) {
+          status.textContent = "Sending address to Discord...";
+          status.classList.remove("is-error");
+        }
+
+        try {
+          const response = await fetch("/api/physical-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result?.ok) {
+            throw new Error(result?.error || "Unable to submit the address.");
+          }
+
+          if (status instanceof HTMLElement) {
+            status.textContent = "Address sent. Redirecting...";
+          }
+
+          window.location.href = result.redirectUrl || "/store/physical-order";
+        } catch (error) {
+          if (status instanceof HTMLElement) {
+            status.textContent = error instanceof Error ? error.message : "Unable to submit the address.";
+            status.classList.add("is-error");
+          }
+        } finally {
+          if (submitter instanceof HTMLButtonElement) {
+            submitter.disabled = false;
+            submitter.textContent = "Buy and continue";
+          }
+        }
+      });
+    }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCheckout();
+    });
+  }
+</script>

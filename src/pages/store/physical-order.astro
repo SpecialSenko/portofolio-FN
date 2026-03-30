@@ -1,0 +1,85 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout>
+  <main class="order-page">
+    <section class="order-card">
+      <p class="order-eyebrow">Physical Order</p>
+      <h1>GTX 1650 4GB VRAM</h1>
+      <p>
+        Your address form was submitted for the GTX 1650 listing. The current price is
+        <strong>Rp4,000,000</strong>, which is about <strong>US$237.65</strong> using the March 30, 2026
+        IDR to USD mid-market rate.
+      </p>
+      <p>
+        Replace this page with payment instructions, a thank-you screen, or your final contact / checkout link.
+      </p>
+      <a href="/" class="order-link">Back Home</a>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .order-page {
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+  }
+
+  .order-card {
+    width: min(100%, 42rem);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.96));
+    padding: clamp(1.5rem, 4vw, 2.4rem);
+    color: #f8fafc;
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.46);
+  }
+
+  .order-eyebrow {
+    margin: 0 0 0.75rem;
+    color: rgba(148, 163, 184, 0.72);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .order-card h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1;
+  }
+
+  .order-card p {
+    color: rgba(226, 232, 240, 0.74);
+    line-height: 1.75;
+  }
+
+  .order-card strong {
+    color: #f8fafc;
+  }
+
+  .order-card code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #dbeafe;
+  }
+
+  .order-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 1.1rem;
+    margin-top: 1rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(96, 165, 250, 0.24);
+    background: rgba(37, 99, 235, 0.18);
+    color: #dbeafe;
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+</style>

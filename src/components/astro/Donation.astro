@@ -1,0 +1,491 @@
+---
+const items = [
+  {
+    name: "Paypal",
+    short: "PP",
+    image: "https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg",
+    link: "https://paypal.me/FraxbN",
+    accent: "#1a4fa0",
+  },
+  {
+    name: "Bank BCA",
+    short: "BCA",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/200px-Bank_Central_Asia.svg.png",
+    link: "https://media.discordapp.net/attachments/789678794989895690/1468539326706221089/Screenshot_20260204_163045.jpg",
+    accent: "#1560b7",
+  },
+  {
+    name: "Steam",
+    short: "ST",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/200px-Steam_icon_logo.svg.png",
+    link: "https://steamcommunity.com/tradeoffer/new/?partner=1128574417&token=HPuh4-Hf",
+    accent: "#2a475e",
+  },
+  {
+    name: "Touch&Go",
+    short: "TG",
+    image: null,
+    link: "https://consumer.touchngo.com.my/login",
+    accent: "#0d7a6b",
+  },
+  {
+    name: "StreamElements",
+    short: "SE",
+    image: "https://cdn.streamelements.com/static/logo.png",
+    link: "https://streamelements.com/fraxbnezl_bevtvany/tip",
+    accent: "#f5a623",
+  },
+];
+---
+
+<section class="don-section" data-donation data-open="false">
+  <div class="don-scene" data-scene>
+
+    <!-- SVG snake lines layer -->
+    <svg id="don-lines" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible;" aria-hidden="true">
+      <defs>
+        <linearGradient id="snakeGold" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#78350f" stop-opacity="0.4"/>
+          <stop offset="30%"  stop-color="#d97706" stop-opacity="1"/>
+          <stop offset="50%"  stop-color="#fef08a" stop-opacity="1"/>
+          <stop offset="70%"  stop-color="#d97706" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#78350f" stop-opacity="0.4"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- Center orb -->
+    <button class="don-orb" data-center-wrap aria-expanded="false" aria-label="Show donation methods">
+      <span class="don-orb__ring don-orb__ring--1"></span>
+      <span class="don-orb__ring don-orb__ring--2"></span>
+      <span class="don-orb__ring don-orb__ring--3"></span>
+      <span class="don-orb__glow"></span>
+      <span class="don-orb__inner">
+        <span class="don-orb__title">Support<br/>Donate</span>
+        <span class="don-orb__sub" data-center-sub>tap to open</span>
+      </span>
+    </button>
+
+    <!-- Cards -->
+    {items.map((item) => (
+      <a
+        class="don-card"
+        href={item.link}
+        target="_blank"
+        rel="noreferrer"
+        data-orbit-item
+        style={`--card-accent: ${item.accent};`}
+      >
+        <span class="don-card__img-wrap">
+          {item.image ? (
+            <>
+              <img src={item.image} alt={item.name} loading="lazy" data-orbit-logo />
+              <span class="don-card__fallback" data-orbit-fallback aria-hidden="true">{item.short}</span>
+            </>
+          ) : (
+            <span class="don-card__fallback don-card__fallback--show" data-orbit-fallback aria-hidden="true">{item.short}</span>
+          )}
+        </span>
+        <span class="don-card__name">{item.name}</span>
+      </a>
+    ))}
+
+  </div>
+</section>
+
+<style>
+  .don-section {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .don-scene {
+    position: relative;
+    width: min(88vw, 580px, 76vh);
+    aspect-ratio: 1;
+    margin: 0 auto;
+  }
+
+  /* ── ORB ─────────────────────────────────────────── */
+  .don-orb {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    width: 10rem;
+    height: 10rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .don-orb__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 35% 35%, rgba(251,191,36,0.15), rgba(0,0,0,0.7) 65%);
+    border: 1px solid rgba(251,191,36,0.35);
+    backdrop-filter: blur(16px);
+    color: white;
+    text-align: center;
+    transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+  }
+
+  .don-orb:hover .don-orb__inner {
+    border-color: rgba(251,191,36,0.7);
+    box-shadow: 0 0 40px rgba(245,158,11,0.25);
+    transform: scale(1.04);
+  }
+
+  .don-section[data-open="true"] .don-orb__inner {
+    border-color: rgba(251,191,36,0.8);
+    box-shadow: 0 0 60px rgba(245,158,11,0.35), 0 0 120px rgba(245,158,11,0.12);
+  }
+
+  .don-orb__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #fde68a, #f59e0b, #fde68a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .don-orb__sub {
+    margin-top: 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .don-orb__glow {
+    position: absolute;
+    inset: -40px;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(245,158,11,0.18), transparent 65%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  /* Animated rings */
+  .don-orb__ring {
+    position: absolute;
+    border-radius: 9999px;
+    border: 1px solid rgba(251,191,36,0.18);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 400ms ease;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .don-orb__ring--1 { width: calc(10rem + 44px); height: calc(10rem + 44px); }
+  .don-orb__ring--2 { width: calc(10rem + 76px); height: calc(10rem + 76px); border-style: dashed; border-color: rgba(251,191,36,0.1); }
+  .don-orb__ring--3 { width: calc(10rem + 116px); height: calc(10rem + 116px); border-color: rgba(251,191,36,0.06); }
+
+  .don-section[data-open="true"] .don-orb__ring { opacity: 1; }
+
+
+
+
+
+  /* ── CARDS ────────────────────────────────────────── */
+  .don-card {
+    --card-accent: #666;
+    position: absolute;
+    left: 50%; top: 50%;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 6.2rem;
+    height: 7rem;
+    border-radius: 1.1rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--card-accent) 40%, transparent), rgba(0,0,0,0.65));
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.1);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    will-change: transform, opacity;
+  }
+
+  .don-card.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .don-card:hover {
+    border-color: rgba(251,191,36,0.6);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px color-mix(in srgb, var(--card-accent) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .don-card__img-wrap {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+
+  .don-card img {
+    max-width: 76%;
+    max-height: 76%;
+    object-fit: contain;
+  }
+
+  .don-card__fallback {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .don-card__fallback--show { display: flex; }
+
+  .don-card__name {
+    margin-top: 0.6rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+  }
+
+  @media (max-width: 580px) {
+    .don-orb__inner { width: 8rem; height: 8rem; }
+    .don-orb__title { font-size: 0.9rem; }
+    .don-card { width: 5.2rem; height: 6rem; }
+    .don-card__img-wrap { width: 2.8rem; height: 2.8rem; }
+    .don-card__name { font-size: 0.55rem; }
+  }
+</style>
+
+<script>
+  const roots = document.querySelectorAll("[data-donation]");
+
+  for (const root of roots) {
+    if (!(root instanceof HTMLElement)) continue;
+    if (root.dataset.initialized === "true") continue;
+    root.dataset.initialized = "true";
+
+    const scene   = root.querySelector("[data-scene]");
+    const wrap    = root.querySelector("[data-center-wrap]");
+    const sub     = root.querySelector("[data-center-sub]");
+    const cards   = Array.from(root.querySelectorAll<HTMLElement>("[data-orbit-item]"));
+    const logos   = Array.from(root.querySelectorAll<HTMLImageElement>("[data-orbit-logo]"));
+    const total   = cards.length;
+
+    if (!scene || !wrap || !sub || total === 0) continue;
+
+    let open = false;
+    let busy = false;
+    const timers: number[] = [];
+    const positions: { x: number; y: number }[] = [];
+
+    // ── SVG paths (created with NO d attribute — prevents any rendering) ──
+    const svgEl = root.querySelector("#don-lines") as SVGSVGElement | null;
+    const paths: SVGPathElement[] = svgEl ? cards.map(() => {
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p.setAttribute("fill", "none");
+      p.setAttribute("stroke", "url(#snakeGold)");
+      p.setAttribute("stroke-width", "2.5");
+      p.setAttribute("stroke-linecap", "round");
+      p.style.opacity = "0";
+      // NO d attribute set here — path has zero geometry until animation starts
+      svgEl.appendChild(p);
+      return p;
+    }) : [];
+
+    const makePath = (x1: number, y1: number, x2: number, y2: number): string => {
+      const dx = x2-x1, dy = y2-y1;
+      const len = Math.sqrt(dx*dx+dy*dy) || 1;
+      const nx = -dy/len, ny = dx/len;
+      const w1 = len*0.28, w2 = -len*0.22, w3 = len*0.14;
+      const c1x = x1+dx*0.20+nx*w1, c1y = y1+dy*0.20+ny*w1;
+      const c2x = x1+dx*0.45+nx*w2, c2y = y1+dy*0.45+ny*w2;
+      const mx  = x1+dx*0.5,        my  = y1+dy*0.5;
+      const c3x = x1+dx*0.72+nx*w3, c3y = y1+dy*0.72+ny*w3;
+      return `M${x1.toFixed(1)},${y1.toFixed(1)} C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)} S${c3x.toFixed(1)},${c3y.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`;
+    };
+
+    const crawlIn = (path: SVGPathElement, len: number, dur: number, onDone: () => void): void => {
+      path.style.strokeDasharray = String(len);
+      path.style.strokeDashoffset = String(len);
+      path.style.opacity = "1";
+      const t0 = performance.now();
+      const tick = (now: number): void => {
+        const t = Math.min((now-t0)/dur, 1);
+        const e = 1 - Math.pow(1-t, 3);
+        path.style.strokeDashoffset = String(len*(1-e));
+        if (t < 1) requestAnimationFrame(tick);
+        else { path.style.strokeDashoffset = "0"; onDone(); }
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const crawlOut = (path: SVGPathElement, len: number, dur: number): void => {
+      const t0 = performance.now();
+      const tick = (now: number): void => {
+        const t = Math.min((now-t0)/dur, 1);
+        path.style.strokeDashoffset = String(len*(t*t));
+        if (t < 1) requestAnimationFrame(tick);
+        else { path.style.opacity = "0"; path.removeAttribute("d"); }
+      };
+      requestAnimationFrame(tick);
+    };
+
+    // ── card pop animation ───────────────────────────────────────────────────
+    const popCard = (card: HTMLElement, x: number, y: number): void => {
+      card.style.transition = "none";
+      card.style.opacity = "0";
+      card.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(0.1)`;
+      card.classList.add("visible");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          card.style.transition = "transform 420ms cubic-bezier(0.34,1.56,0.64,1), opacity 280ms ease";
+          card.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1)`;
+          card.style.opacity = "1";
+        });
+      });
+    };
+
+    const hideCard = (card: HTMLElement): void => {
+      card.style.transition = "transform 240ms ease-in, opacity 180ms ease";
+      card.style.transform = card.style.transform.replace("scale(1)", "scale(0.1)");
+      card.style.opacity = "0";
+      const tid = window.setTimeout(() => card.classList.remove("visible"), 260);
+      timers.push(tid);
+    };
+
+    // ── layout ───────────────────────────────────────────────────────────────
+    const layout = () => {
+      const b = scene.getBoundingClientRect();
+      const sz = Math.min(b.width, b.height);
+      const r  = Math.min(Math.max(sz * 0.33, 100), sz * 0.40);
+      positions.length = 0;
+      cards.forEach((_card, i) => {
+        const angle = -Math.PI/2 + (2*Math.PI*i)/total;
+        positions.push({ x: Math.cos(angle)*r, y: Math.sin(angle)*r });
+      });
+    };
+
+    const clearTimers = () => { timers.forEach(clearTimeout); timers.length = 0; };
+
+    // ── open / close ─────────────────────────────────────────────────────────
+    const doOpen = () => {
+      open = true;
+      busy = true;
+      root.dataset.open = "true";
+      wrap.setAttribute("aria-expanded", "true");
+      sub.textContent = "pick a method";
+
+      const b = scene.getBoundingClientRect();
+      const cx = b.width/2, cy = b.height/2;
+      cards.forEach((card, i) => {
+        const { x, y } = positions[i] || { x:0, y:0 };
+        const tid = window.setTimeout(() => {
+          if (paths[i]) {
+            // Set d HERE inside timeout — no geometry before this moment
+            const d = makePath(cx, cy, cx+x, cy+y);
+            paths[i].setAttribute("d", d);
+            const len = paths[i].getTotalLength() || 200;
+            crawlIn(paths[i], len, 480, () => popCard(card, x, y));
+          } else {
+            popCard(card, x, y);
+          }
+        }, i * 130);
+        timers.push(tid);
+      });
+
+      const done = window.setTimeout(() => { busy = false; }, total*140 + 600);
+      timers.push(done);
+    };
+
+    const doClose = () => {
+      open = false;
+      busy = true;
+      root.dataset.open = "false";
+      wrap.setAttribute("aria-expanded", "false");
+      sub.textContent = "tap to open";
+
+      const b2 = scene.getBoundingClientRect();
+      const cx2 = b2.width/2, cy2 = b2.height/2;
+      cards.forEach((card, i) => {
+        hideCard(card as HTMLElement);
+        if (paths[i] && paths[i].hasAttribute("d")) {
+          const { x, y } = positions[i] || { x:0, y:0 };
+          const len = paths[i].getTotalLength() || 200;
+          crawlOut(paths[i], len, 280);
+        }
+      });
+
+      const done = window.setTimeout(() => { busy = false; }, 380);
+      timers.push(done);
+    };
+
+    wrap.addEventListener("click", () => {
+      if (busy) return;
+      clearTimers();
+      open ? doClose() : doOpen();
+    });
+
+    root.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && open && !busy) { clearTimers(); doClose(); (wrap as HTMLElement).focus(); }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!open || busy) return;
+      if (!root.contains(e.target as Node)) { clearTimers(); doClose(); }
+    });
+
+    window.addEventListener("resize", layout);
+
+    // logo fallback
+    for (const logo of logos) {
+      if (!(logo instanceof HTMLImageElement)) continue;
+      const fb = logo.nextElementSibling;
+      const show = () => { logo.hidden=true; fb?.classList.add("don-card__fallback--show"); };
+      logo.addEventListener("error", show, { once: true });
+      if (logo.complete && logo.naturalWidth === 0) show();
+    }
+
+    requestAnimationFrame(layout);
+
+    window.addEventListener("astro:before-swap", () => {
+      clearTimers();
+      cards.forEach(c => { c.classList.remove("visible"); c.style.opacity="0"; });
+      paths.forEach(p => { p.style.opacity="0"; p.removeAttribute("d"); });
+      root.dataset.initialized = "false";
+    }, { once: true });
+  }
+</script>

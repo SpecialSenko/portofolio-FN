@@ -1,0 +1,219 @@
+---
+const myReferrals = [
+  { text: "GamerPay", link: "https://gamerpay.gg/partner/525d38b58d" },
+  { text: "Wise", link: "https://wise.com/invite/dic/thoriqa4" },
+  { text: "REF2E5288", copy: true, link: "https://csgo-skins.com/account" },
+  { text: "SKIN CASH", link: "https://skins.cash/user/ref/76561199088840145" },
+  { text: "nfeu3o2", copy: true, link: "https://csgofast.com/account/referral/campaigns" },
+  { text: "HoneyGain", copy: true, link: "https://join.honeygain.com/ALFAT1D1B1" },
+  { text: "Microsoft", link: "https://rewards.bing.com/welcome?rh=1830CE79&ref=rafsrchae&form=ML2XE3&OCID=ML2XE3&PUBL=RewardsDO&CREA=ML2XE3" },
+  { type: "video", src: "/videos/casehug.webm",    link: "https://casehug.com/b/1BBC466A48924B3D" },
+  { type: "video", src: "/videos/KISSORKILL.webm", link: "https://kd.media/banner?code=RBCCHMTI" },
+];
+
+const sponsorAds = [
+  { text: "RENT", link: "#" },
+  { text: "RENT", link: "#" },
+  { text: "RENT", link: "#" },
+  { text: "RENT", link: "#" },
+];
+---
+
+<style>
+/* ── layout ───────────────────────────────────────────────── */
+.ads-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 40px);
+  width: 100%;
+  max-width: min(900px, 96vw);
+  margin: 0 auto;
+  padding: clamp(24px, 6vw, 60px) clamp(12px, 4vw, 20px);
+  box-sizing: border-box;
+}
+
+/* stack columns on small screens */
+@media (max-width: 600px) {
+  .ads-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+}
+
+/* ── card ─────────────────────────────────────────────────── */
+.text-box {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.035);
+  backdrop-filter: blur(14px);
+  border-radius: clamp(12px, 2vw, 20px);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: clamp(14px, 3vw, 20px);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.12),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+  box-sizing: border-box;
+}
+
+.text-box h3 {
+  text-align: center;
+  color: white;
+  font-size: clamp(10px, 1.5vw, 12px);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0 0 clamp(10px, 2vw, 14px) 0;
+  opacity: 0.9;
+}
+
+/* ── list ─────────────────────────────────────────────────── */
+.text-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1.2vw, 8px);
+}
+
+/* ── item ─────────────────────────────────────────────────── */
+.text-item {
+  display: block;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: clamp(7px, 1.5vw, 10px);
+  padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 14px);
+  color: white;
+  font-size: clamp(11px, 1.8vw, 13px);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.text-item:hover {
+  transform: translateX(4px);
+  background: rgba(255,255,255,0.07);
+  box-shadow: 0 0 12px rgba(255,255,255,0.12);
+}
+
+/* on phones, don't slide — just highlight */
+@media (max-width: 600px) {
+  .text-item:hover {
+    transform: none;
+  }
+  .text-item:active {
+    background: rgba(255,255,255,0.16);
+  }
+}
+
+/* ── banner (video) ───────────────────────────────────────── */
+.text-item.banner {
+  padding: 0;
+  height: clamp(44px, 8vw, 52px);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 0 12px rgba(255,255,255,0.12),
+    inset 0 0 14px rgba(255,255,255,0.08);
+}
+
+.text-item.banner:hover {
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.18),
+    inset 0 0 18px rgba(255,255,255,0.1);
+}
+
+.text-item.banner video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── divider ──────────────────────────────────────────────── */
+.divider {
+  width: 2px;
+  align-self: stretch;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9), transparent);
+  box-shadow: 0 0 16px rgba(255,255,255,0.8);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 14px white;
+}
+
+/* on phones the divider becomes a horizontal rule */
+@media (max-width: 600px) {
+  .divider {
+    width: 100%;
+    height: 2px;
+    align-self: auto;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent);
+    box-shadow: 0 0 16px rgba(255,255,255,0.8);
+  }
+
+  .divider::before {
+    top: 50%;
+    left: 50%;
+  }
+}
+</style>
+
+<div class="ads-container">
+
+  <!-- Referrals -->
+  <div class="text-box">
+    <h3>My Referrals</h3>
+    <div class="text-list">
+      {myReferrals.map(ref =>
+        ref.type === "video" ? (
+          <a class="text-item banner" href={ref.link} target="_blank" rel="noopener noreferrer">
+            <video autoplay loop muted playsinline preload="auto">
+              <source src={ref.src} type="video/webm" />
+            </video>
+          </a>
+        ) : (
+          <a class="text-item" href={ref.link} target="_blank" rel="noopener noreferrer">
+            {ref.text}
+          </a>
+        )
+      )}
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Sponsor Ads -->
+  <div class="text-box">
+    <h3>Sponsor Ads</h3>
+    <div class="text-list">
+      {sponsorAds.map(ad => (
+        <a class="text-item" href={ad.link} target="_blank" rel="noopener noreferrer">
+          {ad.text}
+        </a>
+      ))}
+    </div>
+  </div>
+
+</div>
+
+<script is:inline>
+  document.querySelectorAll("video").forEach(v => {
+    v.muted = true;
+    v.play().catch(() => {});
+  });
+</script>

@@ -1,99 +1,880 @@
 ---
-import "../../styles/AboutMe.css";
-import GridGen from "../../components/react/GridGen.jsx";
+const sections = [
+  { id: "stats", label: "Stats", icon: "ST" },
+  { id: "work", label: "Work", icon: "WK" },
+  { id: "game", label: "Game", icon: "GM" },
+  { id: "skills", label: "Skills", icon: "SK" },
+  { id: "contact", label: "Contact", icon: "CT" },
+];
+
+const socialStatCards = [
+  { key: "twitchFollowers", title: "Twitch Followers", note: "@Fraxbnezl_Bevtvany" },
+  { key: "twitchSubscribers", title: "Twitch Subscribers", note: "live channel subs" },
+  { key: "githubFollowers", title: "GitHub Followers", note: "github.com/fraxb" },
+  { key: "discordMembers", title: "Discord Members", note: "discord.gg/Xg3Ecpz" },
+  { key: "discordOnline", title: "Discord Online", note: "online right now" },
+];
 ---
 
 <section
-  id="hero"
-  class="relative w-screen h-screen flex justify-center items-center overflow-hidden"
+  data-about-me
+  class="relative flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-transparent font-mono"
 >
-  <!-- Background -->
-  <div
-    class="absolute inset-0 z-[-10] pointer-events-auto"
-  >
-    <div class="absolute inset-0 background"></div>
+  <canvas id="comet-bg" class="absolute inset-0 z-[-20] pointer-events-none"></canvas>
+  <div class="space-nebula absolute inset-0 z-[-18]"></div>
+  <div class="space-stars space-stars--far absolute inset-0 z-[-16]"></div>
+  <div class="space-stars space-stars--near absolute inset-0 z-[-14]"></div>
 
-    <div
-      class="absolute inset-0 grid grid-cols-10 opacity-40"
-    >
-      <GridGen client:load />
+  <div
+    id="main-view"
+    class="relative z-20 flex w-full max-w-7xl flex-col items-center gap-12 px-6 transition-transform duration-700 ease-in-out lg:flex-row lg:justify-start lg:gap-16 lg:pl-[8vw]"
+  >
+    <!-- INFO / STREAM PANEL -->
+    <div id="info-panel-wrap" class="relative w-full max-w-sm lg:max-w-md xl:max-w-lg overflow-hidden transition-opacity duration-300">
+      <div class="about-panel relative overflow-hidden rounded-sm bg-[rgba(2,10,18,0.24)] shadow-[0_0_22px_rgba(34,211,238,0.08)] backdrop-blur-[2px]">
+        <div class="absolute inset-0 pointer-events-none bg-scanline opacity-10 z-10"></div>
+
+        <!-- TEXT VIEW -->
+        <div id="text-panel" class="p-6 md:p-8 text-cyan-50">
+          <p id="scifi-text" class="leading-relaxed tracking-wide">System.Initialize...</p>
+
+          <a
+            id="stream-link"
+            href="https://www.twitch.tv/fraxbnezl_bevtvany"
+            target="_blank"
+            rel="noreferrer"
+            class="mt-5 hidden w-fit rounded-full border border-cyan-400/40 bg-transparent px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/10 hover:text-white"
+          >
+            twitch.tv/fraxbnezl_bevtvany
+          </a>
+
+          <div class="mt-4 flex items-center justify-start gap-2">
+            <span id="data-stream" class="uppercase tracking-[0.2em] text-cyan-500/70">Data Stream Active</span>
+            <div class="h-2 w-2 animate-pulse rounded-full bg-cyan-500"></div>
+          </div>
+        </div>
+
+        <!-- TWITCH EMBED VIEW (hidden by default) -->
+        <div id="twitch-panel" style="height:0;overflow:hidden;opacity:0;transition:opacity 300ms ease;">
+          <div class="relative w-full" style="padding-top: 56.25%;">
+            <iframe
+              id="twitch-iframe"
+              class="absolute inset-0 w-full h-full"
+              src="about:blank"
+              title="Fraxbnezl_Bevtvany Twitch stream"
+              allow="autoplay; fullscreen"
+              frameborder="0"
+              scrolling="no"
+            ></iframe>
+          </div>
+          <div class="flex items-center gap-3 px-4 py-3 border-t border-cyan-400/20">
+            <div class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+            <span class="text-xs uppercase tracking-[0.2em] text-cyan-400/80">Live on Twitch</span>
+            <a
+              href="https://www.twitch.tv/fraxbnezl_bevtvany"
+              target="_blank"
+              rel="noreferrer"
+              class="ml-auto text-xs text-cyan-300/60 hover:text-cyan-200 transition"
+            >
+              Open full ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toggle hint below the card -->
+      <p id="toggle-hint" class="mt-3 text-center text-[0.68rem] uppercase tracking-[0.25em]">
+        click logo to watch stream
+      </p>
+    </div>
+
+    <!-- ORBIT SHELL -->
+    <div id="orbit-shell" class="relative shrink-0" style="--orbit-radius: clamp(88px, 16vw, 150px);">
+      <div class="orbit-ring"></div>
+      <div class="orbit-ring orbit-ring--inner"></div>
+
+      {
+        sections.map((section, index) => (
+          <button
+            type="button"
+            class="orbit-node"
+            data-section={section.id}
+            aria-label={section.label}
+            style={`--angle:${index * (360 / sections.length)}deg; --delay:${index * 60}ms;`}
+          >
+            <span class="orbit-node__icon">{section.icon}</span>
+            <span class="orbit-node__label">{section.label}</span>
+          </button>
+        ))
+      }
+
+      <button
+        id="main-trigger"
+        type="button"
+        aria-expanded="false"
+        class="relative z-30 flex h-28 w-28 items-center justify-center rounded-full border border-cyan-400/40 bg-transparent backdrop-blur-[2px] transition duration-500 hover:scale-105 hover:border-cyan-300/70 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)] active:scale-95 md:h-32 md:w-32"
+      >
+        <span class="pointer-events-none absolute inset-[-18px] rounded-full bg-cyan-400/10 blur-2xl"></span>
+        <img
+          src="/my-icon-transparent.png"
+          alt="FN Logo"
+          class="relative z-10 h-20 w-20 rounded-full border border-cyan-100/15 object-contain md:h-24 md:w-24"
+        />
+        <span class="orbit-hint">watch stream</span>
+      </button>
     </div>
   </div>
 
-  <!-- Hero Content -->
-  <div
-    id="hero-content"
-    class="relative flex flex-col items-center text-center px-6"
-  >
-    <h1
-      class="bebas-neue-regular text-[4rem] md:text-[7rem] tracking-widest uppercase
-             text-cyan-300 drop-shadow-[0_0_20px_#22d3ee]"
-      data-cursor-style="line-text"
-    >
-      Daffa
-    </h1>
+  <!-- SECTION VIEW -->
+  <div id="section-view" class="absolute inset-0 z-30 translate-x-full transition-transform duration-700 ease-in-out">
+    <div class="flex h-full w-full items-center justify-center p-6 md:p-8">
+      <div class="relative w-full max-w-2xl">
+          <!-- Back button — outside overflow, top-left of panel -->
+          <button
+            id="back-button"
+            class="opacity-0 pointer-events-none transition-all duration-300 absolute -top-4 -left-4 z-20 flex items-center justify-center w-8 h-8 rounded-full border border-cyan-400/40 bg-black/60 text-cyan-400 hover:bg-cyan-400/10 hover:border-cyan-300 hover:text-white active:scale-95"
+            aria-label="Go back"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
 
-    <p
-      class="mt-4 text-lg md:text-xl text-gray-300 tracking-wide opacity-80"
-      data-cursor-style="line-text"
-    >
-      Creative Web Developer • Interactive Experiences
-    </p>
+          <div class="about-panel relative rounded-sm bg-[rgba(2,10,18,0.26)] p-5 text-cyan-50 shadow-[0_0_24px_rgba(34,211,238,0.08)] backdrop-blur-[2px] overflow-hidden">
+          <div class="absolute inset-0 pointer-events-none bg-scanline opacity-10"></div>
 
-    <div class="mt-10 flex gap-6">
-      <a
-        href="#about"
-        class="px-8 py-3 border border-white/30 hover:border-cyan-300 transition uppercase tracking-wider"
-      >
-        Enter
-      </a>
+        <div id="stats-content" class="section-content hidden">
+          <h2 class="mb-4 text-xl font-bold uppercase tracking-wider text-cyan-400">Community Stats</h2>
+          <div class="grid gap-3 sm:grid-cols-2">
+            {socialStatCards.map((stat) => (
+              <div class="rounded border border-cyan-400/30 bg-transparent p-3" data-stat-card={stat.key}>
+                <p class="text-xs text-cyan-500">{stat.title}</p>
+                <p class="text-3xl font-bold text-cyan-100" data-stat-value>--</p>
+                <p class="mt-1 text-[0.65rem] uppercase tracking-[0.18em] text-cyan-200/55" data-stat-note data-default-note={stat.note}>{stat.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <a
-        href="#projects"
-        class="px-8 py-3 bg-white text-black hover:bg-opacity-80 transition uppercase tracking-wider"
-      >
-        Projects
-      </a>
+        <div id="work-content" class="section-content hidden">
+          <h2 class="mb-4 text-xl font-bold uppercase tracking-wider text-cyan-400">Work</h2>
+          <div class="space-y-2">
+            <div class="rounded border border-cyan-400/30 bg-transparent p-4">
+              <h3 class="text-base font-semibold text-cyan-300">Visual Storytelling</h3>
+              <p class="mt-1 text-sm text-cyan-100/75">Cinematic edits, branded visuals, and experimental layouts designed to feel alive on screen.</p>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent p-4">
+              <h3 class="text-base font-semibold text-cyan-300">Interactive Web Builds</h3>
+              <p class="mt-1 text-sm text-cyan-100/75">React and Astro interfaces with motion, layered media, and custom interactions that feel personal.</p>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent p-4">
+              <h3 class="text-base font-semibold text-cyan-300">Creative Direction</h3>
+              <p class="mt-1 text-sm text-cyan-100/75">Design systems and content direction shaped for artists, streamers, and portfolio-first brands.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="game-content" class="section-content hidden">
+          <h2 class="mb-4 text-xl font-bold uppercase tracking-wider text-cyan-400">Game</h2>
+          <div class="grid gap-3 grid-cols-2">
+            <div class="rounded border border-cyan-400/30 bg-transparent p-4">
+              <h3 class="text-base font-semibold text-cyan-300">Gameplay Captures</h3>
+              <p class="mt-1 text-sm text-cyan-100/75">Fast-cut highlights and showcase edits built around energy, pace, and atmosphere.</p>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent p-4">
+              <h3 class="text-base font-semibold text-cyan-300">World Building</h3>
+              <p class="mt-1 text-sm text-cyan-100/75">Concepts and scenes that merge photography, game aesthetics, and motion design.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="skills-content" class="section-content hidden">
+          <h2 class="mb-4 text-xl font-bold uppercase tracking-wider text-cyan-400">Skills</h2>
+          <div class="grid grid-cols-3 gap-2">
+            {["JavaScript", "TypeScript", "React", "Astro", "Node.js", "Python", "CSS/Tailwind", "Git", "Docker", "Photography", "Film Making", "Editing"].map((skill) => (
+              <div class="rounded border border-cyan-400/30 bg-transparent p-2 text-center">
+                <p class="text-sm font-semibold text-cyan-100">{skill}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div id="contact-content" class="section-content hidden">
+          <h2 class="mb-4 text-xl font-bold uppercase tracking-wider text-cyan-400">Contact</h2>
+          <div class="space-y-2">
+            <div class="rounded border border-cyan-400/30 bg-transparent px-4 py-3 flex items-center gap-4">
+              <p class="text-xs uppercase text-cyan-500 w-16 shrink-0">Twitch</p>
+              <a href="https://www.twitch.tv/fraxbnezl_bevtvany" target="_blank" rel="noreferrer" class="text-sm text-cyan-100 transition hover:text-white">Fraxbnezl_Bevtvany</a>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent px-4 py-3 flex items-center gap-4">
+              <p class="text-xs uppercase text-cyan-500 w-16 shrink-0">Discord</p>
+              <p class="text-sm text-cyan-100">discord.gg/Xg3Ecpz</p>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent px-4 py-3 flex items-center gap-4">
+              <p class="text-xs uppercase text-cyan-500 w-16 shrink-0">GitHub</p>
+              <p class="text-sm text-cyan-100">github.com/fraxb</p>
+            </div>
+            <div class="rounded border border-cyan-400/30 bg-transparent px-4 py-3 flex items-center gap-4">
+              <p class="text-xs uppercase text-cyan-500 w-16 shrink-0">Pastebin</p>
+              <a href="https://pastebin.com/u/fraxb" target="_blank" rel="noreferrer" class="text-sm text-cyan-100 transition hover:text-white">pastebin.com/u/fraxb</a>
+            </div>
+          </div>
+        </div>
+          </div>
+      </div>
     </div>
-  </div>
-
-  <!-- Scroll Hint -->
-  <div class="absolute bottom-10 text-sm tracking-widest opacity-50">
-    Scroll
   </div>
 </section>
 
+<style>
+  .about-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    opacity: 1;
+  }
 
-<!-- animation for the background -->
+  .space-nebula {
+    background:
+      radial-gradient(circle at 20% 25%, rgba(34, 211, 238, 0.16), transparent 28%),
+      radial-gradient(circle at 78% 18%, rgba(59, 130, 246, 0.14), transparent 24%),
+      radial-gradient(circle at 50% 75%, rgba(168, 85, 247, 0.08), transparent 30%),
+      linear-gradient(180deg, rgba(2, 6, 23, 0.15), rgba(2, 6, 23, 0.42));
+  }
+
+  .space-stars {
+    opacity: 0.75;
+    background-repeat: repeat;
+    animation: drift 38s linear infinite;
+  }
+
+  .space-stars--far {
+    background-image:
+      radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.65) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 72% 36%, rgba(147, 197, 253, 0.5) 0 1px, transparent 1.8px),
+      radial-gradient(circle at 44% 78%, rgba(255, 255, 255, 0.45) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 88% 68%, rgba(103, 232, 249, 0.45) 0 1px, transparent 1.8px);
+    background-size: 320px 320px;
+    opacity: 0.45;
+  }
+
+  .space-stars--near {
+    background-image:
+      radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.95) 0 1.3px, transparent 2px),
+      radial-gradient(circle at 60% 30%, rgba(255, 255, 255, 0.8) 0 1.3px, transparent 2px),
+      radial-gradient(circle at 82% 58%, rgba(147, 197, 253, 0.85) 0 1.3px, transparent 2px),
+      radial-gradient(circle at 30% 72%, rgba(103, 232, 249, 0.8) 0 1.3px, transparent 2px),
+      radial-gradient(circle at 52% 88%, rgba(255, 255, 255, 0.85) 0 1.2px, transparent 1.9px);
+    background-size: 220px 220px;
+  }
+
+  .bg-scanline {
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(34, 211, 238, 0.08) 51%,
+      transparent 52%
+    );
+    background-size: 100% 4px;
+    animation: scanline 10s linear infinite;
+  }
+
+  @keyframes scanline {
+    from { background-position: 0 0; }
+    to { background-position: 0 100%; }
+  }
+
+  @keyframes drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-40px, 24px, 0); }
+  }
+
+  @keyframes triggerBeacon {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.16), 0 0 24px rgba(34, 211, 238, 0.12); }
+    50% { box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.34), 0 0 34px rgba(34, 211, 238, 0.22); }
+  }
+
+  @keyframes triggerHalo {
+    0%, 100% { transform: scale(0.96); opacity: 0.35; }
+    50% { transform: scale(1.08); opacity: 0.85; }
+  }
+
+  @keyframes hintPulse {
+    0%, 100% { border-color: rgba(34, 211, 238, 0.26); box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.08), 0 12px 28px rgba(0, 0, 0, 0.24); }
+    50% { border-color: rgba(103, 232, 249, 0.55); box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.18), 0 16px 32px rgba(8, 47, 73, 0.34); }
+  }
+
+  #scifi-text {
+    font-size: clamp(0.78rem, 1.4vw + 0.3rem, 1.18rem);
+    line-height: 1.7;
+  }
+
+  #data-stream {
+    font-size: clamp(0.55rem, 0.8vw + 0.2rem, 0.9rem);
+    letter-spacing: 0.12em;
+  }
+
+  #orbit-shell {
+    width: min(84vw, 380px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  #main-trigger {
+    overflow: visible;
+    isolation: isolate;
+    animation: triggerBeacon 3.2s ease-in-out infinite;
+  }
+
+  #main-trigger::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    border-radius: 9999px;
+    border: 1px solid rgba(103, 232, 249, 0.28);
+    opacity: 0.6;
+    pointer-events: none;
+    animation: triggerHalo 2.8s ease-in-out infinite;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    inset: 12%;
+    border-radius: 9999px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    transition: opacity 320ms ease, transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1), visibility 320ms ease;
+  }
+
+  .orbit-ring--inner {
+    inset: 22%;
+    border-style: dashed;
+    opacity: 0;
+  }
+
+  #orbit-shell.orbit-open .orbit-ring {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+
+  .orbit-node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    background: rgba(5, 15, 30, 0.22);
+    color: rgb(207 250 254);
+    padding: 0.75rem 0.95rem;
+    border-radius: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translateY(calc(var(--orbit-radius) * -0.2))
+      rotate(calc(var(--angle) * -1))
+      scale(0.55);
+    transition:
+      opacity 240ms ease,
+      transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+    transition-delay: var(--delay);
+    min-width: 78px;
+  }
+
+  #orbit-shell.orbit-open .orbit-node {
+    opacity: 1;
+    pointer-events: auto;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translateY(calc(var(--orbit-radius) * -1))
+      rotate(calc(var(--angle) * -1))
+      scale(1);
+  }
+
+  .orbit-node:hover {
+    border-color: rgba(103, 232, 249, 0.85);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.22);
+  }
+
+  .orbit-node__icon {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 9999px;
+    background: rgba(34, 211, 238, 0.12);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .orbit-node__label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .orbit-hint {
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: max-content;
+    padding: 0.35rem 0.8rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    background: rgba(8, 47, 73, 0.55);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.08), 0 10px 22px rgba(0, 0, 0, 0.24);
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(207, 250, 254, 0.94);
+    white-space: nowrap;
+  }
+
+  #toggle-hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: fit-content;
+    margin-inline: auto;
+    padding: 0.48rem 1.05rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(34, 211, 238, 0.26);
+    background: rgba(8, 47, 73, 0.46);
+    color: rgba(207, 250, 254, 0.86);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.08), 0 12px 28px rgba(0, 0, 0, 0.24);
+    animation: hintPulse 2.8s ease-in-out infinite;
+  }
+
+  #toggle-hint::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: #22d3ee;
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.92);
+    flex: 0 0 auto;
+  }
+
+  /* Twitch panel fade transition */
+  .card-border-hide {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #text-panel, #twitch-panel {
+    transition: opacity 300ms ease;
+  }
+
+  #twitch-panel.fade-in {
+    animation: fadeIn 350ms ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Live pulse ring on logo when stream mode */
+  #main-trigger.stream-mode {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    animation: livePulse 2s infinite;
+  }
+
+  #main-trigger.stream-mode::before {
+    border-color: rgba(248, 113, 113, 0.35);
+    animation-duration: 2s;
+  }
+
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70%  { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+  .slide-left {
+    transform: translateX(-108%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .slide-in {
+    transform: translateX(0);
+  }
+
+  @media (max-width: 1023px) {
+    .slide-left {
+      transform: translateY(-110%);
+    }
+
+    .slide-in {
+      transform: translateX(0);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .orbit-node {
+      min-width: 70px;
+      padding: 0.7rem 0.85rem;
+    }
+
+    .orbit-node__label {
+      letter-spacing: 0.12em;
+    }
+  }
+</style>
+
 <script>
-  import { animate, stagger, onScroll } from "animejs";
+  const TWITCH_CHANNEL = "Fraxbnezl_Bevtvany";
 
-  // Initial state
-  animate("#hero-content > *", {
-    opacity: [0, 1],
-    translateY: [40, 0],
-    delay: stagger(200),
-    duration: 1200,
-    easing: "easeOutExpo",
-  });
+  const root = document.querySelector("[data-about-me]");
 
-  // Background motion
-  animate(".background", {
-    scale: [1.1, 1],
-    opacity: [0, 1],
-    duration: 2000,
-    easing: "easeOutExpo",
-  });
+  if (root instanceof HTMLElement && root.dataset.initialized !== "true") {
+    root.dataset.initialized = "true";
 
-  // Grid subtle pulse on scroll
-  animate(".bg-cell", {
-    opacity: [0, 0.15],
-    delay: stagger(40),
-    duration: 800,
-    easing: "easeOutSine",
-    autoplay: onScroll({
-      enter: "enter bottom",
-    }),
-  });
+    const textElement = root.querySelector("#scifi-text");
+    const streamLink = root.querySelector("#stream-link");
+    const orbitShell = root.querySelector("#orbit-shell");
+    const mainTrigger = root.querySelector("#main-trigger");
+    const mainView = root.querySelector("#main-view");
+    const sectionView = root.querySelector("#section-view");
+    const backButton = root.querySelector("#back-button");
+    const canvas = root.querySelector("#comet-bg");
+    const sectionContents = root.querySelectorAll<HTMLElement>(".section-content");
+    const statCards = root.querySelectorAll<HTMLElement>("[data-stat-card]");
+    const orbitNodes = root.querySelectorAll<HTMLButtonElement>(".orbit-node");
+    const textPanel = root.querySelector<HTMLElement>("#text-panel");
+    const twitchPanel = root.querySelector<HTMLElement>("#twitch-panel");
+    const twitchIframe = root.querySelector<HTMLIFrameElement>("#twitch-iframe");
+    const toggleHint = root.querySelector<HTMLElement>("#toggle-hint");
+
+    if (
+      textElement instanceof HTMLElement &&
+      streamLink instanceof HTMLElement &&
+      orbitShell instanceof HTMLElement &&
+      mainTrigger instanceof HTMLElement &&
+      mainView instanceof HTMLElement &&
+      sectionView instanceof HTMLElement &&
+      backButton instanceof HTMLElement &&
+      textPanel instanceof HTMLElement &&
+      twitchPanel instanceof HTMLElement &&
+      twitchIframe instanceof HTMLIFrameElement
+    ) {
+      const introText =
+        "hey there! I'm Fraxb known as FN or Effen, a passionate developer with a knack for creating dynamic web experiences.";
+      const streamText =
+        "stream beacon locked in... catch me live on Twitch as Thoriq_Stream for gameplay, edits, and behind-the-scenes creative sessions.";
+      let intervalId = 0;
+      let orbitOpen = false;
+      let streamMode = false;
+      let animationFrameId = 0;
+      let streamPanelTimerId = 0;
+      let twitchMountFrameId = 0;
+      let statsRefreshTimerId = 0;
+      let twitchEmbedLoaded = false;
+
+      const clearDecodeTimer = () => {
+        if (intervalId) {
+          window.clearInterval(intervalId);
+          intervalId = 0;
+        }
+      };
+
+      const clearStreamPanelTimer = () => {
+        if (streamPanelTimerId) {
+          window.clearTimeout(streamPanelTimerId);
+          streamPanelTimerId = 0;
+        }
+      };
+
+      const clearTwitchMountFrame = () => {
+        if (twitchMountFrameId) {
+          window.cancelAnimationFrame(twitchMountFrameId);
+          twitchMountFrameId = 0;
+        }
+      };
+
+      const clearStatsRefreshTimer = () => {
+        if (statsRefreshTimerId) {
+          window.clearInterval(statsRefreshTimerId);
+          statsRefreshTimerId = 0;
+        }
+      };
+
+      const formatStatValue = (value: unknown) => {
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return new Intl.NumberFormat().format(value);
+        }
+        return "--";
+      };
+
+      const renderSocialStats = (payload: unknown) => {
+        const stats =
+          payload && typeof payload === "object" && "stats" in payload && payload.stats && typeof payload.stats === "object"
+            ? payload.stats as Record<string, { value?: number | null; note?: string }>
+            : {};
+
+        statCards.forEach((card) => {
+          const key = card.dataset.statCard;
+          if (!key) return;
+
+          const valueElement = card.querySelector<HTMLElement>("[data-stat-value]");
+          const noteElement = card.querySelector<HTMLElement>("[data-stat-note]");
+          const stat = stats[key];
+          const defaultNote = noteElement?.dataset.defaultNote || "";
+
+          if (valueElement) {
+            valueElement.textContent = formatStatValue(stat?.value);
+          }
+
+          if (noteElement) {
+            noteElement.textContent = stat?.note || defaultNote;
+          }
+        });
+      };
+
+      const loadSocialStats = async () => {
+        try {
+          const response = await fetch(`/api/social-stats?t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error("Unable to load social stats.");
+          }
+          renderSocialStats(await response.json());
+        } catch {
+          renderSocialStats(null);
+        }
+      };
+
+      const decodeText = (targetText: string) => {
+        clearDecodeTimer();
+        let i = 0;
+        textElement.innerText = "";
+        intervalId = window.setInterval(() => {
+          i++;
+          textElement.innerText = targetText.slice(0, i);
+          if (i >= targetText.length) clearDecodeTimer();
+        }, 28);
+      };
+
+      // ─── STREAM MODE TOGGLE ───────────────────────────────────────────────
+      const getTwitchEmbedSrc = () => {
+        const parent = window.location.hostname || "localhost";
+        // muted=true is required for browsers to allow autoplay without a user gesture
+        return `https://player.twitch.tv/?channel=${TWITCH_CHANNEL}&parent=${parent}&autoplay=true&muted=true`;
+      };
+
+      const infoPanelWrap = root.querySelector<HTMLElement>("#info-panel-wrap");
+
+      const mountTwitchEmbed = () => {
+        if (twitchEmbedLoaded) return;
+
+        clearTwitchMountFrame();
+        twitchMountFrameId = window.requestAnimationFrame(() => {
+          twitchMountFrameId = window.requestAnimationFrame(() => {
+            twitchMountFrameId = 0;
+            if (!streamMode) return;
+            twitchIframe.src = getTwitchEmbedSrc();
+            twitchEmbedLoaded = true;
+          });
+        });
+      };
+
+      const unmountTwitchEmbed = () => {
+        clearTwitchMountFrame();
+        if (!twitchEmbedLoaded) return;
+        twitchIframe.src = "about:blank";
+        twitchEmbedLoaded = false;
+      };
+
+      const enterStreamMode = () => {
+        clearStreamPanelTimer();
+        streamMode = true;
+        mainTrigger.classList.add("stream-mode");
+        if (toggleHint) toggleHint.textContent = "click logo to close stream";
+        if (infoPanelWrap) infoPanelWrap.style.opacity = "1";
+
+        textPanel.style.opacity = "0";
+        streamPanelTimerId = window.setTimeout(() => {
+          streamPanelTimerId = 0;
+          if (!streamMode) return;
+          textPanel.style.display = "none";
+          twitchPanel.style.height = "auto";
+          twitchPanel.style.opacity = "1";
+          twitchPanel.style.overflow = "visible";
+          mountTwitchEmbed();
+          textPanel.style.opacity = "";
+        }, 180);
+      };
+
+      const exitStreamMode = () => {
+        clearStreamPanelTimer();
+        streamMode = false;
+        mainTrigger.classList.remove("stream-mode");
+        if (toggleHint) toggleHint.textContent = "click logo to watch stream";
+        if (infoPanelWrap) infoPanelWrap.style.opacity = "0";
+
+        unmountTwitchEmbed();
+        twitchPanel.style.height = "0";
+        twitchPanel.style.opacity = "0";
+        twitchPanel.style.overflow = "hidden";
+        textPanel.style.display = "";
+        textPanel.style.opacity = "";
+      };
+
+      const setOrbitState = (nextOpen: boolean) => {
+        orbitOpen = nextOpen;
+        orbitShell.classList.toggle("orbit-open", orbitOpen);
+        mainTrigger.setAttribute("aria-expanded", String(orbitOpen));
+        streamLink.classList.toggle("hidden", !orbitOpen);
+        // Hide the info panel when orbit is open so its border doesn't show as a line
+        if (infoPanelWrap) {
+          infoPanelWrap.style.opacity = orbitOpen && !streamMode ? "0" : "1";
+        }
+        // Only update text if not in stream mode
+        if (!streamMode) {
+          decodeText(orbitOpen ? streamText : introText);
+        }
+      };
+
+      const openSection = (sectionId: string | null) => {
+        if (!sectionId) return;
+
+        sectionContents.forEach((content) => content.classList.add("hidden"));
+        const target = root.querySelector(`#${sectionId}-content`);
+        target?.classList.remove("hidden");
+
+        mainView.classList.add("slide-left");
+        sectionView.classList.add("slide-in");
+        backButton.classList.remove("opacity-0", "pointer-events-none");
+        backButton.classList.add("opacity-100", "pointer-events-auto");
+      };
+
+      const closeSection = () => {
+        mainView.classList.remove("slide-left");
+        sectionView.classList.remove("slide-in");
+        backButton.classList.add("opacity-0", "pointer-events-none");
+        backButton.classList.remove("opacity-100", "pointer-events-auto");
+      };
+
+      const handleTriggerClick = () => {
+        if (streamMode) {
+          exitStreamMode();
+        } else {
+          enterStreamMode();
+        }
+        // Still toggle orbit open/close as before
+        setOrbitState(!orbitOpen);
+      };
+
+      mainTrigger.addEventListener("click", handleTriggerClick);
+
+      const nodeListeners: Array<[HTMLButtonElement, () => void]> = [];
+      orbitNodes.forEach((node) => {
+        const handleNodeClick = () => {
+          const sectionId = node.getAttribute("data-section");
+          if (!orbitOpen) setOrbitState(true);
+          openSection(sectionId);
+        };
+
+        node.addEventListener("click", handleNodeClick);
+        nodeListeners.push([node, handleNodeClick]);
+      });
+
+      backButton.addEventListener("click", closeSection);
+      decodeText(introText);
+      loadSocialStats();
+      statsRefreshTimerId = window.setInterval(loadSocialStats, 300000);
+
+      const cleanup = () => {
+        clearDecodeTimer();
+        clearStreamPanelTimer();
+        clearStatsRefreshTimer();
+        unmountTwitchEmbed();
+        if (animationFrameId) {
+          window.cancelAnimationFrame(animationFrameId);
+        }
+
+        mainTrigger.removeEventListener("click", handleTriggerClick);
+        backButton.removeEventListener("click", closeSection);
+        nodeListeners.forEach(([node, listener]) => {
+          node.removeEventListener("click", listener);
+        });
+
+        root.dataset.initialized = "false";
+      };
+
+      if (canvas instanceof HTMLCanvasElement) {
+        const ctx = canvas.getContext("2d");
+
+        if (ctx) {
+          const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+          };
+
+          const comets = Array.from({ length: 25 }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: Math.random() * 1 + 0.2,
+            vy: Math.random() * 1 + 0.2,
+            r: Math.random() * 1.5 + 0.5,
+          }));
+
+          const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(34,211,238,0.3)";
+
+            for (const comet of comets) {
+              ctx.beginPath();
+              ctx.arc(comet.x, comet.y, comet.r, 0, Math.PI * 2);
+              ctx.fill();
+
+              comet.x += comet.vx;
+              comet.y += comet.vy;
+
+              if (comet.x > canvas.width) comet.x = 0;
+              if (comet.y > canvas.height) comet.y = 0;
+            }
+
+            animationFrameId = window.requestAnimationFrame(animate);
+          };
+
+          window.addEventListener("resize", resize);
+          resize();
+          animate();
+
+          const fullCleanup = () => {
+            window.removeEventListener("resize", resize);
+            cleanup();
+          };
+
+          window.addEventListener("astro:before-swap", fullCleanup, { once: true });
+        } else {
+          window.addEventListener("astro:before-swap", cleanup, { once: true });
+        }
+      } else {
+        window.addEventListener("astro:before-swap", cleanup, { once: true });
+      }
+    }
+  }
 </script>
-

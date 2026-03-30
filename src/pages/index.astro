@@ -1,31 +1,482 @@
 ---
+import Layout from "../layouts/Layout.astro";
 import BackgroundParticles from "../components/astro/BackgroundParticles.astro";
 import AboutMe from "../components/astro/AboutMe.astro";
-// import LandingPageText from '../components/astro/LandingPageText.astro';
+import StoreSection from "../components/astro/StoreSection.astro";
 import { CustomCursor } from "../components/react/CustomCursor.jsx";
-import Layout from "../layouts/Layout.astro";
-import SkillsShowcase from "../components/astro/SkillsShowcase.astro";
-// import "../styles/AboutMe.css";
+import FilmStrip from "../components/react/FilmStrip.jsx";
+import Donation from "../components/astro/Donation.astro";
+import SkillsShowcase from "../components/astro/Experience.astro";
 ---
 
 <Layout>
-	<CustomCursor client:only />
+  <CustomCursor client:only="react" />
 
-	<section
-		class="w-screen h-screen flex justify-center items-center-safe flex-col"
-	>
-		<BackgroundParticles />
-		<h1 class="special-gothic-expanded-one-regular text-6xl text-center">
-			What's Up!
-			<span class="text-6xl uppercase">hiyo</span>
-		</h1>
+  <main id="page-shell" class="page-shell">
+    <section
+      id="hero"
+      class="slide relative flex items-center justify-center overflow-hidden text-white"
+      data-section
+    >
+      <BackgroundParticles />
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
 
-		<p class="text-center text-lg mt-4" data-cursor-style="line-text">
-			I'm a web developer
-		</p>
-		<!-- ini sementara -->
-	</section>
+      <div
+        id="hero-content"
+        class="relative z-10 flex w-full max-w-[1520px] flex-col items-center px-6 text-center"
+      >
+        <p class="hero-kicker">Senko Fraxb Home</p>
+        <div class="hero-title-shell">
+        <h1
+          class="special-gothic-expanded-one-regular
+                 text-[4rem] md:text-[7rem]
+                 uppercase tracking-[0.14em]
+                 relative flex items-baseline"
+        >
+          <span class="letter">F</span>
+          <span class="letter">R</span>
+          <span class="letter">A</span>
+          <span class="letter">X</span>
+          <span class="letter">B</span>
+        </h1>
+        </div>
 
-	<AboutMe />
-	<SkillsShowcase />
+        <p class="hero-subtitle mt-8 text-base md:text-lg tracking-wider opacity-0 animate-reveal">
+          <span class="billboard">Thank you for visiting!</span>
+        </p>
+        </div>
+    </section>
+
+    <section id="about" class="slide slide--bleed" data-section>
+      <AboutMe />
+    </section>
+
+    <section id="store" class="slide slide--bleed" data-section>
+      <StoreSection />
+    </section>
+
+    <section id="skills" class="slide slide--bleed overflow-hidden" data-section>
+      <SkillsShowcase />
+    </section>
+
+    <section id="film" class="slide slide--bleed overflow-hidden relative" data-section>
+      <FilmStrip client:load />
+    </section>
+
+    <section id="donation" class="slide slide--bleed" data-section>
+      <Donation />
+    </section>
+  </main>
+
+  <nav id="scroll-indicator" class="scroll-nav" aria-label="Section navigation">
+    <button type="button" class="scroll-nav__item" data-slide="0">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">Hero</span>
+    </button>
+    <button type="button" class="scroll-nav__item" data-slide="1">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">About</span>
+    </button>
+    <button type="button" class="scroll-nav__item" data-slide="2">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">Store</span>
+    </button>
+    <button type="button" class="scroll-nav__item" data-slide="3">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">Skills</span>
+    </button>
+    <button type="button" class="scroll-nav__item" data-slide="4">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">Film</span>
+    </button>
+    <button type="button" class="scroll-nav__item" data-slide="5">
+      <span class="scroll-nav__dot"></span>
+      <span class="scroll-nav__label">Donate</span>
+    </button>
+  </nav>
 </Layout>
+
+<style>
+.page-shell {
+  position: relative;
+  height: 100svh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.page-shell::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  height: 100svh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  padding: 0;
+}
+
+.slide--bleed {
+  padding: 0;
+}
+
+#skills {
+  overflow: hidden;
+}
+
+#film {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Force astro-island to fill the film section */
+#film astro-island {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hero letters animation */
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px) scale(0.8);
+  animation: letterIn 0.8s ease forwards, letterBounce 2.5s ease-in-out 1.4s infinite;
+}
+.letter:nth-child(1) { animation-delay: 0s; }
+.letter:nth-child(2) { animation-delay: 0.2s; }
+.letter:nth-child(3) { animation-delay: 0.4s; }
+.letter:nth-child(4) { animation-delay: 0.6s; }
+.letter:nth-child(5) { animation-delay: 0.8s; }
+
+
+
+.hero-title-shell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+}
+
+.hero-kicker {
+  margin: 0 0 0.9rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+
+@keyframes letterIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes letterBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-8px) scale(1.02); }
+  50% { transform: translateY(0) scale(1); }
+  75% { transform: translateY(-4px) scale(1.01); }
+}
+
+
+.billboard {
+  display: inline-block;
+  font-weight: 700;
+  animation: jumpingLetters 2s ease-in-out infinite;
+}
+
+.hero-subtitle {
+  max-width: min(92vw, 960px);
+  color: rgba(255,255,255,0.86);
+  text-shadow: 0 0 16px rgba(255,255,255,0.08);
+  text-wrap: balance;
+}
+
+
+/* Tagline reveal */
+.animate-reveal {
+  animation: fadeUp 2s ease forwards;
+  animation-delay: 1.5s;
+}
+@keyframes fadeUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+
+.scroll-nav {
+  position: fixed;
+  top: 50%;
+  right: clamp(0.75rem, 2vw, 1.4rem);
+  z-index: 60;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 9.5rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 1.4rem;
+  background: rgba(5, 10, 20, 0.58);
+  backdrop-filter: blur(18px);
+  transform: translateY(-50%);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+}
+
+.scroll-nav__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  color: rgba(255,255,255,0.55);
+  transition: background-color 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.scroll-nav__item:hover {
+  transform: translateY(-1px);
+  color: rgba(255,255,255,0.86);
+}
+
+.scroll-nav__item.active {
+  background: rgba(34, 211, 238, 0.14);
+  color: rgba(255,255,255,0.96);
+}
+
+.scroll-nav__dot {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.35);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+  transition: background-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.scroll-nav__item.active .scroll-nav__dot {
+  background: rgb(34, 211, 238);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.75);
+  transform: scale(1.08);
+}
+
+.scroll-nav__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .hero-title-shell {
+    padding: 0.65rem 0.5rem;
+  }
+
+  .scroll-nav {
+    right: 0.55rem;
+    min-width: 7.75rem;
+    padding: 0.4rem;
+    gap: 0.22rem;
+  }
+
+  .scroll-nav__item {
+    justify-content: flex-start;
+    padding: 0.48rem 0.6rem;
+  }
+
+  .scroll-nav__label {
+    display: inline;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+}
+</style>
+
+<script is:inline>
+  const pageShell = document.getElementById("page-shell");
+  const slides = pageShell ? Array.from(pageShell.querySelectorAll(".slide")) : [];
+  const dots = Array.from(document.querySelectorAll('#scroll-indicator [data-slide]'));
+  let index = 0;
+  let locked = false;
+  let unlockTimer = 0;
+  let scrollAnimationFrame = 0;
+  let wheelDelta = 0;
+  let wheelResetTimer = 0;
+  let touchStartY = 0;
+  let touchStartX = 0;
+  const SCROLL_DURATION = 1000;
+  const NAV_LOCK_MS = 1100;
+
+  function clearLockTimer() {
+    if (unlockTimer) {
+      window.clearTimeout(unlockTimer);
+      unlockTimer = 0;
+    }
+  }
+
+  function lockNavigation() {
+    locked = true;
+    clearLockTimer();
+    unlockTimer = window.setTimeout(() => {
+      locked = false;
+      unlockTimer = 0;
+    }, NAV_LOCK_MS);
+  }
+
+  function resetWheelDelta() {
+    wheelDelta = 0;
+    if (wheelResetTimer) {
+      window.clearTimeout(wheelResetTimer);
+      wheelResetTimer = 0;
+    }
+  }
+
+  function setActive(nextIndex) {
+    index = nextIndex;
+    slides.forEach((slide, slideIndex) => {
+      slide.classList.toggle("is-active", slideIndex === nextIndex);
+    });
+    dots.forEach((dot, dotIndex) => {
+      dot.classList.toggle("active", dotIndex === nextIndex);
+    });
+  }
+
+  function easeInOutCubic(t) {
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function animateToSlide(nextIndex) {
+    if (!pageShell || !slides[nextIndex]) return;
+
+    if (scrollAnimationFrame) {
+      window.cancelAnimationFrame(scrollAnimationFrame);
+      scrollAnimationFrame = 0;
+    }
+
+    const startTop = pageShell.scrollTop;
+    const targetTop = slides[nextIndex].offsetTop;
+    const distance = targetTop - startTop;
+    const startTime = performance.now();
+
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / SCROLL_DURATION, 1);
+      const eased = easeInOutCubic(progress);
+
+      pageShell.scrollTop = startTop + distance * eased;
+
+      if (progress < 1) {
+        scrollAnimationFrame = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      pageShell.scrollTop = targetTop;
+      scrollAnimationFrame = 0;
+    };
+
+    scrollAnimationFrame = window.requestAnimationFrame(tick);
+  }
+
+  function goTo(nextIndex) {
+    if (!pageShell || locked || nextIndex < 0 || nextIndex >= slides.length || nextIndex === index) return;
+    lockNavigation();
+    resetWheelDelta();
+    animateToSlide(nextIndex);
+    setActive(nextIndex);
+  }
+
+  if (pageShell && slides.length) {
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const nextIndex = Number(dot.getAttribute("data-slide") || 0);
+        goTo(nextIndex);
+      });
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (!visibleEntries.length) return;
+        const activeSlide = visibleEntries[0]?.target;
+        const activeIndex = slides.findIndex((slide) => slide === activeSlide);
+        if (activeIndex >= 0) setActive(activeIndex);
+      },
+      {
+        root: pageShell,
+        threshold: [0.35, 0.55, 0.72]
+      }
+    );
+
+    slides.forEach((slide) => observer.observe(slide));
+    requestAnimationFrame(() => setActive(0));
+
+    pageShell.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      if (locked) return;
+
+      wheelDelta += e.deltaY;
+
+      if (wheelResetTimer) {
+        window.clearTimeout(wheelResetTimer);
+      }
+
+      wheelResetTimer = window.setTimeout(() => {
+        wheelResetTimer = 0;
+        wheelDelta = 0;
+      }, 180);
+
+      if (Math.abs(wheelDelta) < 45) return;
+
+      goTo(index + (wheelDelta > 0 ? 1 : -1));
+    }, { passive: false });
+
+    pageShell.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchStartY = touch.clientY;
+      touchStartX = touch.clientX;
+    }, { passive: true });
+
+    pageShell.addEventListener("touchend", (e) => {
+      if (locked) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+
+      const deltaY = touchStartY - touch.clientY;
+      const deltaX = Math.abs(touchStartX - touch.clientX);
+
+      if (Math.abs(deltaY) < 60 || deltaX > Math.abs(deltaY)) return;
+      goTo(index + (deltaY > 0 ? 1 : -1));
+    }, { passive: true });
+
+    window.addEventListener("keydown", (e) => {
+      const tagName = document.activeElement?.tagName;
+      if (tagName === "INPUT" || tagName === "TEXTAREA") return;
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        goTo(index + 1);
+      }
+      if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        goTo(index - 1);
+      }
+    });
+  }
+</script>
