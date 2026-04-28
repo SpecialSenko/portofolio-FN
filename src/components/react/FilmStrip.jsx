@@ -8,7 +8,7 @@ const STEAM_COMMUNITY_API_URL = `https://steamcommunity.com/inventory/${STEAM_ID
 const STEAM_LEGACY_API_URL = `https://steamcommunity.com/profiles/${STEAM_ID}/inventory/json/${APP_ID}/${CONTEXT_ID}/?start=0`;
 const CSFLOAT_STALL_URL = `https://csfloat.com/stall/${STEAM_ID}`;
 const CSFLOAT_LISTINGS_API_URL = `https://csfloat.com/api/v1/listings?user_id=${STEAM_ID}&limit=50&sort_by=most_recent`;
-const GIVEAWAY_CHANNEL_URL = "https://discordapp.com/channels/637489101800472586/1486832107631284417";
+const GIVEAWAY_CHANNEL_URL = "https://discord.gg/Xg3Epcz";
 const STEAM_IMAGE_HOSTS = [
   "community.cloudflare.steamstatic.com",
   "community.akamai.steamstatic.com",
@@ -17,11 +17,11 @@ const STEAM_IMAGE_HOSTS = [
 
 const projectImages = import.meta.glob(
   "../../assets/project/*.{png,jpg,jpeg,webp}",
-  { eager: true, query: "?url", import: "default" }
+  { query: "?url", import: "default" }
 );
 const gameImages = import.meta.glob(
   "../../assets/games/*.{png,jpg,jpeg,webp}",
-  { eager: true, query: "?url", import: "default" }
+  { query: "?url", import: "default" }
 );
 
 // ── AUTO-DETECT CERTIFICATES from assets/certificates/ ───────────────────────
@@ -44,7 +44,22 @@ const CERTIFICATES = Object.entries(_certGlob)
   .map(([path, src]) => ({ src, title: formatAssetTitle(path) }));
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-const getImages = (g) => Object.entries(g).sort(([a],[b])=>a.localeCompare(b)).map(([,v])=>v).filter(v=>typeof v==="string");
+const loadImages = async (g) => {
+  const values = await Promise.all(
+    Object.entries(g)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(async ([, loader]) => {
+        try {
+          const value = await loader();
+          return typeof value === "string" ? value : null;
+        } catch {
+          return null;
+        }
+      })
+  );
+
+  return values.filter((value) => typeof value === "string");
+};
 const toSteamGlowColor = (c) => c && c !== "transparent" ? (c.startsWith("#") ? c : `#${c}`) : null;
 const rarityToColor = (rarity) => {
   switch (rarity) {
@@ -269,45 +284,6 @@ function useCVSwipe(onSwipeLeft) {
     return()=>{el.removeEventListener("touchstart",onTS);el.removeEventListener("touchend",onTE);};
   },[onSwipeLeft]);
   return ref;
-}
-
-// ── CertModal (fullscreen viewer) ─────────────────────────────────────────────
-function CertModal({cert,onClose}) {
-  useEffect(()=>{
-    if(!cert)return;
-    const h=e=>{if(e.key==="Escape")onClose();};
-    const shell=document.getElementById("page-shell");
-    window.addEventListener("keydown",h);
-    if(shell) shell.style.overflow="hidden";
-    return()=>{
-      window.removeEventListener("keydown",h);
-      if(shell) shell.style.overflow="";
-    };
-  },[cert,onClose]);
-  return (
-    <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:950,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(6px)",opacity:cert?1:0,pointerEvents:cert?"auto":"none",transition:"opacity 260ms ease"}} />
-      <div style={{position:"fixed",top:"50%",left:"50%",zIndex:960,transform:cert?"translate(-50%,-50%) scale(1)":"translate(-50%,-50%) scale(0.88)",width:"min(720px,96vw)",maxHeight:"88vh",background:"linear-gradient(160deg,#f5ead6 0%,#ede0c4 30%,#e8d9b8 60%,#dfd0aa 100%)",borderRadius:"10px",boxShadow:"0 40px 100px rgba(0,0,0,0.7),0 4px 20px rgba(0,0,0,0.4)",opacity:cert?1:0,pointerEvents:cert?"auto":"none",transition:"opacity 280ms ease,transform 300ms cubic-bezier(0.34,1.2,0.64,1)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
-        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:1,backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E")`,backgroundRepeat:"repeat",opacity:0.6}} />
-        <div style={{position:"relative",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:"1rem",padding:"0.9rem 1.1rem 0.8rem",borderBottom:"1px solid rgba(139,100,50,0.2)"}}>
-          <div style={{minWidth:0}}>
-            <p style={{margin:0,fontFamily:"'Palatino Linotype',Palatino,serif",fontSize:"0.74rem",letterSpacing:"0.3em",textTransform:"uppercase",color:"rgba(100,65,15,0.55)"}}>Certificate</p>
-            <p style={{margin:"0.2rem 0 0",fontFamily:"Georgia,serif",fontSize:"0.8rem",color:"rgba(70,45,12,0.82)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{cert?.title||"Certificate"}</p>
-          </div>
-          <button onClick={onClose} style={{display:"inline-flex",alignItems:"center",gap:"0.55rem",background:"rgba(90,60,20,0.12)",border:"1px solid rgba(139,100,50,0.36)",borderRadius:"9999px",padding:"0.5rem 0.95rem",fontSize:"0.58rem",fontWeight:700,letterSpacing:"0.24em",textTransform:"uppercase",color:"rgba(80,50,10,0.9)",cursor:"pointer",boxShadow:"0 8px 20px rgba(90,60,20,0.12)",transition:"transform 180ms ease,background 180ms ease,border-color 180ms ease"}}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.background="rgba(139,100,50,0.2)";e.currentTarget.style.borderColor="rgba(139,100,50,0.6)";}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.background="rgba(90,60,20,0.12)";e.currentTarget.style.borderColor="rgba(139,100,50,0.36)";}}>Back</button>
-        </div>
-        <div style={{position:"relative",zIndex:5,padding:"0.85rem 1rem 1rem",overflow:"auto"}}>
-          <div style={{borderRadius:"6px",border:"1px solid rgba(139,100,50,0.22)",overflow:"hidden",background:"#fff",boxShadow:"0 4px 20px rgba(0,0,0,0.15)"}}>
-            {cert?.src?.toLowerCase().endsWith(".pdf")
-              ? <iframe src={`${cert.src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} title={cert.title} style={{display:"block",width:"100%",height:"min(72vh,760px)",border:"none"}} />
-              : <img src={cert?.src} alt={cert?.title} style={{display:"block",width:"100%",height:"auto",maxHeight:"55vh",objectFit:"contain"}} />
-            }
-          </div>
-        </div>
-      </div>
-    </>
-  );
 }
 
 // ── CV Pages ──────────────────────────────────────────────────────────────────
@@ -670,7 +646,7 @@ function CVPaper({open,onClose}) {
         {/* Header: ‹ back · dots · page counter */}
         <div style={{position:"relative",zIndex:10,display:"flex",alignItems:"center",gap:"0.9rem",padding:"1rem 1.1rem 0.75rem",borderBottom:"1px solid rgba(139,100,50,0.2)",flexShrink:0}}>
           {/* ‹ back — right next to dots */}
-          <button onClick={onClose} aria-label="Back" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:"0.55rem",minWidth:"11.75rem",border:"1px solid rgba(139,100,50,0.4)",background:`rgba(255,255,255,0.32) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='60' viewBox='0 0 280 60'%3E%3Ctext x='42' y='39' font-family='Arial, sans-serif' font-size='24' font-weight='700' fill='%2350320a'%3E%26lt%3B BACK%3C/text%3E%3C/svg%3E") center / 82% auto no-repeat`,borderRadius:"9999px",padding:"0.8rem 1.25rem",cursor:"pointer",fontFamily:"'Palatino Linotype',Palatino,serif",fontSize:"0",fontWeight:700,letterSpacing:"0.26em",textTransform:"uppercase",color:"transparent",textIndent:"-9999px",boxShadow:"0 10px 24px rgba(90,60,20,0.14)",flexShrink:0,transition:"transform 180ms ease,background 180ms ease,border-color 180ms ease"}}
+          <button onClick={onClose} aria-label="Back" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:"0.55rem",minWidth:"12.5rem",border:"1px solid rgba(139,100,50,0.4)",background:`rgba(255,255,255,0.32) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='44' viewBox='0 0 320 44'%3E%3Ctext x='58' y='29' font-family='Arial, sans-serif' font-size='20' font-weight='700' fill='%2350320a'%3E%26lt%3B BACK%3C/text%3E%3C/svg%3E") center / 78% auto no-repeat`,borderRadius:"9999px",padding:"0.45rem 1.45rem",cursor:"pointer",fontFamily:"'Palatino Linotype',Palatino,serif",fontSize:"0",fontWeight:700,letterSpacing:"0.26em",textTransform:"uppercase",color:"transparent",textIndent:"-9999px",boxShadow:"0 8px 20px rgba(90,60,20,0.12)",flexShrink:0,transition:"transform 180ms ease,background 180ms ease,border-color 180ms ease"}}
             onMouseEnter={e=>e.currentTarget.style.color="rgba(80,50,10,1)"} onMouseLeave={e=>e.currentTarget.style.color="rgba(80,50,10,0.6)"}>‹</button>
           {/* Dot nav */}
           <div style={{display:"flex",gap:"0.4rem",alignItems:"center",flexWrap:"wrap"}}>
@@ -735,31 +711,39 @@ function CVChipList({items}){
   </div>;
 }
 
-function CertPanelRail({onOpenCert}) {
+function CertPanelRail() {
   if(CERTIFICATES.length===0) return(
     <p style={{fontFamily:"Georgia,serif",fontSize:"0.72rem",color:"rgba(134,239,172,0.4)",padding:"1rem",fontStyle:"italic"}}>No certificates found. Add PDFs to src/assets/certificates/</p>
   );
   return(
     <>
       {CERTIFICATES.map((cert,i)=>(
-        <button key={i} onClick={()=>onOpenCert(cert)}
+        <article key={i}
           className="film-frame shrink-0 snap-start"
-          style={{background:"#fff",border:"1px solid rgba(134,239,172,0.18)",borderRadius:"1rem",overflow:"hidden",cursor:"pointer",padding:0,transition:"transform 200ms ease,border-color 200ms ease,box-shadow 200ms ease"}}
-          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor="rgba(134,239,172,0.55)";e.currentTarget.style.boxShadow="0 10px 28px rgba(0,0,0,0.35)";}}
-          onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.borderColor="rgba(134,239,172,0.18)";e.currentTarget.style.boxShadow="none";}}>
-          <div style={{position:"relative",width:"100%",height:"100%",overflow:"hidden",background:"#f5f5f0"}}>
-            <iframe
-              src={`${cert.src}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-              title={`cert-${i}`}
-              style={{position:"absolute",top:0,left:0,width:"250%",height:"250%",border:"none",transform:"scale(0.4)",transformOrigin:"top left",pointerEvents:"none"}}
-              loading="lazy"
-            />
-            <div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0.4rem 0.6rem",background:"linear-gradient(0deg,rgba(0,0,0,0.6),transparent)"}}>
-              <span style={{fontSize:"10px",textTransform:"uppercase",letterSpacing:"0.28em",color:"rgba(255,255,255,0.55)"}}>Cert {String(i+1).padStart(2,"0")}</span>
-              <span style={{width:"0.5rem",height:"0.5rem",borderRadius:"9999px",background:"rgb(134,239,172)",boxShadow:"0 0 14px rgba(134,239,172,0.8)",display:"inline-block"}}/>
+          style={{display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"1rem",background:"linear-gradient(160deg,rgba(255,255,255,0.95),rgba(240,253,244,0.92))",border:"1px solid rgba(134,239,172,0.22)",borderRadius:"1rem",overflow:"hidden",boxShadow:"0 10px 28px rgba(0,0,0,0.18)",gap:"0.75rem"}}>
+          <div style={{display:"grid",gap:"0.6rem"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"0.5rem"}}>
+              <span style={{fontSize:"10px",textTransform:"uppercase",letterSpacing:"0.28em",color:"rgba(21,94,117,0.58)"}}>Cert {String(i+1).padStart(2,"0")}</span>
+              <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:"3.6rem",padding:"0.22rem 0.5rem",borderRadius:"9999px",border:"1px solid rgba(134,239,172,0.38)",fontSize:"9px",fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",color:"rgba(20,83,45,0.78)"}}>PDF</span>
+            </div>
+            <div style={{padding:"0.85rem 0.8rem",borderRadius:"0.9rem",background:"linear-gradient(180deg,rgba(236,253,245,0.95),rgba(220,252,231,0.72))",border:"1px solid rgba(134,239,172,0.25)"}}>
+              <p style={{margin:0,fontSize:"0.64rem",fontWeight:700,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(22,101,52,0.58)"}}>Light Preview</p>
+              <p style={{margin:"0.45rem 0 0",fontFamily:"Georgia,serif",fontSize:"0.9rem",lineHeight:1.4,color:"rgba(20,30,25,0.9)"}}>{cert.title}</p>
             </div>
           </div>
-        </button>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"0.75rem"}}>
+            <span style={{fontSize:"0.62rem",letterSpacing:"0.2em",textTransform:"uppercase",color:"rgba(22,101,52,0.52)"}}>Certificate Info</span>
+            <a
+              href={cert.src}
+              target="_blank"
+              rel="noreferrer"
+              style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"0.55rem 0.9rem",borderRadius:"9999px",border:"1px solid rgba(16,185,129,0.34)",background:"rgba(16,185,129,0.08)",color:"rgba(6,95,70,0.92)",fontSize:"0.58rem",fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",textDecoration:"none",whiteSpace:"nowrap",transition:"transform 180ms ease,background 180ms ease,border-color 180ms ease"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.background="rgba(16,185,129,0.14)";e.currentTarget.style.borderColor="rgba(16,185,129,0.52)";}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.background="rgba(16,185,129,0.08)";e.currentTarget.style.borderColor="rgba(16,185,129,0.34)";}}>
+              Open Full
+            </a>
+          </div>
+        </article>
       ))}
     </>
   );
@@ -775,7 +759,13 @@ export default function FilmStrip() {
   const [menuOpen,setMenuOpen]=useState(false);
   const [view,setView]=useState("idle");
   const [showPanel, setShowPanel] = useState(false);
-  const [activeCert,setActiveCert]=useState(null);
+
+  const PROFILE_IMG_SRC = "/Profile.JPG";
+  const profileReel = useMemo(() => Array.from({ length: 12 }, () => PROFILE_IMG_SRC), []);
+
+  const [filmReel, setFilmReel] = useState(profileReel);
+  const [workReel, setWorkReel] = useState(profileReel);
+  const [galleryLoading, setGalleryLoading] = useState({ film: false, projects: false });
   // CV: 0=hidden, 1=cert orb visible (click1), 2=CV paper open (click2)
   const [cvStep,setCvStep]=useState(0);
   const [certSlideOpen,setCertSlideOpen]=useState(false);
@@ -800,11 +790,6 @@ export default function FilmStrip() {
   },[closePanel]);
   const closeCV=useCallback(()=>setCvStep(0),[]);
   const handleWheel=e=>{const rail=railRef.current;if(!rail)return;if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();rail.scrollBy({left:e.deltaY,behavior:"auto"});}};
-  const handleOpenCertificate=useCallback((cert)=>{
-    closePanel();
-    setActiveCert(cert);
-  },[closePanel]);
-
   const handleCVOrbClick=useCallback(()=>{
     if(cvStep===0){setCvStep(1);if(certSlideOpen){closePanel();setCertSlideOpen(false);}}
     else if(cvStep===1){openCV();}
@@ -816,10 +801,52 @@ export default function FilmStrip() {
     else{setCertSlideOpen(true);openPanel("certs");}
   },[certSlideOpen,closePanel,openPanel]);
 
-  const filmReel=useMemo(()=>getImages(projectImages),[]);
-  const workReel=useMemo(()=>getImages(gameImages),[]);
-  const featuredFilmReel=filmReel.length?filmReel:workReel;
-  const panelImages=view==="film"?featuredFilmReel:view==="projects"?workReel:[];
+  useEffect(() => {
+    let cancelled = false;
+
+    if (view !== "film" || filmReel.length || galleryLoading.film) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setGalleryLoading((current) => ({ ...current, film: true }));
+
+    void loadImages(projectImages).then((images) => {
+      if (cancelled) return;
+      setFilmReel(images);
+      setGalleryLoading((current) => ({ ...current, film: false }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [view, filmReel.length, galleryLoading.film]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (view !== "projects" || workReel.length || galleryLoading.projects) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setGalleryLoading((current) => ({ ...current, projects: true }));
+
+    void loadImages(gameImages).then((images) => {
+      if (cancelled) return;
+      setWorkReel(images);
+      setGalleryLoading((current) => ({ ...current, projects: false }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [view, workReel.length, galleryLoading.projects]);
+
+  const panelImages=view==="film"?filmReel:view==="projects"?workReel:[];
+  const panelIsLoading=view==="film"?galleryLoading.film:view==="projects"?galleryLoading.projects:false;
   const inventoryUnavailable=!loading&&!items.length;
   const inventoryLink=source==="csfloat"?CSFLOAT_STALL_URL:STEAM_INVENTORY_URL;
   const inventoryLinkLabel=source==="csfloat"?"Open CSFloat":"Open Inventory";
@@ -833,14 +860,13 @@ export default function FilmStrip() {
         ? "Steam is rate-limited right now, so this reel is using your public CSFloat stall."
         : "Live items from Steam. Click and drag to browse."
     : view==="certs"
-      ? "Tap a certificate to open it fullscreen."
+      ? "Lightweight certificate info cards. Use the button on any card if you want the full PDF."
       : view==="film"
         ? "Local photo frames and cinematic stills are back in the reel. Click and drag to browse."
         : "Project visuals and artwork collected from the local gallery.";
   return (
     <section className="relative flex h-full w-full flex-col justify-start overflow-hidden bg-transparent px-3 py-3 select-none md:justify-center md:px-6 md:py-5">
       <CVPaper open={cvOpen} onClose={closeCV}/>
-      <CertModal cert={activeCert} onClose={()=>setActiveCert(null)}/>
 
       {/* 1. ORB + CARDS */}
       <div style={{maxHeight:view==="idle"?"430px":"0px",opacity:view==="idle"?1:0,overflow:"hidden",transition:"max-height 320ms ease,opacity 220ms ease",pointerEvents:view==="idle"?"auto":"none"}}>
@@ -898,10 +924,14 @@ export default function FilmStrip() {
                       ? <div className="steam-panel-empty">The live inventory feed is unavailable right now. Use the button above to open it directly.</div>
                       : items.map((item,i)=><SteamPanelFrame key={`s-${i}`} item={item} index={i} wasDragging={wasDragging}/>)
                   : view==="certs"
-                  ? <CertPanelRail onOpenCert={handleOpenCertificate}/>
-                  : panelImages.map((src,i)=>(
+                  ? <CertPanelRail/>
+                  : panelIsLoading
+                    ? <div className="steam-panel-empty">Loading the gallery. It now loads on demand so the page feels lighter.</div>
+                    : !panelImages.length
+                      ? <div className="steam-panel-empty">No gallery images are available in this reel right now.</div>
+                      : panelImages.map((src,i)=>(
                       <div key={`${view}-${i}`} className="film-frame shrink-0 snap-start">
-                        <img src={src} alt={`${panelTitle} ${i+1}`} className="h-full w-full object-cover" draggable={false}/>
+                        <img src={src} alt={`${panelTitle} ${i+1}`} className="h-full w-full object-cover" draggable={false} loading="lazy" decoding="async"/>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"/>
                         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 py-2">
                           <span className="text-[10px] uppercase tracking-[0.28em] text-white/55"> {String(i+1).padStart(2,"0")}</span>
