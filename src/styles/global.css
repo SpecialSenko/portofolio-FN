@@ -24,15 +24,74 @@ html {
 }
 
 body {
-	position: relative;
-	margin: 0;
-	padding: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	color: white;
-	background: linear-gradient(270deg, #0f0e1a, #0a0a23, #000000);
-	background-size: 600% 600%;
-	animation: gradientShift 20s ease infinite;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #ffffff;
+  background: #000000;
+  background-image: 
+    var(--manga-noise, url('/textures/manga-noise.svg')),
+    var(--halftone, url('/textures/halftone-dots.svg')),
+    url('/textures/ink-splatter.svg');
+  background-size: 300px 300px, 8px 8px, auto 20%, var(--manga-noise);
+  background-position: 0 0, 0 0, 20% 80%;
+  background-repeat: repeat, repeat, no-repeat;
+  background-blend-mode: multiply, screen;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('/textures/kanji-particles.svg') no-repeat center/cover;
+  opacity: 0.05;
+  animation: kanjiFloat 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes kanjiFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.05; }
+  33% { transform: translateY(-20px) rotate(2deg); opacity: 0.08; }
+  66% { transform: translateY(10px) rotate(-1deg); opacity: 0.03; }
+}
+
+@keyframes gradientShift {
+  /* Keep existing for compatibility */
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes inkWipe {
+  0% { clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%); }
+  50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+}
+
+@keyframes mangaSlam {
+  0% { transform: translateY(100px) opacity: 0; }
+  100% { transform: translateY(0) opacity: 1; }
+}
+
+@keyframes pulsingAura {
+  0%, 100% { box-shadow: 0 0 20px #fff, 0 0 40px #fff, 0 0 60px rgba(255,255,255,0.3); }
+  50% { box-shadow: 0 0 30px #fff, 0 0 60px #fff, 0 0 90px rgba(255,255,255,0.5); }
+}
+
+/* Manga panel lines utility */
+.manga-panel-line {
+  border-image: url('/textures/halftone-dots.svg') 1 fill repeat;
+}
+
+/* Custom sword cursor */
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M12 2L13.09 8.26L22 9L12 2L13.09 8.26L22 9L17 17L12 2L7 17L2 9L10.91 8.26L12 2Z" fill="%23fff" stroke="%23fff" stroke-width="1"/</svg>'), auto;
 }
 
 button,

@@ -1,0 +1,176 @@
+---
+---
+
+<header class="manga-navbar fixed top-0 left-0 right-0 z-[999] bg-black/95 backdrop-blur-xl border-b-2 border-white/20 shadow-2xl manga-panel-line">
+  <div class="navbar-container mx-auto flex h-20 max-w-7xl items-center px-6 lg:px-8">
+    
+    <!-- Logo -->
+    <a href="/" class="logo-link flex items-center gap-3" aria-label="Home">
+      <img 
+        src="/my-icon.webp" 
+        alt="Fraxb Logo" 
+        class="h-12 w-12 rounded-lg border-4 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.8)] hover:shadow-[0_0_40px_#fff] transition-all duration-300 hover:scale-110 ink-glow"
+        loading="lazy"
+      />
+      <span class="logo-text hidden md:inline bebas-neue text-2xl font-black tracking-widest text-white drop-shadow-lg">Fraxb</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="navbar-nav ml-auto hidden items-center gap-8 md:flex lg:gap-12">
+      <a href="#hero" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Home</a>
+      <a href="#about" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Stats</a>
+      <a href="#store" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Projects</a>
+      <a href="#skills" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Skills</a>
+      <a href="#film" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Film</a>
+      <a href="#donation" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Support</a>
+      <a href="#about" class="nav-link text-lg font-bold tracking-wide text-white/80 uppercase transition-all duration-300 hover:text-white hover:underline decoration-4 underline-offset-8 decoration-white/60 hover:decoration-white hover:[text-shadow:_0_0_10px_#fff] glitch-hover relative">Stream</a>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <button class="hamburger md:hidden ml-4 flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white/30 bg-black/50 text-white hover:bg-white/10 hover:shadow-[0_0_15px_#fff] transition-all duration-300" aria-label="Toggle menu" aria-expanded="false">
+      <span class="hamburger-line block h-0.5 w-6 bg-white transition-transform duration-300"></span>
+      <span class="hamburger-line block h-0.5 w-6 bg-white transition-transform duration-300 translate-y-1.5"></span>
+      <span class="hamburger-line block h-0.5 w-6 bg-white transition-transform duration-300 translate-y-3"></span>
+    </button>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu absolute top-full left-0 right-0 hidden origin-top bg-black/98 backdrop-blur-xl border-t border-white/20 pt-4 pb-8 md:hidden">
+      <a href="#hero" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Home</a>
+      <a href="#about" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Stats</a>
+      <a href="#store" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Projects</a>
+      <a href="#skills" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Skills</a>
+      <a href="#film" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Film</a>
+      <a href="#donation" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Support</a>
+      <a href="#about" class="menu-link block w-full px-6 py-4 text-xl font-bold text-white/90 uppercase hover:text-white hover:pl-6 transition-all duration-300 border-l-4 border-transparent hover:border-white hover:shadow-inner">Stream</a>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  /* Manga Navbar Styles */
+  .manga-navbar {
+    border-image: url('/textures/halftone-dots.svg') 1 repeat;
+  }
+  
+  .ink-glow {
+    filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 16px #fff);
+  }
+  
+  .glitch-hover {
+    position: relative;
+  }
+  
+  .glitch-hover::before,
+  .glitch-hover::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+  
+  .glitch-hover::before {
+    animation: glitch-1 0.2s infinite;
+    color: #f0f0f0;
+    left: 2px;
+    text-shadow: -1px 0 #888;
+  }
+  
+  .glitch-hover::after {
+    animation: glitch-2 0.2s infinite;
+    color: #888;
+    left: -2px;
+    text-shadow: 1px 0 #f0f0f0;
+  }
+  
+  @keyframes glitch-1 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(-1px, -1px); }
+    60% { transform: translate(1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+  }
+  
+  @keyframes glitch-2 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(1px, -1px); }
+    40% { transform: translate(1px, 1px); }
+    60% { transform: translate(-1px, -1px); }
+    80% { transform: translate(-1px, 1px); }
+  }
+  
+  /* Hamburger Animation */
+  .hamburger[aria-expanded="true"] .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  
+  .hamburger[aria-expanded="true"] .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger[aria-expanded="true"] .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+  }
+  
+  .menu-link {
+    position: relative;
+  }
+  
+  .menu-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0;
+    height: 2px;
+    background: #fff;
+    transition: width 0.3s ease;
+  }
+  
+  .menu-link:hover::before {
+    width: 100%;
+  }
+</style>
+
+<script>
+  // Mobile menu toggle
+  const hamburger = document.querySelector('.hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  
+  if (hamburger &amp;&amp; mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true';
+      hamburger.setAttribute('aria-expanded', (!expanded).toString());
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) &amp;&amp; !mobileMenu.contains(e.target)) {
+        hamburger.setAttribute('aria-expanded', 'false');
+        mobileMenu.classList.add('hidden');
+      }
+    });
+  }
+  
+  // Smooth scroll for nav links
+  document.querySelectorAll('.nav-link, .menu-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (href &amp;&amp; href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Close mobile menu
+        if (hamburger) hamburger.setAttribute('aria-expanded', 'false');
+        if (mobileMenu) mobileMenu.classList.add('hidden');
+      }
+    });
+  });
+</script>
+

@@ -23,6 +23,14 @@ const sponsorAds = [
 /* ── layout ───────────────────────────────────────────────── */
 .ads-container {
   display: flex;
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  gap: clamp(24px, 5vw, 48px);
+}
+
+.ads-container::-webkit-scrollbar { height: 4px; }
+.ads-container::-webkit-scrollbar-track { background: rgba(17,17,17,0.8); }
+.ads-container::-webkit-scrollbar-thumb { background: #fff; border-radius: 2px; }
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
@@ -47,15 +55,37 @@ const sponsorAds = [
 .text-box {
   flex: 1;
   min-width: 0;
-  background: rgba(255,255,255,0.035);
+  background: black;
   backdrop-filter: blur(14px);
-  border-radius: clamp(12px, 2vw, 20px);
-  border: 1px solid rgba(255,255,255,0.14);
-  padding: clamp(14px, 3vw, 20px);
-  box-shadow:
-    0 8px 24px rgba(0,0,0,0.12),
-    inset 0 0 0 1px rgba(255,255,255,0.02);
-  box-sizing: border-box;
+  border-radius: 12px;
+  border: 3px solid white;
+  padding: clamp(20px, 4vw, 32px);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1), manga-panel;
+  position: relative;
+  font-family: 'Rajdhani', monospace;
+}
+
+.text-box h3 {
+  text-align: center;
+  color: white;
+  font-size: clamp(14px, 2vw, 18px);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin: 0 0 clamp(16px, 3vw, 24px) 0;
+  font-weight: 800;
+  text-shadow: 2px 2px 0 black;
+  position: relative;
+}
+
+.text-box h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: url('/textures/brush-stroke-diagonal.svg') no-repeat center/contain;
 }
 
 .text-box h3 {
@@ -78,18 +108,45 @@ const sponsorAds = [
 /* ── item ─────────────────────────────────────────────────── */
 .text-item {
   display: block;
-  background: rgba(255,255,255,0.045);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: clamp(7px, 1.5vw, 10px);
-  padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 14px);
+  background: black;
+  border: 2px solid white;
+  border-radius: 4px;
+  padding: clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px);
   color: white;
-  font-size: clamp(11px, 1.8vw, 13px);
+  font-size: clamp(12px, 1.8vw, 14px);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+  position: relative;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.text-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #111, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.text-item:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: #f0f0f0;
+  box-shadow: 
+    ink-glow-strong,
+    0 20px 60px rgba(0,0,0,0.9);
+  text-shadow: 2px 2px 0 #000, 0 0 12px #fff;
+}
+
+.text-item:hover::before {
+  opacity: 1;
 }
 
 .text-item:hover {
@@ -135,12 +192,26 @@ const sponsorAds = [
 
 /* ── divider ──────────────────────────────────────────────── */
 .divider {
-  width: 2px;
+  width: 4px;
   align-self: stretch;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9), transparent);
-  box-shadow: 0 0 16px rgba(255,255,255,0.8);
+  background: linear-gradient(to bottom, transparent, #fff, transparent);
+  box-shadow: 0 0 24px #fff;
   position: relative;
   flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.divider::before {
+  content: ' ';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 20px #fff;
 }
 
 .divider::before {
@@ -201,9 +272,9 @@ const sponsorAds = [
   <div class="text-box">
     <h3>Sponsor Ads</h3>
     <div class="text-list">
-      {sponsorAds.map(ad => (
-        <a class="text-item" href={ad.link} target="_blank" rel="noopener noreferrer">
-          {ad.text}
+{sponsorAds.map((ad, index) => (
+        <a class="text-item rent-slot border-dashed border-white/60 animate-[blink_1.5s_infinite]" href={ad.link} target="_blank" rel="noopener noreferrer" style="--blink-delay: ${index * 0.3}s">
+          SLOT<br/>AVAILABLE
         </a>
       ))}
     </div>

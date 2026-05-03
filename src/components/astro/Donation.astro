@@ -61,7 +61,7 @@ const items = [
       <span class="don-orb__ring don-orb__ring--3"></span>
       <span class="don-orb__glow"></span>
       <span class="don-orb__inner">
-        <span class="don-orb__title">Support<br/>Donate</span>
+<span class="don-orb__title bebas-neue text-2xl font-black tracking-wider drop-shadow-2xl">SELECT</span>
         <span class="don-orb__sub" data-center-sub>tap to open</span>
       </span>
     </button>
@@ -101,6 +101,22 @@ const items = [
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
+    font-family: 'Rajdhani', monospace;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%);
+  }
+
+  .don-section::before {
+    content: '支援 SUPPORT';
+    position: absolute;
+    top: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: white;
+    text-shadow: 3px 3px 0 black, 0 0 20px #fff;
   }
 
   .don-scene {
@@ -136,8 +152,8 @@ const items = [
     width: 10rem;
     height: 10rem;
     border-radius: 9999px;
-    background: radial-gradient(circle at 35% 35%, rgba(251,191,36,0.15), rgba(0,0,0,0.7) 65%);
-    border: 1px solid rgba(251,191,36,0.35);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.08), black 65%);
+    border: 3px solid white;
     backdrop-filter: blur(16px);
     color: white;
     text-align: center;
@@ -220,7 +236,7 @@ const items = [
     height: 7rem;
     border-radius: 1.1rem;
     border: 1px solid rgba(255,255,255,0.08);
-    background: linear-gradient(160deg, color-mix(in srgb, var(--card-accent) 40%, transparent), rgba(0,0,0,0.65));
+    background: linear-gradient(160deg, black, rgba(0,0,0,0.8));
     text-decoration: none;
     opacity: 0;
     pointer-events: none;
@@ -237,8 +253,8 @@ const items = [
   }
 
   .don-card:hover {
-    border-color: rgba(251,191,36,0.6);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px color-mix(in srgb, var(--card-accent) 60%, transparent), inset 0 1px 0 rgba(255,255,255,0.1);
+    border-color: #f0f0f0;
+    box-shadow: ink-glow-strong, 0 8px 32px rgba(0,0,0,0.4), 0 0 20px #fff, inset 0 1px 0 rgba(255,255,255,0.2);
   }
 
   .don-card__img-wrap {
