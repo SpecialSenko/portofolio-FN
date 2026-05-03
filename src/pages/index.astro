@@ -1,8 +1,10 @@
----
+--- 
+
 import Layout from "../layouts/Layout.astro";
 import BackgroundParticles from "../components/astro/BackgroundParticles.astro";
 import AboutMe from "../components/astro/AboutMe.astro";
 import StoreSection from "../components/astro/StoreSection.astro";
+import MarketSection from "../components/astro/MarketSection.astro";
 import { CustomCursor } from "../components/react/CustomCursor.jsx";
 import FilmStrip from "../components/react/FilmStrip.jsx";
 import Donation from "../components/astro/Donation.astro";
@@ -53,6 +55,10 @@ import SkillsShowcase from "../components/astro/Experience.astro";
 
     <section id="store" class="slide slide--bleed" data-section>
       <StoreSection />
+    </section>
+
+    <section id="market" class="slide slide--bleed" data-section>
+      <MarketSection client:load />
     </section>
 
     <section id="skills" class="slide slide--bleed overflow-hidden" data-section>
