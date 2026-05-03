@@ -1,183 +1,553 @@
+---
+
+---
+
 <canvas id="canvas" class="w-screen h-screen fixed z-[-10]"></canvas>
 
+
+<!-- background animation -->
 <script>
-const el = document.getElementById("canvas");
-if (!(el instanceof HTMLCanvasElement)) {
-  throw new Error("Canvas element '#canvas' not found");
+   const canvas = document.getElementById('canvas');
+   if (!canvas) {
+    console.error('Canvas element not found');
+} else {
+        const ctx = canvas.getContext('2d');
+        
+        let mouse = { x: 0, y: 0 };
+        let warpMode = false;
+        let warpIntensity = 0;
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Enhanced star system with multiple layers
+        let backgroundStars = [];
+        let midgroundStars = [];
+        let foregroundStars = [];
+        let nebulaClouds = [];
+        let comets = [];
+        let shootingStars = [];
+        let pulsars = [];
+        
+        const starColors = [
+            '#ffffff', '#ffffcc', '#ccccff', '#ffcccc', '#ccffcc', 
+            '#ffaa88', '#88aaff', '#ff88aa', '#aaff88', '#ffff88'
+        ];
+
+        // Background stars (far away, slow)
+        function BackgroundStar() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.z = Math.random() * 1000 + 1000;
+            this.size = Math.random() * 0.5 + 0.2;
+            this.color = starColors[Math.floor(Math.random() * starColors.length)];
+            this.twinkle = Math.random() * Math.PI * 2;
+            this.twinkleSpeed = Math.random() * 0.01 + 0.005;
+        }
+
+        BackgroundStar.prototype.update = function() {
+            this.twinkle += this.twinkleSpeed;
+            
+            if (warpMode) {
+                this.z -= 10;
+                if (this.z <= 0) {
+                    this.z = 2000;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            }
+        };
+
+        BackgroundStar.prototype.draw = function() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            let x, y, size;
+            
+            if (warpMode) {
+                const perspective = 500 / this.z;
+                x = centerX + (this.x - centerX) * perspective;
+                y = centerY + (this.y - centerY) * perspective;
+                size = this.size * perspective * 2;
+            } else {
+                x = this.x + (mouse.x - canvas.width / 2) * 0.002;
+                y = this.y + (mouse.y - canvas.height / 2) * 0.002;
+                size = this.size;
+            }
+            
+            if (x < -50 || x > canvas.width + 50 || y < -50 || y > canvas.height + 50) return;
+            
+            const alpha = (0.3 + Math.sin(this.twinkle) * 0.2) * (warpMode ? Math.min(1, size * 2) : 1);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        };
+
+        // Midground stars (medium distance, medium speed)
+        function MidgroundStar() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.z = Math.random() * 500 + 500;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.color = starColors[Math.floor(Math.random() * starColors.length)];
+            this.twinkle = Math.random() * Math.PI * 2;
+            this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = (Math.random() - 0.5) * 0.3;
+        }
+
+        MidgroundStar.prototype.update = function() {
+            this.twinkle += this.twinkleSpeed;
+            
+            if (warpMode) {
+                this.z -= 15;
+                if (this.z <= 0) {
+                    this.z = 1000;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            } else {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+        };
+
+        MidgroundStar.prototype.draw = function() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            let x, y, size;
+            
+            if (warpMode) {
+                const perspective = 500 / this.z;
+                x = centerX + (this.x - centerX) * perspective;
+                y = centerY + (this.y - centerY) * perspective;
+                size = this.size * perspective * 3;
+                
+                // Draw warp streaks
+                if (size > 0.5) {
+                    const streakLength = (1000 - this.z) * 0.1;
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = size * 0.5;
+                    ctx.globalAlpha = 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + (x - centerX) * 0.1, y + (y - centerY) * 0.1);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            } else {
+                x = this.x + (mouse.x - canvas.width / 2) * 0.005;
+                y = this.y + (mouse.y - canvas.height / 2) * 0.005;
+                size = this.size;
+            }
+            
+            if (x < -50 || x > canvas.width + 50 || y < -50 || y > canvas.height + 50) return;
+            
+            const alpha = 0.6 + Math.sin(this.twinkle) * 0.3;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Sparkle effect
+            if (size > 1 && !warpMode) {
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x - size * 2, y);
+                ctx.lineTo(x + size * 2, y);
+                ctx.moveTo(x, y - size * 2);
+                ctx.lineTo(x, y + size * 2);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        };
+
+        // Foreground stars (close, fast)
+        function ForegroundStar() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.z = Math.random() * 200 + 50;
+            this.size = Math.random() * 3 + 1;
+            this.color = starColors[Math.floor(Math.random() * starColors.length)];
+            this.twinkle = Math.random() * Math.PI * 2;
+            this.twinkleSpeed = Math.random() * 0.03 + 0.02;
+            this.speedX = (Math.random() - 0.5) * 0.8;
+            this.speedY = (Math.random() - 0.5) * 0.8;
+        }
+
+        ForegroundStar.prototype.update = function() {
+            this.twinkle += this.twinkleSpeed;
+            
+            if (warpMode) {
+                this.z -= 25;
+                if (this.z <= 0) {
+                    this.z = 250;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                }
+            } else {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+        };
+
+        ForegroundStar.prototype.draw = function() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            let x, y, size;
+            
+            if (warpMode) {
+                const perspective = 200 / this.z;
+                x = centerX + (this.x - centerX) * perspective;
+                y = centerY + (this.y - centerY) * perspective;
+                size = this.size * perspective * 4;
+                
+                // Draw intense warp streaks
+                if (size > 1) {
+                    const streakLength = (250 - this.z) * 0.3;
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = size;
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + (x - centerX) * 0.2, y + (y - centerY) * 0.2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            } else {
+                x = this.x + (mouse.x - canvas.width / 2) * 0.01;
+                y = this.y + (mouse.y - canvas.height / 2) * 0.01;
+                size = this.size;
+            }
+            
+            if (x < -100 || x > canvas.width + 100 || y < -100 || y > canvas.height + 100) return;
+            
+            const alpha = 0.7 + Math.sin(this.twinkle) * 0.3;
+            
+            // Glow effect
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+            gradient.addColorStop(0, this.color);
+            gradient.addColorStop(0.4, this.color + '80');
+            gradient.addColorStop(1, this.color + '00');
+            
+            ctx.globalAlpha = alpha * 0.3;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Main star
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.globalAlpha = 1;
+        };
+
+        // Nebula clouds
+        function NebulaCloud() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 200 + 100;
+            this.color = ['#ff00ff', '#00ffff', '#ff8800', '#8800ff', '#00ff88'][Math.floor(Math.random() * 5)];
+            this.alpha = Math.random() * 0.1 + 0.02;
+            this.drift = Math.random() * 0.2 + 0.1;
+            this.angle = Math.random() * Math.PI * 2;
+        }
+
+        NebulaCloud.prototype.update = function() {
+            this.angle += 0.001;
+            this.x += Math.sin(this.angle) * this.drift;
+            this.y += Math.cos(this.angle) * this.drift * 0.5;
+            
+            if (this.x < -this.size) this.x = canvas.width + this.size;
+            if (this.x > canvas.width + this.size) this.x = -this.size;
+            if (this.y < -this.size) this.y = canvas.height + this.size;
+            if (this.y > canvas.height + this.size) this.y = -this.size;
+        };
+
+        NebulaCloud.prototype.draw = function() {
+            const x = this.x + (mouse.x - canvas.width / 2) * 0.001;
+            const y = this.y + (mouse.y - canvas.height / 2) * 0.001;
+            
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, this.size);
+            gradient.addColorStop(0, this.color + Math.floor(this.alpha * 255).toString(16).padStart(2, '0'));
+            gradient.addColorStop(0.5, this.color + Math.floor(this.alpha * 128).toString(16).padStart(2, '0'));
+            gradient.addColorStop(1, this.color + '00');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        // Enhanced comets
+        function Comet() {
+            const edge = Math.floor(Math.random() * 4);
+            switch(edge) {
+                case 0: this.x = Math.random() * canvas.width; this.y = -100; break;
+                case 1: this.x = canvas.width + 100; this.y = Math.random() * canvas.height; break;
+                case 2: this.x = Math.random() * canvas.width; this.y = canvas.height + 100; break;
+                case 3: this.x = -100; this.y = Math.random() * canvas.height; break;
+            }
+            
+            const targetX = canvas.width * Math.random();
+            const targetY = canvas.height * Math.random();
+            const distance = Math.sqrt((targetX - this.x) ** 2 + (targetY - this.y) ** 2);
+            const speed = Math.random() * 4 + 3;
+            
+            this.speedX = ((targetX - this.x) / distance) * speed;
+            this.speedY = ((targetY - this.y) / distance) * speed;
+            this.size = Math.random() * 4 + 3;
+            this.trail = [];
+            this.maxTrailLength = 25;
+            this.color = ['#ffffff', '#ffff88', '#88ffff', '#ff88ff'][Math.floor(Math.random() * 4)];
+            this.life = 2000;
+        }
+
+        Comet.prototype.update = function() {
+            this.trail.push({x: this.x, y: this.y});
+            if (this.trail.length > this.maxTrailLength) this.trail.shift();
+            
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.life--;
+            
+            return this.life > 0 && this.x > -200 && this.x < canvas.width + 200 && 
+                   this.y > -200 && this.y < canvas.height + 200;
+        };
+
+        Comet.prototype.draw = function() {
+            // Trail with particles
+            for (let i = 0; i < this.trail.length; i++) {
+                const alpha = (i / this.trail.length) * 0.8;
+                const size = (i / this.trail.length) * this.size;
+                
+                ctx.globalAlpha = alpha;
+                const gradient = ctx.createRadialGradient(
+                    this.trail[i].x, this.trail[i].y, 0,
+                    this.trail[i].x, this.trail[i].y, size * 2
+                );
+                gradient.addColorStop(0, this.color);
+                gradient.addColorStop(1, this.color + '00');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.trail[i].x, this.trail[i].y, size * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Comet head with intense glow
+            ctx.globalAlpha = 1;
+            const headGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+            headGradient.addColorStop(0, '#ffffff');
+            headGradient.addColorStop(0.3, this.color);
+            headGradient.addColorStop(1, this.color + '00');
+            
+            ctx.fillStyle = headGradient;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        // Pulsars
+        function Pulsar() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.pulse = 0;
+            this.pulseSpeed = Math.random() * 0.05 + 0.02;
+            this.color = ['#ff0080', '#0080ff', '#80ff00', '#ff8000'][Math.floor(Math.random() * 4)];
+            this.maxSize = Math.random() * 30 + 20;
+        }
+
+        Pulsar.prototype.update = function() {
+            this.pulse += this.pulseSpeed;
+        };
+
+        Pulsar.prototype.draw = function() {
+            const x = this.x + (mouse.x - canvas.width / 2) * 0.003;
+            const y = this.y + (mouse.y - canvas.height / 2) * 0.003;
+            const size = (Math.sin(this.pulse) * 0.5 + 0.5) * this.maxSize;
+            const alpha = Math.sin(this.pulse) * 0.3 + 0.1;
+            
+            ctx.globalAlpha = alpha;
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+            gradient.addColorStop(0, this.color);
+            gradient.addColorStop(0.7, this.color + '80');
+            gradient.addColorStop(1, this.color + '00');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        };
+
+        // Initialize everything
+        function init() {
+            // Background stars
+            for (let i = 0; i < 150; i++) {
+                backgroundStars.push(new BackgroundStar());
+            }
+            
+            // Midground stars
+            for (let i = 0; i < 100; i++) {
+                midgroundStars.push(new MidgroundStar());
+            }
+            
+            // Foreground stars
+            for (let i = 0; i < 50; i++) {
+                foregroundStars.push(new ForegroundStar());
+            }
+            
+            // Nebula clouds
+            for (let i = 0; i < 8; i++) {
+                nebulaClouds.push(new NebulaCloud());
+            }
+            
+            // Pulsars
+            for (let i = 0; i < 5; i++) {
+                pulsars.push(new Pulsar());
+            }
+        }
+
+        let lastCometTime = 0;
+        let lastShootingStarTime = 0;
+
+        function animate() {
+            // Dynamic background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, warpMode ? '#001122' : '#000011');
+            gradient.addColorStop(0.5, warpMode ? '#002244' : '#000022');
+            gradient.addColorStop(1, warpMode ? '#003366' : '#000033');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update warp effects
+            if (warpMode && warpIntensity < 1) {
+                warpIntensity += 0.05;
+            } else if (!warpMode && warpIntensity > 0) {
+                warpIntensity -= 0.02;
+            }
+            
+            // Draw nebula clouds first (background)
+            nebulaClouds.forEach(cloud => {
+                cloud.update();
+                cloud.draw();
+            });
+            
+            // Draw pulsars
+            pulsars.forEach(pulsar => {
+                pulsar.update();
+                pulsar.draw();
+            });
+            
+            // Draw star layers
+            backgroundStars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            
+            midgroundStars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            
+            foregroundStars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            
+            // Spawn and update comets
+            if (Date.now() - lastCometTime > 6000 && comets.length < 4) {
+                comets.push(new Comet());
+                lastCometTime = Date.now();
+            }
+            
+            for (let i = comets.length - 1; i >= 0; i--) {
+                if (!comets[i].update()) {
+                    comets.splice(i, 1);
+                } else {
+                    comets[i].draw();
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Mouse tracking
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        // Initialize and start
+        init();
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+    window.addEventListener('load', () => {
+        canvas.style.display = 'block';
+    });
+
+    window.addEventListener('beforeunload', () => {
+        canvas.style.display = 'none';
+    });
+
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            canvas.style.display = 'none';
+        } else {
+            canvas.style.display = 'block';
+        }
+    });
+
+    // window.addEventListener('blur', () => {
+    //     canvas.style.display = 'none';
+    // });
+    
+    window.addEventListener('focus', () => {
+        canvas.style.display = 'block';
+    });
+    // window.addEventListener('contextmenu', (e) => {
+    //     e.preventDefault();
+    // });
+    // window.addEventListener('keydown', (e) => {
+    //     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+    //         e.preventDefault();
+    //     }
+    // });
 }
-const canvas = el;
-const ctx = canvas.getContext("2d")!;
-if (!ctx) {
-  throw new Error("2D rendering context not available");
-}
-
-// CONFIG
-const MAX_COMETS = 5;
-let nextCometTime = performance.now() + Math.random() * 4000 + 2000;
-
-let mouse = { x: 0, y: 0 };
-
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-// ===== BLACK & WHITE ONLY
-const starColors = ["#ffffff", "#dddddd", "#bbbbbb", "#999999"];
-
-// ===== STAR
-class Star {
-  x: number = 0;
-  y: number = 0;
-  size: number = 0;
-  twinkle: number = 0;
-  color: string = "";
-
-  constructor() { this.reset(); }
-  reset() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 1.5 + 0.3;
-    this.twinkle = Math.random() * Math.PI * 2;
-    this.color = starColors[Math.floor(Math.random() * starColors.length)];
-  }
-  update() { this.twinkle += 0.02; }
-  draw() {
-    const px = this.x + (mouse.x - canvas.width / 2) * 0.003;
-    const py = this.y + (mouse.y - canvas.height / 2) * 0.003;
-    const alpha = 0.4 + Math.sin(this.twinkle) * 0.3;
-
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(px, py, this.size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-
-// ===== NEBULA
-class Nebula {
-  x: number;
-  y: number;
-  size: number;
-  alpha: number;
-  speed: number;
-
-  constructor() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 300 + 200;
-    this.alpha = Math.random() * 0.025 + 0.015;
-    this.speed = Math.random() * 0.05 + 0.03;
-  }
-  update() { this.x += this.speed; if (this.x > canvas.width + this.size) this.x = -this.size; }
-  draw() {
-    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-    g.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
-    g.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-// ===== COMET
-class Comet {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  fade: number;
-  trail: Array<{ x: number; y: number; a: number }>;
-  maxTrail: number;
-
-  constructor() {
-    this.x = -80;
-    this.y = Math.random() * canvas.height * 0.8 + canvas.height * 0.1;
-    this.vx = Math.random() * 2 + 2.5;
-    this.vy = Math.random() * 0.25 - 0.12;
-    this.life = 1;
-    this.fade = 0.015;
-    this.trail = [];
-    this.maxTrail = 18;
-  }
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life -= this.fade;
-    this.trail.push({ x: this.x, y: this.y, a: this.life });
-    if (this.trail.length > this.maxTrail) this.trail.shift();
-    return this.life > 0;
-  }
-  draw() {
-    for (let i = 0; i < this.trail.length; i++) {
-      const t = this.trail[i];
-      const alpha = (i / this.trail.length) * t.a;
-      ctx.globalAlpha = alpha * 0.18;
-      const g = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 8);
-      g.addColorStop(0, "rgba(255,255,255,0.6)");
-      g.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, 8, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.globalAlpha = this.life;
-    const head = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 10);
-    head.addColorStop(0, "rgba(255,255,255,0.75)");
-    head.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = head;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-
-// ===== INIT
-const stars: Star[] = [];
-const nebulas: Nebula[] = [];
-const comets: Comet[] = [];
-
-for (let i = 0; i < 220; i++) stars.push(new Star());
-for (let i = 0; i < 6; i++) nebulas.push(new Nebula());
-
-// ===== ANIMATE
-function animate() {
-  const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bg.addColorStop(0, "#000000");
-  bg.addColorStop(1, "#0d0d0d");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  nebulas.forEach(n => { n.update(); n.draw(); });
-  stars.forEach(s => { s.update(); s.draw(); });
-
-  // RANDOM comet spawn (1–5)
-  const now = performance.now();
-  if (comets.length < MAX_COMETS && now > nextCometTime) {
-    comets.push(new Comet());
-    nextCometTime = now + Math.random() * 6000 + 2000; // 2–8s until next
-  }
-
-  for (let i = comets.length - 1; i >= 0; i--) {
-    if (!comets[i].update()) comets.splice(i, 1);
-    else comets[i].draw();
-  }
-
-  requestAnimationFrame(animate);
-}
-
-document.addEventListener("mousemove", e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
-
-animate();
 </script>

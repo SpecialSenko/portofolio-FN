@@ -68,7 +68,8 @@ import SkillsShowcase from "../components/astro/Experience.astro";
     </section>
   </main>
 
-  <nav id="scroll-indicator" class="scroll-nav" aria-label="Section navigation">
+  <nav id="scroll-indicator" class="scroll-nav scroll-nav--horizontal" aria-label="Section navigation">
+
     <button type="button" class="scroll-nav__item" data-slide="0">
       <span class="scroll-nav__dot"></span>
       <span class="scroll-nav__label">Hero</span>
@@ -79,7 +80,8 @@ import SkillsShowcase from "../components/astro/Experience.astro";
     </button>
     <button type="button" class="scroll-nav__item" data-slide="2">
       <span class="scroll-nav__dot"></span>
-      <span class="scroll-nav__label">Store</span>
+      <span class="scroll-nav__label">All</span>
+
     </button>
     <button type="button" class="scroll-nav__item" data-slide="3">
       <span class="scroll-nav__dot"></span>
@@ -215,23 +217,42 @@ import SkillsShowcase from "../components/astro/Experience.astro";
 
 .scroll-nav {
   position: fixed;
-  top: 50%;
-  right: clamp(0.75rem, 2vw, 1.4rem);
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 60;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  min-width: 9.5rem;
-  padding: 0.55rem;
+  padding: 0.75rem 1rem;
   border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 1.4rem;
-  background: rgba(5, 10, 20, 0.58);
+  border-radius: 0 0 1.4rem 1.4rem;
+  background: rgba(5, 10, 20, 0.85);
   backdrop-filter: blur(18px);
-  transform: translateY(-50%);
-  box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+  box-shadow: 0 8px 45px rgba(0,0,0,0.28);
+  min-width: auto;
+  width: auto;
 }
+
+.scroll-nav--horizontal .scroll-nav__item {
+  min-width: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .scroll-nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    left: 0;
+    right: 0;
+    transform: none;
+    border-radius: 0;
+  }
+}
+
 
 .scroll-nav__item {
   display: inline-flex;

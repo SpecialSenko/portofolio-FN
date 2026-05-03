@@ -1,0 +1,69 @@
+---
+import SkillsBox from "../react/SkillsBox.jsx";
+import { SkillsCollection } from "../react/SkillsCollection.jsx";
+import { Image } from "astro:assets";
+---
+
+<section
+class={`w-screen h-screen flex justify-center items-center-safe flex-col relative overflow-hidden`}
+>
+	<div id="content-skills" class="blur-md">
+		<Image
+			src="/my-icon.webp"
+			alt="Portrait of Daffa"
+			data-cursor-style="image"
+			id="icon-skills"
+			width={430}
+			height={430}
+      class={"rounded-xl shadow-lg max-w-xs pointer-events-auto z-30"}
+		/>
+
+		<!-- <div id="skills" class="w-20 h-20 bg-red-500 absolute top-90 left-200">
+		</div> -->
+
+		<SkillsCollection client:only />
+	</div>
+
+	<h1
+		id="skills-showcase-title"
+		class="text-7xl font-bold uppercase special-gothic-expanded-one-regular text-center absolute pointer-events-auto"
+		data-cursor-style="none"
+	>
+		My skills
+	</h1>
+</section>
+
+<script>
+	import { animate, onScroll } from "animejs";
+
+	animate("#skills-showcase-title", {
+		delay: 700,
+		opacity: 0,
+		scale: 5.5,
+		ease: "inExpo",
+		autoplay: onScroll({
+			leave: "top+=300",
+		}),
+
+		onComplete: () => {
+			// FOR PC USER
+			const titleElement = document.getElementById("skills-showcase-title");
+			if (titleElement) {
+				titleElement.style.display = "none";
+			}
+
+			animate("#icon-skills", {
+				width: 130,
+				height: 130,
+				duration: 400,
+				easing: "inOutBounce",
+			});
+
+			animate("#content-skills", {
+				filter: "blur(0px)",
+				duration: 1000,
+				easing: "easeOutExpo",
+			});
+		},
+	});
+</script>
