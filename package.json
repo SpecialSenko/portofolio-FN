@@ -1,0 +1,15 @@
+{
+  "name": "portofolio-fn",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/local-auth-server.mjs --host 0.0.0.0 --port 4321",
+    "dev:vite": "vite --host 127.0.0.1 --port 4321",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4321"
+  },
+  "devDependencies": {
+    "vite": "^6.4.2"
+  }
+}

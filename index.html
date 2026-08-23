@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fraxb - CS2 Market</title>
+<style>
+  :root {
+    --bg: #08090b;
+    --panel: #101216;
+    --panel-2: #15171b;
+    --border: #24272e;
+    --text: #e9eaec;
+    --muted: #767d88;
+    --accent: #6ea8ff;
+    --gold-a: #fff3c4;
+    --gold-b: #caa338;
+    --holo-a: #43e5ff;
+    --holo-b: #ff3dcb;
+  }
+  * { box-sizing: border-box; scrollbar-width: none; -ms-overflow-style: none; }
+
+  html { scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar,
+  *::-webkit-scrollbar { display: none; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+  }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    position: relative;
+    width: 68px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 0;
+    gap: 4px;
+  }
+  .sidebar-bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 0 0;
+  }
+  .twitch-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: #15171b;
+    border: 1px solid var(--border);
+    color: #a970ff;
+    cursor: pointer;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .twitch-btn:hover { border-color: #a970ff; transform: translateY(-1px); }
+  .twitch-btn svg { width: 17px; height: 17px; }
+  .twitch-live-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ff3b3b;
+    border: 2px solid var(--panel);
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,59,.55); }
+    50% { box-shadow: 0 0 0 4px rgba(255,59,59,0); }
+  }
+
+  .sidebar-logo {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
+    margin-bottom: 22px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #0a0b0d;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nav-item {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .15s ease;
+    z-index: 1;
+  }
+  .nav-item svg { width: 19px; height: 19px; }
+  .nav-item:hover { color: var(--text); }
+  .nav-item.active { color: var(--text); }
+  .nav-indicator {
+    position: absolute;
+    left: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 9px;
+    background: transparent; /* invisible by default, JS will show when active */
+    transition: top .25s cubic-bezier(.3,1,.4,1), background .12s ease;
+    z-index: 0;
+  }
+
+  .main { flex: 1; min-width: 0; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 26px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar h1 {
+    font-size: 15px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .01em;
+    min-width: max-content;
+  }
+  .search {
+    flex: 1;
+    max-width: 360px;
+    min-width: 160px;
+    padding: 8px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+  }
+  .search::placeholder { color: var(--muted); }
+  .market-toggle {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .market-toggle svg { width: 16px; height: 16px; }
+  .steam-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 7px 12px;
+    background: transparent;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .steam-auth { display: contents; }
+  .steam-avatar-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 5px 12px 5px 5px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .steam-avatar-btn img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: block;
+    background: #24272e;
+  }
+  .discord-btn {
+    background: #5865f2;
+    color: #fff;
+  }
+  .portfolio-btn {
+    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
+    color: #0a0b0d;
+    text-decoration: none;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    background: rgba(4, 5, 6, 0.72);
+    backdrop-filter: blur(2px);
+    padding: 24px;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-box {
+    position: relative;
+    width: min(920px, 100%);
+    height: min(640px, 90vh);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(10, 11, 13, 0.75);
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .modal-close:hover { border-color: var(--text); }
+  .modal-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #0a0b0d;
+  }
+
+  .content { padding: 20px 26px 40px; }
+
+  .inv-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .inv-dot { width: 7px; height: 7px; border-radius: 50%; background: #4dffb2; flex-shrink: 0; }
+  .inv-banner .muted { color: var(--muted); }
+  .inv-banner .link {
+    margin-left: auto;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .protect-banner {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    background: rgba(77,255,178,.06);
+    border: 1px solid rgba(77,255,178,.25);
+    border-radius: 8px;
+  }
+  .protect-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(77,255,178,.12);
+    color: #4dffb2;
+  }
+  .protect-icon svg { width: 15px; height: 15px; }
+  .protect-title { margin: 0 0 2px; font-size: 12.5px; font-weight: 700; color: #4dffb2; }
+  .protect-copy { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .viewing-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12.5px;
+  }
+  .viewing-banner strong { color: var(--text); }
+  .back-btn {
+    margin-left: auto;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .private-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 36px 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+  .private-state strong { color: var(--text); font-size: 13px; }
+
+  .cat-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .cat-tab {
+    padding: 6px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .cat-tab.active { color: var(--bg); background: var(--text); border-color: var(--text); }
+
+  /* Light theme overrides */
+  :root[data-theme="light"] {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --panel-2: #f3f4f6;
+    --border: #e6e7ea;
+    --text: #0a0b0d;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --holo-a: #43e5ff;
+    --holo-b: #ff3dcb;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 30px 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+  }
+
+  .seller-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .seller-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 18px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .seller-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0a0b0d;
+  }
+  .seller-name { margin: 4px 0 0; font-size: 12.5px; font-weight: 600; }
+  .seller-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .seller-stat { text-align: center; }
+  .seller-stat-value { display: block; font-size: 13px; font-weight: 700; }
+  .seller-stat-label { display: block; font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+
+  .page-title { font-size: 16px; margin: 4px 0 6px; }
+  .page-copy { color: var(--muted); font-size: 13px; margin: 0; }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-label { margin: 0; font-size: 13px; font-weight: 600; }
+  .settings-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+  .currency-select {
+    padding: 8px 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .trade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .trade-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .trade-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    background: linear-gradient(155deg, #1c1f24, #101216);
+    border: 1px solid var(--border);
+  }
+  .trade-main { flex: 1; min-width: 0; }
+  .trade-item {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .trade-meta {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .trade-meta strong { color: var(--text); font-weight: 600; }
+  .trade-direction {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .trade-direction.sent { background: rgba(255,107,107,.12); color: #ff8a8a; }
+  .trade-direction.received { background: rgba(77,255,178,.12); color: #4dffb2; }
+  .trade-date {
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 74px;
+    text-align: right;
+  }
+
+  .inv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .inv-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .inv-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    background: linear-gradient(155deg, #1c1f24, #101216);
+    border: 1px solid var(--border);
+  }
+  .inv-main { flex: 1; min-width: 0; }
+  .inv-item {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .inv-meta { margin: 2px 0 0; font-size: 11.5px; color: var(--muted); }
+  .inv-game {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--border);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .inv-price {
+    font-size: 12px;
+    font-weight: 600;
+    width: 70px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .list-toggle {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .list-toggle.is-listed {
+    background: #4dffb2;
+    border-color: #4dffb2;
+    color: #06110c;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+  }
+
+  .variant-card {
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #1c1f24, #101216);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .stat-badge {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    z-index: 3;
+    display: none;
+    place-items: center;
+    width: 34px;
+    height: 22px;
+    clip-path: polygon(0% 100%, 0% 30%, 20% 0%, 80% 0%, 100% 30%, 100% 100%);
+    background: linear-gradient(140deg, var(--gold-a), #ffe28a, var(--gold-b), #fff6d6);
+    background-size: 250% 250%;
+    animation: holo-shift 3s ease infinite, badge-glow 2.2s ease-in-out infinite;
+  }
+  .stat-badge-text {
+    position: relative;
+    z-index: 1;
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: #3a2c05;
+  }
+  .variant-card[data-tier*="stattrak"] .stat-badge { display: grid; }
+  .variant-card[data-tier="stattrak"]:hover {
+    border-color: var(--gold-b);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold-b) 45%, transparent);
+  }
+  .holo-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, #ff9a5a, #ff5ea3, #b56aff, #4da9ff, #4dffc4, #ff9a5a);
+    background-size: 300% 300%;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .variant-card[data-tier*="holo"]:hover .holo-fill {
+    opacity: 1;
+    animation: holo-shift 4s ease infinite;
+  }
+  .variant-card[data-tier*="holo"]:hover {
+    border-color: transparent;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--holo-a) 45%, transparent);
+  }
+  @keyframes badge-glow {
+    0%, 100% { box-shadow: 0 0 4px 1px rgba(202,163,56,.55), 0 1px 2px rgba(0,0,0,.5); }
+    50% { box-shadow: 0 0 9px 3px rgba(255,226,138,.85), 0 1px 2px rgba(0,0,0,.5); }
+  }
+  .variant-card[data-tier*="stattrak"]:hover .stat-badge {
+    animation: holo-shift 3s ease infinite, badge-glow 1.1s ease-in-out infinite;
+  }
+  .holo-shine {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: radial-gradient(130px circle at var(--mx) var(--my), rgba(255,255,255,.85), transparent 60%);
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity .2s ease;
+    display: none;
+  }
+  .variant-card[data-tier*="stattrak"] .holo-shine:not(.holo-shine--holo) { display: block; }
+  .variant-card[data-tier*="holo"] .holo-shine--holo { display: block; }
+  .variant-card:hover .holo-shine { opacity: 1; }
+  .info {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 4;
+    padding: 10px 12px;
+    background: linear-gradient(0deg, rgba(6,7,8,.92), rgba(6,7,8,.55) 80%, transparent);
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .variant-card:hover .info { transform: translateY(0); opacity: 1; }
+  .info-name { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--text); }
+  .info-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .info-tier { font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  .variant-card[data-tier="stattrak"] .info-tier { color: var(--gold-b); }
+  .variant-card[data-tier*="holo"] .info-tier {
+    background: linear-gradient(120deg, var(--holo-a), var(--holo-b));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .info-price { font-size: 12px; font-weight: 600; color: var(--text); }
+  @keyframes holo-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @media (max-width: 760px) {
+    .layout {
+      display: block;
+      min-height: 100vh;
+      padding-bottom: 72px;
+    }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      width: auto;
+      height: 64px;
+      flex-direction: row;
+      justify-content: center;
+      padding: 8px 10px;
+      border-right: none;
+      border-top: 1px solid var(--border);
+      gap: 4px;
+    }
+    .twitch-btn,
+    .sidebar-logo {
+      margin: 0;
+    }
+    .nav-indicator {
+      display: none;
+    }
+    .nav-item {
+      width: 42px;
+      height: 42px;
+    }
+    .nav-item.active {
+      background: var(--text);
+      color: var(--bg);
+    }
+    .topbar {
+      flex-wrap: wrap;
+      padding: 14px 16px;
+      gap: 10px;
+    }
+    .topbar h1 {
+      width: calc(100% - 48px);
+    }
+    .search {
+      order: 3;
+      flex-basis: 100%;
+      max-width: none;
+    }
+    .steam-btn {
+      margin-left: 0;
+    }
+    .content {
+      padding: 16px 14px 28px;
+    }
+    .inv-banner,
+    .viewing-banner,
+    .settings-row {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .inv-banner .link,
+    .back-btn {
+      margin-left: 0;
+    }
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .seller-grid {
+      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+    }
+    .trade-row,
+    .inv-row {
+      flex-wrap: wrap;
+    }
+    .trade-main,
+    .inv-main {
+      flex-basis: calc(100% - 46px);
+    }
+    .trade-date {
+      width: auto;
+      margin-left: auto;
+    }
+    .inv-price {
+      width: auto;
+      margin-left: auto;
+    }
+    .currency-select {
+      width: 100%;
+    }
+    .modal-overlay {
+      padding: 12px;
+    }
+    .modal-box {
+      height: min(620px, 88vh);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav class="sidebar">
+    <button class="twitch-btn" title="Live on Twitch" aria-label="Watch live on Twitch">
+      <span class="twitch-live-dot" aria-hidden="true"></span>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.3 2 3 5.4v14.2h5v2.4h2.8l2.4-2.4h3.6L21.6 15V2H4.3Zm15.3 12.1-3 3h-3.6l-2.4 2.4v-2.4H6.4V4h13.2v10.1Z"/><path d="M16.9 6.9h1.9v5.2h-1.9zM11.6 6.9h1.9v5.2h-1.9z"/></svg>
+    </button>
+    <button class="sidebar-logo" id="sidebarLogo" title="Back to my store">FN</button>
+    <div class="nav-indicator" data-indicator></div>
+    <button class="nav-item" data-nav data-page="global" title="Global Market" aria-label="Global Market">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>
+    </button>
+    <button class="nav-item active" data-nav data-page="market" title="Marketplace" aria-label="Marketplace">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 9h16l-1.5 9.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>
+    </button>
+    <button class="nav-item" data-nav data-page="inventory" title="Inventory" aria-label="Inventory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
+    </button>
+    <button class="nav-item" data-nav data-page="trades" title="Trades" aria-label="Trades">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h11M11 4l4 4-4 4"/><path d="M20 16H9M13 20l-4-4 4-4"/></svg>
+    </button>
+    <button class="nav-item" data-nav data-page="settings" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </button>
+    <div class="sidebar-bottom">
+      <button class="steam-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Marketplace</h1>
+      <input class="search" type="text" placeholder="Search skins..." aria-label="Search skins" />
+      <button class="market-toggle" aria-label="Browse full marketplace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M12 2.5c-1.6 1.4-2.6 3-2.4 4.7.1 1-.5 1.5-1.3 2.1C6.7 10.4 5.5 12 5.5 14a6.5 6.5 0 0 0 13 0c0-2.1-1.3-3.7-2.9-4.8-.8-.6-1.3-1-1.2-2C14.6 5.4 13.6 3.8 12 2.5Z"/>
+        </svg>
+      </button>
+      <div class="steam-auth" id="steamAuth">
+        <button type="button" class="steam-btn" id="steamConnectBtn" aria-label="Connect Steam">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+        </button>
+        <button type="button" class="steam-avatar-btn" id="steamAvatarBtn" hidden>
+          <img id="steamAvatarImg" src="" alt="" />
+          <span id="steamNameLabel"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="inv-banner">
+        <span class="inv-dot"></span>
+        <span>Inventory public &mdash; <strong>128</strong> items found.</span>
+        <a class="link" href="#">Manage privacy settings</a>
+      </div>
+
+      <section class="page" data-page="global" hidden>
+        <h2 class="page-title">Global Market</h2>
+
+        <div class="protect-banner">
+          <span class="protect-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>
+          <div>
+            <p class="protect-title">Trade Protection</p>
+            <p class="protect-copy">The item is sent to you first. Funds are held for 7 days and only released to the seller once the trade is confirmed clean &mdash; protects both sides from scams.</p>
+          </div>
+        </div>
+
+        <p class="page-copy">Sellers active on the platform right now.</p>
+        <div class="seller-grid" id="sellerGrid"></div>
+      </section>
+
+      <section class="page" data-page="market">
+        <div class="viewing-banner" id="viewingBanner" hidden>
+          <span id="viewingText"></span>
+          <button class="back-btn" id="backToMyStore">Back to my store</button>
+        </div>
+
+        <div class="cat-tabs" aria-label="Item categories">
+          <button class="cat-tab active" data-cat="all">All</button>
+          <button class="cat-tab" data-cat="rifles">Rifles</button>
+          <button class="cat-tab" data-cat="pistols">Pistols</button>
+          <button class="cat-tab" data-cat="knives">Knives</button>
+          <button class="cat-tab" data-cat="gloves">Gloves</button>
+        </div>
+
+        <div class="grid" id="grid"></div>
+      </section>
+
+      <section class="page" data-page="inventory" hidden>
+        <h2 class="page-title">Your Inventory</h2>
+        <p class="page-copy">Every tradable item across your Steam account, not just CS2. Toggle "List" to send an item to the marketplace.</p>
+        <div class="inv-list" id="invList"></div>
+      </section>
+
+      <section class="page" data-page="trades" hidden>
+        <h2 class="page-title">Trades</h2>
+        <p class="page-copy">Your recent trade history &mdash; where each item went.</p>
+        <div class="trade-list" id="tradeList"></div>
+      </section>
+
+      <section class="page" data-page="settings" hidden>
+        <h2 class="page-title">Settings</h2>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Giveaway</p>
+            <p class="settings-sub">Join our Discord for weekly skin giveaways</p>
+          </div>
+          <button class="steam-btn discord-btn">Join Discord</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Currency</p>
+            <p class="settings-sub">Prices update across the marketplace</p>
+          </div>
+          <select class="currency-select" id="currencySelect">
+            <option value="USD">USD - US Dollar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="GBP">GBP - British Pound</option>
+            <option value="IDR">IDR - Indonesian Rupiah</option>
+            <option value="JPY">JPY - Japanese Yen</option>
+            <option value="AUD">AUD - Australian Dollar</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Portfolio</p>
+            <p class="settings-sub">This project is part of my personal portfolio</p>
+          </div>
+          <button class="steam-btn portfolio-btn" id="portfolioBtn" type="button">View my portfolio</button>
+        </div>
+        <div class="settings-row" id="accountRow" hidden>
+          <div>
+            <p class="settings-label">Account</p>
+            <p class="settings-sub">Connected to Steam as <span id="settingsSteamName">Steam User</span></p>
+          </div>
+          <button class="steam-btn" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="portfolioModal" hidden>
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <iframe class="modal-frame" id="portfolioFrame" src="" title="My portfolio"></iframe>
+  </div>
+</div>
+
+<script>
+  const navItems = Array.from(document.querySelectorAll("[data-nav]"));
+  const indicator = document.querySelector("[data-indicator]");
+  const pages = Array.from(document.querySelectorAll(".page"));
+  const pageTitle = document.getElementById("pageTitle");
+  const pageTitles = {
+    global: "Global Market",
+    market: "Marketplace",
+    inventory: "Inventory",
+    trades: "Trades",
+    settings: "Settings",
+  };
+
+  let currentViewSeller = null;
+
+  function activePageName() {
+    return document.querySelector("[data-nav].active")?.dataset.page || "market";
+  }
+
+  function syncPageTitle(name) {
+    if (currentViewSeller && name === "market") {
+      pageTitle.textContent = `${currentViewSeller.name}'s Store`;
+      return;
+    }
+    pageTitle.textContent = pageTitles[name] || "Marketplace";
+  }
+
+  function placeIndicator(el) {
+    if (indicator && el) {
+      indicator.style.top = el.offsetTop + "px";
+      // show the white indicator behind the active item
+      indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--text') || '#fff';
+    }
+  }
+
+  function showPage(name) {
+    pages.forEach((p) => {
+      p.hidden = p.dataset.page !== name;
+    });
+    syncPageTitle(name);
+    updateSidebarLogo(name);
+  }
+
+  function updateSidebarLogo(page) {
+    const sidebarLogo = document.getElementById('sidebarLogo');
+    // Steam SVG (simplified) to use as logo on Global Market
+    const steamSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="6.5" cy="12.5" r="2.5"/><path d="M8 12.5l6-3"/><circle cx="17" cy="9" r="2"/><path d="M15.5 10.5l-4 2" opacity=".9"/></svg>';
+    if (!sidebarLogo) return;
+    if (page === 'global' && !currentViewSeller) {
+      sidebarLogo.innerHTML = steamSVG;
+      sidebarLogo.style.color = 'var(--text)';
+    } else if (!currentViewSeller) {
+      sidebarLogo.textContent = 'FN';
+      sidebarLogo.style.color = '';
+    }
+  }
+
+  navItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      navItems.forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+      placeIndicator(item);
+      showPage(item.dataset.page);
+    });
+  });
+
+  const inventory = [
+    { id: 1, name: "AK-47 | Redline", tier: "normal", usd: 41.20, cat: "rifles", game: "CS2", forSale: true },
+    { id: 2, name: "AK-47 | Redline", tier: "stattrak", usd: 68.90, cat: "rifles", game: "CS2", forSale: true },
+    { id: 3, name: "M4A4 | Neo-Noir", tier: "holo", usd: 96.10, cat: "rifles", game: "CS2", forSale: true },
+    { id: 4, name: "Desert Eagle | Blaze", tier: "stattrak-holo", usd: 189.50, cat: "pistols", game: "CS2", forSale: true },
+    { id: 5, name: "AWP | Asiimov", tier: "normal", usd: 132.00, cat: "rifles", game: "CS2", forSale: false },
+    { id: 6, name: "Glock-18 | Fade", tier: "stattrak", usd: 210.00, cat: "pistols", game: "CS2", forSale: true },
+    { id: 7, name: "Karambit | Doppler", tier: "holo", usd: 980.00, cat: "knives", game: "CS2", forSale: false },
+    { id: 8, name: "Sport Gloves | Pandora's Box", tier: "normal", usd: 640.00, cat: "gloves", game: "CS2", forSale: false },
+    { id: 9, name: "USP-S | Kill Confirmed", tier: "normal", usd: 54.30, cat: "pistols", game: "CS2", forSale: true },
+    { id: 10, name: "Unusual Team Captain", tier: "normal", usd: 24.00, cat: null, game: "TF2", forSale: false },
+    { id: 11, name: "Arcana: Axe of Enlightenment", tier: "normal", usd: 18.50, cat: null, game: "Dota 2", forSale: false },
+    { id: 12, name: "Metal Facemask", tier: "normal", usd: 9.10, cat: null, game: "Rust", forSale: false },
+    { id: 13, name: "Booster Pack - Half-Life 2", tier: "normal", usd: 0.35, cat: null, game: "Steam", forSale: false },
+  ];
+  const tierLabel = { normal: "Normal", stattrak: "StatTrak\u2122", holo: "Holo", "stattrak-holo": "StatTrak\u2122 Holo" };
+
+  const currencies = {
+    USD: { symbol: "$", rate: 1 },
+    EUR: { symbol: "\u20ac", rate: 0.92 },
+    GBP: { symbol: "\u00a3", rate: 0.79 },
+    IDR: { symbol: "Rp", rate: 15800 },
+    JPY: { symbol: "\u00a5", rate: 157 },
+    AUD: { symbol: "A$", rate: 1.52 },
+  };
+  let currentCurrency = "USD";
+
+  const connectBtn = document.getElementById("steamConnectBtn");
+  const avatarBtn = document.getElementById("steamAvatarBtn");
+  const avatarImg = document.getElementById("steamAvatarImg");
+  const nameLabel = document.getElementById("steamNameLabel");
+
+  async function refreshSteamAuth() {
+    try {
+      const res = await fetch("/api/auth/me", {
+        credentials: "same-origin",
+        headers: { "Accept": "application/json" },
+      });
+      if (!res.ok) throw new Error("Steam auth status unavailable");
+      const data = await res.json();
+
+      if (data.loggedIn) {
+        connectBtn?.setAttribute("hidden", "");
+        avatarBtn?.removeAttribute("hidden");
+        if (avatarImg) avatarImg.src = data.avatar || "";
+        if (nameLabel) nameLabel.textContent = data.name || "Steam User";
+        // update settings account row
+        const accountRow = document.getElementById('accountRow');
+        const settingsName = document.getElementById('settingsSteamName');
+        if (settingsName) settingsName.textContent = data.name || 'Steam User';
+        if (accountRow) accountRow.hidden = false;
+      } else {
+        connectBtn?.removeAttribute("hidden");
+        avatarBtn?.setAttribute("hidden", "");
+        const accountRow = document.getElementById('accountRow');
+        if (accountRow) accountRow.hidden = true;
+      }
+    } catch {
+      connectBtn?.removeAttribute("hidden");
+      avatarBtn?.setAttribute("hidden", "");
+    }
+  }
+
+  connectBtn?.addEventListener("click", () => {
+    window.location.href = "/api/auth/steam/login";
+  });
+
+  // open settings when clicking the avatar (logout is only available in Settings)
+  avatarBtn?.addEventListener("click", () => {
+    const settingsNav = document.querySelector('[data-nav][data-page="settings"]');
+    if (settingsNav) settingsNav.click();
+  });
+
+  // logout button in settings
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn?.addEventListener('click', async () => {
+    if (!confirm('Log out of Steam?')) return;
+    try {
+      await fetch('/api/auth/me', { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+    } catch (e) {
+      console.warn('Logout request failed', e);
+    }
+    refreshSteamAuth();
+  });
+
+
+  function formatPrice(usd) {
+    const c = currencies[currentCurrency];
+    const amount = usd * c.rate;
+    const decimals = amount >= 1000 ? 0 : 2;
+    const formatted = amount.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return `${c.symbol}${formatted}`;
+  }
+
+  const grid = document.getElementById("grid");
+
+  function cardEl(it) {
+    const card = document.createElement("div");
+    card.className = "variant-card";
+    card.dataset.tier = it.tier;
+    card.innerHTML = `
+      <span class="stat-badge" aria-hidden="true"><span class="holo-shine"></span><span class="stat-badge-text">ST</span></span>
+      <span class="holo-fill" aria-hidden="true"></span>
+      <span class="holo-shine holo-shine--holo" aria-hidden="true"></span>
+      <div class="info">
+        <p class="info-name">${it.name}</p>
+        <div class="info-row"><span class="info-tier">${tierLabel[it.tier]}</span><span class="info-price">${formatPrice(it.usd)}</span></div>
+      </div>
+    `;
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const mx = ((e.clientX - rect.left) / rect.width) * 100;
+      const my = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty("--mx", `${mx}%`);
+      card.style.setProperty("--my", `${my}%`);
+    });
+    return card;
+  }
+
+  function renderGrid(category) {
+    grid.innerHTML = "";
+
+    if (currentViewSeller) {
+      if (currentViewSeller.private) {
+        grid.innerHTML = `
+          <div class="private-state">
+            <strong>This inventory is private</strong>
+            <span>${currentViewSeller.name} hasn't made their Steam inventory public, so their items can't be shown here.</span>
+          </div>`;
+        return;
+      }
+      const sellerItems = category === "all"
+        ? currentViewSeller.items
+        : currentViewSeller.items.filter((it) => it.cat === category);
+      if (sellerItems.length === 0) {
+        grid.innerHTML = `<p class="empty-state">${currentViewSeller.name} has nothing listed in this category.</p>`;
+        return;
+      }
+      sellerItems.forEach((it) => grid.appendChild(cardEl(it)));
+      return;
+    }
+
+    const forSale = inventory.filter((it) => it.game === "CS2" && it.forSale);
+    const filtered = category === "all" ? forSale : forSale.filter((it) => it.cat === category);
+    if (filtered.length === 0) {
+      grid.innerHTML = `<p class="empty-state">Nothing listed in this category yet. Go to Inventory and toggle "List" on an item to sell it here.</p>`;
+      return;
+    }
+    filtered.forEach((it) => grid.appendChild(cardEl(it)));
+  }
+
+  let currentCategory = "all";
+
+  function invRowEl(it) {
+    const row = document.createElement("div");
+    row.className = "inv-row";
+    const isCS2 = it.game === "CS2";
+    row.innerHTML = `
+      <div class="inv-icon"></div>
+      <div class="inv-main">
+        <p class="inv-item">${it.name}${isCS2 ? ` <span style="color:var(--muted); font-weight:500;">&mdash; ${tierLabel[it.tier]}</span>` : ""}</p>
+        <p class="inv-meta">${it.game}</p>
+      </div>
+      <span class="inv-game">${it.game}</span>
+      <span class="inv-price">${formatPrice(it.usd)}</span>
+      <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${isCS2 ? "" : "disabled title=\"Only CS2 items can be listed here\""}>
+        ${it.forSale ? "Listed" : "List"}
+      </button>
+    `;
+    if (isCS2) {
+      row.querySelector(".list-toggle").addEventListener("click", () => {
+        it.forSale = !it.forSale;
+        renderInventory();
+        renderGrid(currentCategory);
+      });
+    }
+    return row;
+  }
+
+  function renderInventory() {
+    const list = document.getElementById("invList");
+    list.innerHTML = "";
+    inventory.forEach((it) => list.appendChild(invRowEl(it)));
+  }
+
+  const sellers = [
+    {
+      name: "skinvault_market", rating: "4.9", listed: 312, private: false,
+      items: [
+        { name: "M4A1-S | Hyper Beast", tier: "stattrak", usd: 74.00, cat: "rifles" },
+        { name: "AWP | Asiimov", tier: "holo", usd: 310.00, cat: "rifles" },
+        { name: "Butterfly Knife | Fade", tier: "normal", usd: 1450.00, cat: "knives" },
+      ],
+    },
+    { name: "TradeBot #3821", rating: "4.7", listed: 128, private: true, items: [] },
+    {
+      name: "csgotrader22", rating: "4.8", listed: 64, private: false,
+      items: [
+        { name: "Glock-18 | Water Elemental", tier: "normal", usd: 22.40, cat: "pistols" },
+        { name: "Five-SeveN | Case Hardened", tier: "stattrak-holo", usd: 88.00, cat: "pistols" },
+      ],
+    },
+    {
+      name: "frostbyte.cs", rating: "5.0", listed: 41, private: false,
+      items: [
+        { name: "Sport Gloves | Vice", tier: "normal", usd: 720.00, cat: "gloves" },
+        { name: "AK-47 | Fire Serpent", tier: "holo", usd: 640.00, cat: "rifles" },
+      ],
+    },
+    { name: "nvk_skins", rating: "4.6", listed: 97, private: true, items: [] },
+    {
+      name: "redlinecase", rating: "4.9", listed: 205, private: false,
+      items: [
+        { name: "USP-S | Orion", tier: "stattrak", usd: 145.00, cat: "pistols" },
+        { name: "M4A4 | Poseidon", tier: "normal", usd: 480.00, cat: "rifles" },
+      ],
+    },
+  ];
+
+  function initials(name) {
+    return name.replace(/[^a-zA-Z0-9]/g, " ").trim().split(/\s+/).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+  }
+
+  function sellerCardEl(s) {
+    const card = document.createElement("button");
+    card.className = "seller-card";
+    card.type = "button";
+    card.innerHTML = `
+      <div class="seller-icon">${initials(s.name)}</div>
+      <p class="seller-name">${s.name}</p>
+      <div class="seller-stats">
+        <div class="seller-stat"><span class="seller-stat-value">${s.rating}</span><span class="seller-stat-label">Rating</span></div>
+        <div class="seller-stat"><span class="seller-stat-value">${s.listed}</span><span class="seller-stat-label">Listed</span></div>
+      </div>
+    `;
+    card.addEventListener("click", () => viewSeller(s));
+    return card;
+  }
+
+  function renderSellers() {
+    const sellerGrid = document.getElementById("sellerGrid");
+    sellerGrid.innerHTML = "";
+    sellers.forEach((s) => sellerGrid.appendChild(sellerCardEl(s)));
+  }
+
+  const sidebarLogo = document.getElementById("sidebarLogo");
+  const viewingBanner = document.getElementById("viewingBanner");
+  const viewingText = document.getElementById("viewingText");
+
+  function viewSeller(seller) {
+    currentViewSeller = seller;
+    sidebarLogo.textContent = initials(seller.name);
+    viewingBanner.hidden = false;
+    viewingText.innerHTML = `Viewing <strong>${seller.name}</strong>'s store`;
+
+    const marketNav = document.querySelector('[data-nav][data-page="market"]');
+    marketNav.click();
+
+    currentCategory = "all";
+    document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+    document.querySelector('.cat-tab[data-cat="all"]').classList.add("active");
+    renderGrid(currentCategory);
+    syncPageTitle("market");
+  }
+
+  function backToMyStore() {
+    currentViewSeller = null;
+    sidebarLogo.textContent = "FN";
+    viewingBanner.hidden = true;
+    renderGrid(currentCategory);
+    syncPageTitle(activePageName());
+  }
+
+  document.getElementById("backToMyStore").addEventListener("click", backToMyStore);
+  sidebarLogo.addEventListener("click", backToMyStore);
+
+  const trades = [
+    { item: "AK-47 | Redline", tier: "stattrak", usd: 68.90, direction: "sent", who: "TradeBot #3821", date: "Aug 18" },
+    { item: "Karambit | Doppler", tier: "holo", usd: 980.00, direction: "received", who: "skinvault_market", date: "Aug 14" },
+    { item: "Desert Eagle | Blaze", tier: "stattrak-holo", usd: 189.50, direction: "sent", who: "u/csgotrader22", date: "Aug 9" },
+    { item: "USP-S | Kill Confirmed", tier: "normal", usd: 54.30, direction: "received", who: "TradeBot #3821", date: "Aug 3" },
+    { item: "Glock-18 | Fade", tier: "stattrak", usd: 210.00, direction: "sent", who: "skinvault_market", date: "Jul 27" },
+  ];
+
+  function tradeRowEl(t) {
+    const row = document.createElement("div");
+    row.className = "trade-row";
+    const going = t.direction === "sent" ? "To" : "From";
+    row.innerHTML = `
+      <div class="trade-icon"></div>
+      <div class="trade-main">
+        <p class="trade-item">${t.item} <span style="color:var(--muted); font-weight:500;">&mdash; ${tierLabel[t.tier]}</span></p>
+        <p class="trade-meta">${going} <strong>${t.who}</strong> &middot; ${formatPrice(t.usd)}</p>
+      </div>
+      <span class="trade-direction ${t.direction}">${t.direction}</span>
+      <span class="trade-date">${t.date}</span>
+    `;
+    return row;
+  }
+
+  function renderTrades() {
+    const list = document.getElementById("tradeList");
+    list.innerHTML = "";
+    trades.forEach((t) => list.appendChild(tradeRowEl(t)));
+  }
+
+  document.querySelectorAll(".cat-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      currentCategory = tab.dataset.cat;
+      renderGrid(currentCategory);
+    });
+  });
+
+  document.getElementById("currencySelect").addEventListener("change", (e) => {
+    currentCurrency = e.target.value;
+    renderGrid(currentCategory);
+    renderTrades();
+    renderInventory();
+  });
+
+  const portfolioModal = document.getElementById("portfolioModal");
+  const portfolioFrame = document.getElementById("portfolioFrame");
+  const PORTFOLIO_URL = "https://fraxb.vercel.app";
+
+  function openPortfolioModal() {
+    portfolioFrame.src = PORTFOLIO_URL;
+    portfolioModal.hidden = false;
+  }
+
+  function closePortfolioModal() {
+    portfolioModal.hidden = true;
+    portfolioFrame.src = "";
+  }
+
+  document.getElementById("portfolioBtn").addEventListener("click", openPortfolioModal);
+  document.getElementById("modalClose").addEventListener("click", closePortfolioModal);
+  portfolioModal.addEventListener("click", (e) => {
+    if (e.target === portfolioModal) closePortfolioModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !portfolioModal.hidden) closePortfolioModal();
+  });
+  window.addEventListener("resize", () => placeIndicator(document.querySelector("[data-nav].active")));
+
+  renderGrid(currentCategory);
+  renderInventory();
+  renderSellers();
+  renderTrades();
+  refreshSteamAuth();
+
+  const initialNav = document.querySelector("[data-nav].active") || navItems[0];
+  placeIndicator(initialNav);
+  showPage(initialNav.dataset.page);
+
+  // Theme handling: time-based default, toggle, and persistence
+  const themeToggle = document.getElementById('themeToggle');
+  const THEME_KEY = 'fn_theme';
+
+  function applyTheme(t) {
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    else document.documentElement.removeAttribute('data-theme');
+    // update indicator color to match text var
+    if (indicator && document.querySelector('[data-nav].active')) {
+      indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--text') || '#fff';
+    }
+  }
+
+  function detectDefaultTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved) return saved;
+    try {
+      const hour = new Date().getHours();
+      return hour >= 7 && hour < 19 ? 'light' : 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  }
+
+  let currentTheme = detectDefaultTheme();
+  applyTheme(currentTheme);
+
+  themeToggle?.addEventListener('click', () => {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, currentTheme);
+    applyTheme(currentTheme);
+  });
+</script>
+
+</body>
+</html>
