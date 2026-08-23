@@ -230,6 +230,65 @@
     text-decoration: none;
   }
 
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .portfolio-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .portfolio-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .portfolio-thumb {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .portfolio-info {
+    padding: 10px;
+  }
+  .portfolio-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .portfolio-desc {
+    margin: 2px 0 0;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .gallery-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    height: 140px;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    font-size: 28px;
+  }
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -928,12 +987,44 @@
             <option value="AUD">AUD - Australian Dollar</option>
           </select>
         </div>
-        <div class="settings-row">
-          <div>
-            <p class="settings-label">Portfolio</p>
-            <p class="settings-sub">This project is part of my personal portfolio</p>
+        <div style="border-bottom: 1px solid var(--border); padding: 20px 0;">
+          <p class="settings-label">My Portfolio</p>
+          <p class="settings-sub" style="margin-bottom: 12px;">Check out my recent projects</p>
+          <div class="portfolio-grid" id="portfolioGrid">
+            <a href="#" class="portfolio-item" target="_blank" rel="noopener">
+              <div class="portfolio-thumb">📊</div>
+              <div class="portfolio-info">
+                <p class="portfolio-title">CS2 Market</p>
+                <p class="portfolio-desc">Marketplace platform</p>
+              </div>
+            </a>
+            <a href="https://fraxb.vercel.app" class="portfolio-item" target="_blank" rel="noopener">
+              <div class="portfolio-thumb">💼</div>
+              <div class="portfolio-info">
+                <p class="portfolio-title">Main Portfolio</p>
+                <p class="portfolio-desc">Full portfolio site</p>
+              </div>
+            </a>
+            <a href="#" class="portfolio-item" target="_blank" rel="noopener">
+              <div class="portfolio-thumb">🎮</div>
+              <div class="portfolio-info">
+                <p class="portfolio-title">Game Project</p>
+                <p class="portfolio-desc">Interactive project</p>
+              </div>
+            </a>
           </div>
-          <button class="steam-btn portfolio-btn" id="portfolioBtn" type="button">View my portfolio</button>
+        </div>
+        <div style="border-bottom: 1px solid var(--border); padding: 20px 0;">
+          <p class="settings-label">Pictures</p>
+          <p class="settings-sub" style="margin-bottom: 12px;">Gallery of my work</p>
+          <div class="gallery-grid" id="galleryGrid">
+            <div class="gallery-item">📸</div>
+            <div class="gallery-item">🖼️</div>
+            <div class="gallery-item">📷</div>
+            <div class="gallery-item">🎨</div>
+            <div class="gallery-item">✨</div>
+            <div class="gallery-item">🌟</div>
+          </div>
         </div>
         <div class="settings-row" id="accountRow" hidden>
           <div>
@@ -944,13 +1035,6 @@
         </div>
       </section>
     </main>
-  </div>
-</div>
-
-<div class="modal-overlay" id="portfolioModal" hidden>
-  <div class="modal-box">
-    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-    <iframe class="modal-frame" id="portfolioFrame" src="" title="My portfolio"></iframe>
   </div>
 </div>
 
@@ -1345,28 +1429,7 @@
     renderInventory();
   });
 
-  const portfolioModal = document.getElementById("portfolioModal");
-  const portfolioFrame = document.getElementById("portfolioFrame");
-  const PORTFOLIO_URL = "https://fraxb.vercel.app";
-
-  function openPortfolioModal() {
-    portfolioFrame.src = PORTFOLIO_URL;
-    portfolioModal.hidden = false;
-  }
-
-  function closePortfolioModal() {
-    portfolioModal.hidden = true;
-    portfolioFrame.src = "";
-  }
-
-  document.getElementById("portfolioBtn").addEventListener("click", openPortfolioModal);
-  document.getElementById("modalClose").addEventListener("click", closePortfolioModal);
-  portfolioModal.addEventListener("click", (e) => {
-    if (e.target === portfolioModal) closePortfolioModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !portfolioModal.hidden) closePortfolioModal();
-  });
+  // Portfolio is now inline in settings, no modal needed
   window.addEventListener("resize", () => placeIndicator(document.querySelector("[data-nav].active")));
 
   renderGrid(currentCategory);
