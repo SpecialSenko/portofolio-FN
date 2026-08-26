@@ -17,6 +17,11 @@
     --gold-b: #caa338;
     --holo-a: #43e5ff;
     --holo-b: #ff3dcb;
+    --nav-bg: #15171b;
+    --nav-active-bg: #24272e;
+    --nav-border: #2b2f36;
+    --nav-hover-border: #3b414b;
+    --nav-active-border: #454b56;
   }
   * { box-sizing: border-box; scrollbar-width: none; -ms-overflow-style: none; }
 
@@ -119,20 +124,30 @@
     display: grid;
     place-items: center;
     border-radius: 9px;
+    border: 1px solid var(--nav-border);
+    background: var(--nav-bg);
     color: var(--muted);
+    padding: 0;
     cursor: pointer;
-    transition: color .15s ease;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
     z-index: 1;
   }
   .nav-item svg { width: 19px; height: 19px; }
-  .nav-item:hover { color: var(--text); }
-  .nav-item.active { color: var(--text); }
+  .nav-item:hover {
+    color: var(--text);
+    border-color: var(--nav-hover-border);
+  }
+  .nav-item.active {
+    color: var(--text);
+    background: var(--nav-active-bg);
+    border-color: var(--nav-active-border);
+  }
   .nav-item-ad {
     margin-top: 2px;
     color: #f6c85f;
   }
   .nav-item-ad.active {
-    color: #1b1302;
+    color: #f6c85f;
   }
   .nav-item-ad::before {
     content: "";
@@ -156,17 +171,6 @@
     font-weight: 800;
     letter-spacing: 0;
   }
-  .nav-indicator {
-    position: absolute;
-    left: 12px;
-    width: 44px;
-    height: 44px;
-    border-radius: 9px;
-    background: transparent; /* invisible by default, JS will show when active */
-    transition: top .25s cubic-bezier(.3,1,.4,1), background .12s ease;
-    z-index: 0;
-  }
-
   .main { flex: 1; min-width: 0; }
 
   .topbar {
@@ -477,6 +481,11 @@
     --accent: #2563eb;
     --holo-a: #43e5ff;
     --holo-b: #ff3dcb;
+    --nav-bg: #ffffff;
+    --nav-active-bg: #e9eaec;
+    --nav-border: #d8dbe0;
+    --nav-hover-border: #b9bec7;
+    --nav-active-border: #aeb4be;
   }
 
   .empty-state {
@@ -927,16 +936,13 @@
     .sidebar-logo {
       margin: 0;
     }
-    .nav-indicator {
-      display: none;
-    }
     .nav-item {
       width: 42px;
       height: 42px;
     }
     .nav-item.active {
-      background: var(--text);
-      color: var(--bg);
+      background: var(--nav-active-bg);
+      color: var(--text);
     }
     .topbar {
       flex-wrap: wrap;
@@ -1019,7 +1025,6 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.3 2 3 5.4v14.2h5v2.4h2.8l2.4-2.4h3.6L21.6 15V2H4.3Zm15.3 12.1-3 3h-3.6l-2.4 2.4v-2.4H6.4V4h13.2v10.1Z"/><path d="M16.9 6.9h1.9v5.2h-1.9zM11.6 6.9h1.9v5.2h-1.9z"/></svg>
     </button>
     <button class="sidebar-logo" id="sidebarLogo" title="Back to my store">FN</button>
-    <div class="nav-indicator" data-indicator></div>
     <button class="nav-item" data-nav data-page="global" title="Global Market" aria-label="Global Market">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>
     </button>
@@ -1229,7 +1234,6 @@
 
 <script>
   const navItems = Array.from(document.querySelectorAll("[data-nav]"));
-  const indicator = document.querySelector("[data-indicator]");
   const pages = Array.from(document.querySelectorAll(".page"));
   const pageTitle = document.getElementById("pageTitle");
   const pageTitles = {
@@ -1253,14 +1257,6 @@
       return;
     }
     pageTitle.textContent = pageTitles[name] || "Marketplace";
-  }
-
-  function placeIndicator(el) {
-    if (indicator && el) {
-      indicator.style.top = el.offsetTop + "px";
-      // show the white indicator behind the active item
-      indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--text') || '#fff';
-    }
   }
 
   function showPage(name) {
@@ -1289,7 +1285,6 @@
     item.addEventListener("click", () => {
       navItems.forEach((i) => i.classList.remove("active"));
       item.classList.add("active");
-      placeIndicator(item);
       showPage(item.dataset.page);
     });
   });
@@ -1625,8 +1620,6 @@
   });
 
   // Portfolio is now inline in settings, no modal needed
-  window.addEventListener("resize", () => placeIndicator(document.querySelector("[data-nav].active")));
-
   renderGrid(currentCategory);
   renderInventory();
   renderSellers();
@@ -1634,7 +1627,6 @@
   refreshSteamAuth();
 
   const initialNav = document.querySelector("[data-nav].active") || navItems[0];
-  placeIndicator(initialNav);
   showPage(initialNav.dataset.page);
 
   // Theme handling: time-based default, toggle, and persistence
@@ -1644,10 +1636,6 @@
   function applyTheme(t) {
     if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
     else document.documentElement.removeAttribute('data-theme');
-    // update indicator color to match text var
-    if (indicator && document.querySelector('[data-nav].active')) {
-      indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--text') || '#fff';
-    }
   }
 
   function detectDefaultTheme() {
