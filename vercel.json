@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build || echo 'No build needed'",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "node scripts/local-auth-server.mjs --host 0.0.0.0 --port 3000",
   "framework": null,
@@ -10,20 +10,6 @@
     "STEAM_RETURN_URL": "@STEAM_RETURN_URL",
     "PORT": "3000"
   },
-  "rewrites": [
-    {
-      "source": "/api/auth/me",
-      "destination": "/api/auth/me.js"
-    },
-    {
-      "source": "/api/auth/steam/login",
-      "destination": "/api/auth/steam/login.js"
-    },
-    {
-      "source": "/api/auth/steam/callback",
-      "destination": "/api/auth/steam/callback.js"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

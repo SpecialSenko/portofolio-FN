@@ -127,6 +127,35 @@
   .nav-item svg { width: 19px; height: 19px; }
   .nav-item:hover { color: var(--text); }
   .nav-item.active { color: var(--text); }
+  .nav-item-ad {
+    margin-top: 2px;
+    color: #f6c85f;
+  }
+  .nav-item-ad.active {
+    color: #1b1302;
+  }
+  .nav-item-ad::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgba(246, 200, 95, .42);
+    border-radius: 8px;
+    background: rgba(246, 200, 95, .08);
+    transition: border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .nav-item-ad:hover::before,
+  .nav-item-ad.active::before {
+    border-color: rgba(246, 200, 95, .78);
+    background: rgba(246, 200, 95, .15);
+    transform: translateY(-1px);
+  }
+  .ad-mark {
+    position: relative;
+    z-index: 1;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
   .nav-indicator {
     position: absolute;
     left: 12px;
@@ -511,6 +540,119 @@
   }
   .settings-label { margin: 0; font-size: 13px; font-weight: 600; }
   .settings-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+  .ad-panel {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid rgba(246, 200, 95, .28);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(246, 200, 95, .10), rgba(67, 229, 255, .06)),
+      var(--panel-2);
+  }
+  .ad-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ad-chip,
+  .ad-open {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .ad-chip {
+    color: #1b1302;
+    background: #f6c85f;
+  }
+  .ad-open {
+    color: #b9fbc0;
+    border: 1px solid rgba(185, 251, 192, .32);
+    background: rgba(185, 251, 192, .08);
+  }
+  .ad-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .ad-copy {
+    margin: 6px 0 0;
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .ad-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .ad-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .ad-link-secondary {
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border);
+  }
+  .referral-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .referral-card {
+    display: block;
+    min-height: 112px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-2);
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .referral-card:hover {
+    border-color: rgba(246, 200, 95, .7);
+    transform: translateY(-2px);
+  }
+  .referral-tag {
+    display: inline-flex;
+    margin-bottom: 10px;
+    color: #f6c85f;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .referral-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .referral-desc {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
   .currency-select {
     padding: 8px 10px;
     background: var(--panel-2);
@@ -779,6 +921,8 @@
       border-right: none;
       border-top: 1px solid var(--border);
       gap: 4px;
+      justify-content: flex-start;
+      overflow-x: auto;
     }
     .twitch-btn,
     .sidebar-logo {
@@ -850,6 +994,14 @@
     .currency-select {
       width: 100%;
     }
+    .ad-panel-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .ad-link {
+      width: 100%;
+      justify-content: center;
+    }
     .modal-overlay {
       padding: 12px;
     }
@@ -883,6 +1035,9 @@
     </button>
     <button class="nav-item" data-nav data-page="settings" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+    </button>
+    <button class="nav-item nav-item-ad" data-nav data-page="advertise" title="Advertise Slot" aria-label="Advertise slot">
+      <span class="ad-mark">AD</span>
     </button>
     <div class="sidebar-bottom">
       <button class="steam-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
@@ -1034,6 +1189,42 @@
           <button class="steam-btn" id="logoutBtn" type="button">Log out</button>
         </div>
       </section>
+
+      <section class="page" data-page="advertise" hidden>
+        <h2 class="page-title">Advertise Slot</h2>
+        <p class="page-copy">My eReferrals and partner placements.</p>
+
+        <div class="ad-panel">
+          <div class="ad-panel-head">
+            <span class="ad-chip">Featured ad</span>
+            <span class="ad-open">Open slot</span>
+          </div>
+          <p class="ad-title">My eReferrals</p>
+          <p class="ad-copy">A clean spot for referral links, sponsor placements, and trusted community offers connected to the marketplace.</p>
+          <div class="ad-actions">
+            <a class="ad-link" href="https://discord.gg/Xg3Ecpz" target="_blank" rel="noopener">Advertise here</a>
+            <a class="ad-link ad-link-secondary" href="https://fraxb.vercel.app" target="_blank" rel="noopener">Main portfolio</a>
+          </div>
+        </div>
+
+        <div class="referral-grid">
+          <a class="referral-card" href="https://discord.gg/Xg3Ecpz" target="_blank" rel="noopener">
+            <span class="referral-tag">Community</span>
+            <p class="referral-name">Discord Giveaways</p>
+            <p class="referral-desc">Weekly skin drops, trade updates, and marketplace announcements.</p>
+          </a>
+          <a class="referral-card" href="https://steamcommunity.com/tradeoffer/new/?partner=1128574417&token=HPuh4-Hf" target="_blank" rel="noopener">
+            <span class="referral-tag">Steam</span>
+            <p class="referral-name">Trade Offers</p>
+            <p class="referral-desc">Fast route for direct Steam trade offers and item support.</p>
+          </a>
+          <a class="referral-card" href="https://fraxb.vercel.app" target="_blank" rel="noopener">
+            <span class="referral-tag">Portfolio</span>
+            <p class="referral-name">Fraxb</p>
+            <p class="referral-desc">Main portfolio, socials, film work, and creator links.</p>
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 </div>
@@ -1049,6 +1240,7 @@
     inventory: "Inventory",
     trades: "Trades",
     settings: "Settings",
+    advertise: "Advertise Slot",
   };
 
   let currentViewSeller = null;
