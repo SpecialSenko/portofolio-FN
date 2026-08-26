@@ -3,11 +3,6 @@
   "outputDirectory": "dist",
   "devCommand": "node scripts/local-auth-server.mjs --host 0.0.0.0 --port 3000",
   "framework": "vite",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "env": {
     "NODE_ENV": "production",
     "SESSION_SECRET": "@SESSION_SECRET",
@@ -15,6 +10,16 @@
     "STEAM_RETURN_URL": "@STEAM_RETURN_URL",
     "PORT": "3000"
   },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
