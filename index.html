@@ -226,28 +226,27 @@
     white-space: nowrap;
   }
   .steam-auth { display: contents; }
-  .steam-avatar-btn {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 34px;
-    padding: 5px 12px 5px 5px;
-    background: transparent;
-    border: 1px solid transparent;
+  .steam-connect {
+    min-width: 122px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
     border-radius: 999px;
+    background: var(--panel-2);
     color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
   }
-  .steam-avatar-btn img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: block;
-    background: #24272e;
+  .steam-connect:hover {
+    border-color: #2a475e;
+  }
+  .steam-connect svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+  }
+  .steam-connect.is-connected {
+    border-color: #2a475e;
+    background: #171a21;
+    color: #fff;
   }
   .discord-btn {
     background: #5865f2;
@@ -1056,12 +1055,11 @@
         </svg>
       </button>
       <div class="steam-auth" id="steamAuth">
-        <button type="button" class="steam-btn" id="steamConnectBtn" aria-label="Connect Steam">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
-        </button>
-        <button type="button" class="steam-avatar-btn" id="steamAvatarBtn" hidden>
-          <img id="steamAvatarImg" src="" alt="" />
-          <span id="steamNameLabel"></span>
+        <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2a10 10 0 0 0-9.96 9.12l5.36 2.22a2.82 2.82 0 0 1 1.6-.49h.12l2.38-3.45v-.05a3.8 3.8 0 1 1 3.8 3.8h-.09l-3.39 2.42v.13A2.85 2.85 0 0 1 6.2 16.4l-3.83-1.58A10 10 0 1 0 12 2Zm-4.13 15.2a2.02 2.02 0 0 0 2.67-2.67 2.02 2.02 0 0 0-2.39-.95l1.2.5a1.49 1.49 0 1 1-1.14 2.75l-1.18-.49c.2.37.48.66.84.86Zm7.43-5.32a2.53 2.53 0 1 0 0-5.06 2.53 2.53 0 0 0 0 5.06Zm0-.63a1.9 1.9 0 1 1 0-3.8 1.9 1.9 0 0 1 0 3.8Z"/>
+          </svg>
+          <span id="steamConnectLabel">Connect Steam</span>
         </button>
       </div>
     </header>
@@ -1324,9 +1322,19 @@
   let currentCurrency = "USD";
 
   const connectBtn = document.getElementById("steamConnectBtn");
-  const avatarBtn = document.getElementById("steamAvatarBtn");
-  const avatarImg = document.getElementById("steamAvatarImg");
-  const nameLabel = document.getElementById("steamNameLabel");
+  const connectLabel = document.getElementById("steamConnectLabel");
+  let steamLoggedIn = false;
+
+  function setSteamButton(loggedIn, name = "Steam User") {
+    steamLoggedIn = loggedIn;
+    if (!connectBtn) return;
+
+    connectBtn.hidden = false;
+    connectBtn.classList.toggle("is-connected", loggedIn);
+    connectBtn.setAttribute("aria-label", loggedIn ? `Steam connected as ${name}. Open Settings` : "Connect Steam");
+    connectBtn.title = loggedIn ? `Steam connected as ${name}` : "Connect Steam";
+    if (connectLabel) connectLabel.textContent = loggedIn ? "Steam Connected" : "Connect Steam";
+  }
 
   async function refreshSteamAuth() {
     try {
@@ -1338,35 +1346,30 @@
       const data = await res.json();
 
       if (data.loggedIn) {
-        connectBtn?.setAttribute("hidden", "");
-        avatarBtn?.removeAttribute("hidden");
-        if (avatarImg) avatarImg.src = data.avatar || "";
-        if (nameLabel) nameLabel.textContent = data.name || "Steam User";
+        setSteamButton(true, data.name || "Steam User");
         // update settings account row
         const accountRow = document.getElementById('accountRow');
         const settingsName = document.getElementById('settingsSteamName');
         if (settingsName) settingsName.textContent = data.name || 'Steam User';
         if (accountRow) accountRow.hidden = false;
       } else {
-        connectBtn?.removeAttribute("hidden");
-        avatarBtn?.setAttribute("hidden", "");
+        setSteamButton(false);
         const accountRow = document.getElementById('accountRow');
         if (accountRow) accountRow.hidden = true;
       }
     } catch {
-      connectBtn?.removeAttribute("hidden");
-      avatarBtn?.setAttribute("hidden", "");
+      setSteamButton(false);
     }
   }
 
   connectBtn?.addEventListener("click", () => {
-    window.location.href = "/api/auth/steam/login";
-  });
+    if (steamLoggedIn) {
+      const settingsNav = document.querySelector('[data-nav][data-page="settings"]');
+      if (settingsNav) settingsNav.click();
+      return;
+    }
 
-  // open settings when clicking the avatar (logout is only available in Settings)
-  avatarBtn?.addEventListener("click", () => {
-    const settingsNav = document.querySelector('[data-nav][data-page="settings"]');
-    if (settingsNav) settingsNav.click();
+    window.location.href = "/api/auth/steam/login";
   });
 
   // logout button in settings
