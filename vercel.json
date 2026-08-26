@@ -2,7 +2,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "node scripts/local-auth-server.mjs --host 0.0.0.0 --port 3000",
-  "framework": null,
+  "framework": "vite",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
   "env": {
     "NODE_ENV": "production",
     "SESSION_SECRET": "@SESSION_SECRET",
