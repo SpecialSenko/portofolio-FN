@@ -739,6 +739,7 @@
     margin-top: 16px;
   }
   .seller-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -754,6 +755,23 @@
     transition: border-color .15s ease, transform .15s ease;
   }
   .seller-card:hover { border-color: var(--nav-hover-border); transform: translateY(-1px); }
+  .seller-alt-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    min-width: 28px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    padding: 0 5px;
+    border: 1px solid #ff4d5f;
+    border-radius: 4px;
+    background: rgba(255, 77, 95, .09);
+    color: #ff6574;
+    font-size: 8px;
+    font-weight: 900;
+    line-height: 1;
+  }
   .seller-icon {
     width: 48px;
     height: 48px;
@@ -2625,6 +2643,7 @@
       steamid,
       name: String(store.name || "Steam User"),
       avatar: trustedSteamImageUrl(store.avatar),
+      isAlt: Boolean(store.isAlt),
       rating: Number.isFinite(rating) ? rating.toFixed(1) : null,
       ratingCount: Number.parseInt(store.ratingCount || "0", 10) || 0,
       listed: items.length,
@@ -3167,6 +3186,14 @@
     card.className = "seller-card";
     card.type = "button";
     card.title = `Open ${s.name}'s store`;
+
+    if (s.isAlt) {
+      const altBadge = document.createElement("span");
+      altBadge.className = "seller-alt-badge";
+      altBadge.textContent = "ALT";
+      altBadge.title = "Account marked as an alternate account";
+      card.appendChild(altBadge);
+    }
 
     const icon = document.createElement("div");
     icon.className = "seller-icon";

@@ -59,6 +59,12 @@ function cleanText(value, fallback, maxLength) {
   return (cleaned || fallback).slice(0, maxLength);
 }
 
+function isMarkedAltAccount(steamid) {
+  return String(process.env.MARKETPLACE_ALT_STEAM_IDS || "")
+    .split(/[\s,]+/)
+    .some((candidate) => candidate === steamid);
+}
+
 function normalizeAuction(value) {
   const currentBidCents = Math.max(0, Number.parseInt(value?.currentBidCents || "0", 10) || 0);
   const bidderSteamId = String(value?.bidder?.steamid || "");
@@ -123,6 +129,7 @@ function normalizeStore(value) {
     steamid,
     name: cleanText(value?.name, "Steam User", 80),
     avatar: safeSteamImage(value?.avatar),
+    isAlt: isMarkedAltAccount(steamid),
     rating: Number.isFinite(rating) && rating >= 0 && rating <= 5 ? rating : null,
     ratingCount: Math.max(0, Number.parseInt(value?.ratingCount || "0", 10) || 0),
     listed: items.length,
