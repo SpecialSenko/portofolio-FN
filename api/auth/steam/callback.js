@@ -1,4 +1,6 @@
 import { createSessionCookie } from "../../_lib/session.js";
+import { upsertMarketplaceProfile } from "../../_lib/marketplace-store.js";
+import { getSteamProfile } from "../../_lib/steam-profile.js";
 
 function extractSteamId64(claimedId) {
   if (!claimedId) return null;
@@ -52,36 +54,19 @@ export default async function handler(req, res) {
   }
 
   const profile = await getSteamProfile(steamid);
-  const cookie = createSessionCookie({
+  const account = {
     steamid,
     name: profile.name,
     avatar: profile.avatar,
     issuedAt: Date.now(),
-  });
+  };
+  const stored = await upsertMarketplaceProfile(account).catch(() => null);
+  if (stored) account.storeSyncedAt = Date.now();
+  const cookie = createSessionCookie(account);
 
   res.statusCode = 302;
   res.setHeader("Location", "/");
   res.setHeader("Set-Cookie", cookie);
   res.setHeader("Cache-Control", "no-store");
   res.end();
-}
-
-async function getSteamProfile(steamid) {
-  const apiKey = process.env.STEAM_API_KEY;
-  const fallback = { name: "Steam User", avatar: "" };
-  if (!apiKey) return fallback;
-
-  const profileRes = await fetch(
-    `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${encodeURIComponent(apiKey)}&steamids=${steamid}`,
-  );
-  if (!profileRes.ok) return fallback;
-
-  const profileData = await profileRes.json();
-  const player = profileData?.response?.players?.[0];
-  if (!player) return fallback;
-
-  return {
-    name: player.personaname ?? fallback.name,
-    avatar: player.avatarfull ?? player.avatar ?? fallback.avatar,
-  };
 }

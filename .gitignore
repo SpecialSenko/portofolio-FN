@@ -20,6 +20,9 @@ astro-dev.err.log
 # environment variables
 .env
 .env.production
+.env*.local
+.vercel/
+.data/
 
 # macOS-specific files
 .DS_Store

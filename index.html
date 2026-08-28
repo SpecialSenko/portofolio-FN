@@ -83,6 +83,11 @@
     transition: border-color .15s ease, transform .15s ease;
   }
   .twitch-btn:hover { border-color: #a970ff; transform: translateY(-1px); }
+  .twitch-btn.active {
+    border-color: #a970ff;
+    background: #211a2b;
+    color: #bf94ff;
+  }
   .twitch-btn svg { width: 17px; height: 17px; }
   .twitch-live-dot {
     position: absolute;
@@ -116,6 +121,16 @@
     padding: 0;
     cursor: pointer;
     font-family: inherit;
+    overflow: hidden;
+  }
+  .sidebar-logo.is-seller-logo {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+  }
+  .sidebar-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .nav-item {
     position: relative;
@@ -171,9 +186,16 @@
     font-weight: 800;
     letter-spacing: 0;
   }
-  .main { flex: 1; min-width: 0; }
+  .main {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 154px;
+    grid-template-rows: auto 1fr;
+  }
 
   .topbar {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -199,19 +221,6 @@
     font-size: 12px;
   }
   .search::placeholder { color: var(--muted); }
-  .market-toggle {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--panel-2);
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .market-toggle svg { width: 16px; height: 16px; }
   .steam-btn {
     margin-left: auto;
     display: flex;
@@ -247,6 +256,14 @@
     height: 17px;
     flex: 0 0 auto;
   }
+  .steam-connect-avatar {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .steam-connect-avatar[hidden] { display: none; }
   .steam-connect.is-connected {
     border-color: #2a475e;
     background: #171a21;
@@ -256,118 +273,332 @@
     background: #5865f2;
     color: #fff;
   }
-  .portfolio-btn {
-    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
-    color: #0a0b0d;
-    text-decoration: none;
-  }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .portfolio-item {
-    background: var(--panel-2);
+  .settings-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 11px;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    text-decoration: none;
+    border-radius: 7px;
+    background: var(--panel-2);
     color: var(--text);
-    transition: border-color .2s ease, transform .2s ease;
-  }
-  .portfolio-item:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-  }
-  .portfolio-thumb {
-    width: 100%;
-    height: 120px;
-    background: linear-gradient(135deg, var(--holo-a), var(--holo-b));
-    display: grid;
-    place-items: center;
-    font-size: 24px;
-    font-weight: 700;
-  }
-  .portfolio-info {
-    padding: 10px;
-  }
-  .portfolio-title {
-    margin: 0;
+    font: inherit;
     font-size: 12px;
-    font-weight: 600;
-  }
-  .portfolio-desc {
-    margin: 2px 0 0;
-    font-size: 10px;
-    color: var(--muted);
-  }
-
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .gallery-item {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    height: 140px;
-    display: grid;
-    place-items: center;
-    color: var(--muted);
-    font-size: 28px;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    place-items: center;
-    background: rgba(4, 5, 6, 0.72);
-    backdrop-filter: blur(2px);
-    padding: 24px;
-  }
-  .modal-overlay[hidden] { display: none; }
-  .modal-box {
-    position: relative;
-    width: min(920px, 100%);
-    height: min(640px, 90vh);
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  }
-  .modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1;
-    width: 30px;
-    height: 30px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: rgba(10, 11, 13, 0.75);
-    color: var(--text);
-    font-size: 18px;
-    line-height: 1;
+    font-weight: 700;
     cursor: pointer;
   }
-  .modal-close:hover { border-color: var(--text); }
-  .modal-frame {
+  .settings-action:hover { border-color: var(--nav-hover-border); }
+  .settings-action svg { width: 16px; height: 16px; }
+
+  .cinema-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    background: rgba(2, 3, 5, .9);
+    backdrop-filter: blur(2px);
+    padding: 18px;
+  }
+  .cinema-modal[hidden] { display: none; }
+  .cinema-shell {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    width: min(1120px, 100%);
+    height: min(720px, 92vh);
+    background: #080a0d;
+    border: 1px solid #30353d;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .7);
+  }
+  .cinema-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 58px;
+    padding: 11px 16px;
+    border-bottom: 1px solid #252a31;
+    background: #0d1014;
+  }
+  .cinema-heading { min-width: 0; }
+  .cinema-title {
+    margin: 0;
+    color: #f5f7fa;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .cinema-meta {
+    margin: 2px 0 0;
+    color: #8f98a5;
+    font-size: 11px;
+  }
+  .icon-button {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #30353d;
+    border-radius: 6px;
+    background: #15191f;
+    color: #f5f7fa;
+    cursor: pointer;
+  }
+  .icon-button:hover { border-color: #7b8491; }
+  .icon-button svg { width: 17px; height: 17px; }
+  .cinema-close { margin-left: auto; }
+  .cinema-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 9px 16px;
+    border-bottom: 1px solid #252a31;
+    overflow-x: auto;
+    background: #0a0d11;
+  }
+  .cinema-tab {
+    min-height: 31px;
+    padding: 6px 11px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: #9099a6;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .cinema-tab.active {
+    border-color: #414854;
+    background: #1a1f26;
+    color: #fff;
+  }
+  .cinema-stage {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-color: #4a525e #101318;
+    scrollbar-width: thin;
+    padding: 22px 18px 20px;
+    background: #07090c;
+  }
+  .cinema-stage::-webkit-scrollbar,
+  .ad-popover::-webkit-scrollbar {
+    display: block;
+    width: 10px;
+  }
+  .cinema-stage::-webkit-scrollbar-track,
+  .ad-popover::-webkit-scrollbar-track { background: #101318; }
+  .cinema-stage::-webkit-scrollbar-thumb,
+  .ad-popover::-webkit-scrollbar-thumb {
+    border: 2px solid #101318;
+    border-radius: 5px;
+    background: #4a525e;
+  }
+  .film-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    align-items: stretch;
+    gap: 14px;
+    min-height: 0;
+    padding: 18px 2px 24px;
+  }
+  .film-frame {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-width: 0;
+    min-height: 230px;
+    padding: 12px 10px 10px;
+    border: 1px solid #30353d;
+    border-radius: 4px;
+    background: #14171b;
+    color: #f5f7fa;
+    text-align: left;
+    cursor: pointer;
+  }
+  .film-frame::before,
+  .film-frame::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    height: 5px;
+    background: repeating-linear-gradient(90deg, #050608 0 7px, transparent 7px 14px);
+    opacity: .85;
+    pointer-events: none;
+  }
+  .film-frame::before { top: 4px; }
+  .film-frame::after { bottom: 4px; }
+  .film-frame:hover,
+  .film-frame:focus-visible { border-color: #9ba4b1; }
+  .film-image {
+    width: 100%;
+    height: 174px;
+    align-self: center;
+    object-fit: contain;
+    background: #0a0c0f;
+  }
+  .film-caption {
+    min-width: 0;
+    padding: 10px 1px 2px;
+  }
+  .film-name {
+    display: block;
+    overflow: hidden;
+    color: #f4f6f8;
+    font-size: 11px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .film-kind {
+    display: block;
+    margin-top: 3px;
+    color: #77818e;
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+  .certificate-cover {
+    height: 174px;
+    display: grid;
+    place-items: center;
+    background: #ece7da;
+    color: #30291d;
+  }
+  .certificate-cover svg { width: 42px; height: 42px; }
+  .certificate-preview { background: #ece7da; }
+  .cinema-empty {
+    min-height: 220px;
+    display: grid;
+    place-items: center;
+    color: #8f98a5;
+    font-size: 12px;
+    text-align: center;
+  }
+  .cinema-footer {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 16px;
+    border-top: 1px solid #252a31;
+    background: #0d1014;
+  }
+  .cinema-count { color: #8f98a5; font-size: 10px; }
+  .cinema-more {
+    min-height: 31px;
+    padding: 6px 10px;
+    border: 1px solid #3d444f;
+    border-radius: 6px;
+    background: #171b21;
+    color: #f5f7fa;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .cinema-more[hidden] { display: none; }
+  .media-viewer {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: #050608;
+  }
+  .media-viewer[hidden] { display: none; }
+  .media-viewer-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #252a31;
+    background: #0d1014;
+  }
+  .media-viewer-title {
+    min-width: 0;
+    overflow: hidden;
+    color: #f5f7fa;
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .media-viewer-content {
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    padding: 12px;
+  }
+  .media-viewer-content img,
+  .media-viewer-content iframe {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    border: 0;
+    background: #fff;
+  }
+  .media-viewer-content img { object-fit: contain; }
+  .media-viewer-content iframe {
     width: 100%;
     height: 100%;
-    border: none;
-    background: #0a0b0d;
   }
 
-  .content { padding: 20px 26px 40px; }
+  .content {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    padding: 20px 26px 40px;
+  }
+  .ad-rail {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    padding: 20px 14px 24px 0;
+  }
+  .ad-rail-inner {
+    position: sticky;
+    top: 20px;
+    min-height: min(540px, calc(100vh - 104px));
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+  }
+  .ad-rail-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .ad-rail-slot {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    min-height: 360px;
+    margin-top: 9px;
+    padding: 10px;
+    border: 1px dashed var(--nav-active-border);
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+  }
 
   .inv-banner {
     display: flex;
@@ -381,6 +612,9 @@
     font-size: 12px;
   }
   .inv-dot { width: 7px; height: 7px; border-radius: 50%; background: #4dffb2; flex-shrink: 0; }
+  .inv-dot.is-loading { background: #f6c85f; }
+  .inv-dot.is-offline { background: var(--muted); }
+  .inv-dot.is-error { background: #ff6b6b; }
   .inv-banner .muted { color: var(--muted); }
   .inv-banner .link {
     margin-left: auto;
@@ -513,8 +747,13 @@
     padding: 18px 12px;
     background: var(--panel-2);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, transform .15s ease;
   }
+  .seller-card:hover { border-color: var(--nav-hover-border); transform: translateY(-1px); }
   .seller-icon {
     width: 48px;
     height: 48px;
@@ -525,7 +764,9 @@
     font-size: 15px;
     font-weight: 800;
     color: #0a0b0d;
+    overflow: hidden;
   }
+  .seller-icon img { width: 100%; height: 100%; object-fit: cover; }
   .seller-name { margin: 4px 0 0; font-size: 12.5px; font-weight: 600; }
   .seller-stats {
     display: flex;
@@ -661,6 +902,213 @@
     font-size: 12px;
     line-height: 1.4;
   }
+  .ad-popover {
+    position: fixed;
+    z-index: 70;
+    width: min(330px, calc(100vw - 78px));
+    max-height: min(480px, calc(100vh - 20px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 14px;
+    border: 1px solid var(--nav-active-border);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .42);
+    scrollbar-width: thin;
+  }
+  .ad-popover[hidden] { display: none; }
+  .ad-popover::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: var(--ad-arrow-top, 50%);
+    width: 10px;
+    height: 10px;
+    border-left: 1px solid var(--nav-active-border);
+    border-bottom: 1px solid var(--nav-active-border);
+    background: var(--panel);
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .ad-popover-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ad-popover-heading { min-width: 0; }
+  .ad-popover-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .ad-popover-subtitle {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .ad-popover-close { margin-left: auto; }
+  .ad-popover .ad-panel {
+    margin-top: 12px;
+    padding: 12px;
+  }
+  .ad-popover .ad-title { font-size: 15px; }
+  .ad-popover .ad-copy { font-size: 11px; }
+  .ad-popover .referral-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-top: 9px;
+  }
+  .ad-popover .referral-card {
+    min-height: 0;
+    padding: 10px;
+  }
+  .ad-popover .referral-tag { margin-bottom: 5px; }
+  .ad-popover .referral-desc { font-size: 10.5px; }
+  .twitch-popover {
+    position: fixed;
+    z-index: 72;
+    width: min(310px, calc(100vw - 78px));
+    padding: 14px;
+    border: 1px solid #6f42a8;
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .46);
+    opacity: 0;
+    transform: translateX(-8px) scale(.97);
+    transform-origin: left var(--twitch-arrow-top, 24px);
+    transition: opacity .18s ease, transform .22s cubic-bezier(.2, .8, .2, 1);
+    pointer-events: none;
+  }
+  .twitch-popover[hidden] { display: none; }
+  .twitch-popover.is-open {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+  }
+  .twitch-popover::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: var(--twitch-arrow-top, 24px);
+    width: 10px;
+    height: 10px;
+    border-left: 1px solid #6f42a8;
+    border-bottom: 1px solid #6f42a8;
+    background: var(--panel);
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .twitch-popover-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .twitch-popover-brand {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 30px;
+    border-radius: 6px;
+    background: #9147ff;
+    color: #fff;
+  }
+  .twitch-popover-brand svg { width: 17px; height: 17px; }
+  .twitch-popover-heading { min-width: 0; }
+  .twitch-popover-title { margin: 0; font-size: 13px; font-weight: 800; overflow-wrap: anywhere; }
+  .twitch-popover-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 10px; }
+  .twitch-popover-close { margin-left: auto; }
+  .twitch-preview {
+    position: relative;
+    min-height: 112px;
+    margin-top: 12px;
+    padding: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #111217;
+  }
+  .twitch-preview::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-top: 1px solid rgba(169, 112, 255, .52);
+    transform: translateY(-1px);
+    animation: twitch-scan 3.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .twitch-preview-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .twitch-channel-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #d6bbff;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .twitch-channel-chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #a970ff;
+    box-shadow: 0 0 0 3px rgba(169, 112, 255, .13);
+  }
+  .twitch-equalizer {
+    height: 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+  }
+  .twitch-equalizer span {
+    width: 3px;
+    height: 7px;
+    border-radius: 2px 2px 0 0;
+    background: #a970ff;
+    animation: twitch-level .9s ease-in-out infinite alternate;
+  }
+  .twitch-equalizer span:nth-child(2) { height: 14px; animation-delay: -.3s; }
+  .twitch-equalizer span:nth-child(3) { height: 10px; animation-delay: -.6s; }
+  .twitch-preview-name { margin: 20px 0 4px; font-size: 17px; font-weight: 800; overflow-wrap: anywhere; }
+  .twitch-preview-copy { margin: 0; color: #9da1aa; font-size: 11px; line-height: 1.45; }
+  .twitch-open {
+    width: 100%;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 10px;
+    border-radius: 7px;
+    background: #9147ff;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .twitch-open:hover { background: #a970ff; transform: translateY(-1px); }
+  .twitch-open svg { width: 14px; height: 14px; }
+  @keyframes twitch-level {
+    from { transform: scaleY(.55); opacity: .7; }
+    to { transform: scaleY(1); opacity: 1; }
+  }
+  @keyframes twitch-scan {
+    0%, 100% { transform: translateY(-2px); opacity: 0; }
+    30%, 70% { opacity: .42; }
+    50% { transform: translateY(110px); opacity: .18; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .twitch-popover,
+    .twitch-equalizer span,
+    .twitch-preview::after { animation: none; transition: none; }
+  }
   .currency-select {
     padding: 8px 10px;
     background: var(--panel-2);
@@ -678,6 +1126,31 @@
     gap: 8px;
     margin-top: 14px;
   }
+  .trade-access {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-top: 14px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-2);
+  }
+  .trade-access-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    background: rgba(77, 255, 178, .08);
+    color: #4dffb2;
+  }
+  .trade-access-icon svg { width: 16px; height: 16px; }
+  .trade-access-copy { flex: 1; min-width: 0; }
+  .trade-access-title { margin: 0; font-size: 11.5px; font-weight: 700; }
+  .trade-access-sub { margin: 2px 0 0; color: var(--muted); font-size: 10.5px; }
+  .trade-access .back-btn { text-decoration: none; }
   .trade-row {
     display: flex;
     align-items: center;
@@ -694,7 +1167,9 @@
     border-radius: 6px;
     background: linear-gradient(155deg, #1c1f24, #101216);
     border: 1px solid var(--border);
+    overflow: hidden;
   }
+  .trade-icon img { width: 100%; height: 100%; object-fit: cover; }
   .trade-main { flex: 1; min-width: 0; }
   .trade-item {
     margin: 0;
@@ -735,6 +1210,62 @@
     gap: 8px;
     margin-top: 14px;
   }
+  .inventory-games {
+    margin-top: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .inventory-games[hidden] { display: none; }
+  .game-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 1px 1px 5px;
+    scrollbar-width: thin;
+  }
+  .game-option {
+    display: grid;
+    grid-template-columns: 26px auto;
+    grid-template-rows: auto auto;
+    column-gap: 8px;
+    min-width: 150px;
+    min-height: 48px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+  }
+  .game-option.active {
+    border-color: var(--text);
+    background: var(--nav-active-bg);
+  }
+  .game-option:disabled { cursor: default; opacity: .72; }
+  .game-option img,
+  .game-option-icon {
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    object-fit: cover;
+    background: #171a21;
+  }
+  .game-option-name {
+    align-self: end;
+    overflow: hidden;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .game-option-count {
+    align-self: start;
+    color: var(--muted);
+    font-size: 9.5px;
+  }
   .inv-row {
     display: flex;
     align-items: center;
@@ -751,6 +1282,7 @@
     border-radius: 6px;
     background: linear-gradient(155deg, #1c1f24, #101216);
     border: 1px solid var(--border);
+    object-fit: contain;
   }
   .inv-main { flex: 1; min-width: 0; }
   .inv-item {
@@ -816,6 +1348,21 @@
     overflow: hidden;
     cursor: pointer;
     transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .variant-card.has-auction {
+    height: 190px;
+    cursor: default;
+  }
+  .item-art {
+    position: absolute;
+    inset: 6px 16px 24px;
+    width: calc(100% - 32px);
+    height: calc(100% - 30px);
+    object-fit: contain;
+  }
+  .variant-card.has-auction .item-art {
+    inset: 6px 16px 76px;
+    height: calc(100% - 82px);
   }
   .stat-badge {
     position: absolute;
@@ -892,6 +1439,12 @@
     transition: transform .2s ease, opacity .2s ease;
   }
   .variant-card:hover .info { transform: translateY(0); opacity: 1; }
+  .variant-card.has-auction .info {
+    bottom: 42px;
+    padding: 8px 10px;
+    transform: translateY(0);
+    opacity: 1;
+  }
   .info-name { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--text); }
   .info-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .info-tier { font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
@@ -903,10 +1456,190 @@
     color: transparent;
   }
   .info-price { font-size: 12px; font-weight: 600; color: var(--text); }
+  .auction-strip {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 5;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 10px;
+    border-top: 1px solid var(--border);
+    background: var(--panel-2);
+  }
+  .auction-current { min-width: 0; flex: 1; }
+  .auction-label {
+    display: block;
+    color: var(--muted);
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .auction-value {
+    display: block;
+    margin-top: 1px;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bid-button {
+    min-width: 64px;
+    height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 10px;
+    border: 1px solid #4dffb2;
+    border-radius: 6px;
+    background: #4dffb2;
+    color: #06110c;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .bid-button:hover { background: #7dffc9; }
+  .bid-button svg { width: 13px; height: 13px; }
+  .auction-owner {
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .bid-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(4, 5, 7, .76);
+  }
+  .bid-modal[hidden] { display: none; }
+  .bid-dialog {
+    width: min(390px, 100%);
+    max-height: min(620px, calc(100vh - 32px));
+    overflow-y: auto;
+    border: 1px solid var(--nav-active-border);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+  }
+  .bid-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .bid-dialog-title { margin: 0; font-size: 13px; font-weight: 800; }
+  .bid-dialog-close { margin-left: auto; }
+  .bid-dialog-body { padding: 14px; }
+  .bid-item-summary {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 11px;
+    align-items: center;
+    padding-bottom: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .bid-item-summary.no-image { grid-template-columns: minmax(0, 1fr); }
+  .bid-item-image {
+    width: 64px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #111317;
+  }
+  .bid-item-name { margin: 0; font-size: 12px; font-weight: 800; overflow-wrap: anywhere; }
+  .bid-item-seller { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+  .bid-current-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 0;
+  }
+  .bid-current-label { margin: 0; color: var(--muted); font-size: 9px; text-transform: uppercase; }
+  .bid-current-value { margin: 3px 0 0; font-size: 18px; font-weight: 800; }
+  .bid-current-user { max-width: 150px; margin: 0; color: var(--muted); font-size: 10px; text-align: right; overflow-wrap: anywhere; }
+  .bid-field-label { display: block; margin-bottom: 6px; font-size: 10px; font-weight: 700; }
+  .bid-input-wrap {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+  }
+  .bid-input-prefix { color: var(--muted); font-size: 13px; font-weight: 800; text-align: center; }
+  .bid-input {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-radius: 0 7px 7px 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .bid-minimum { margin: 6px 0 0; color: var(--muted); font-size: 9.5px; }
+  .bid-error { margin: 10px 0 0; color: #ff8a8a; font-size: 10px; line-height: 1.4; }
+  .bid-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .bid-cancel,
+  .bid-submit {
+    min-height: 34px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .bid-cancel { border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .bid-submit { border: 1px solid #4dffb2; background: #4dffb2; color: #06110c; }
+  .rules-dialog { width: min(520px, 100%); }
+  .rules-body { padding: 6px 16px 16px; }
+  .rules-list { margin: 0; padding: 0; list-style: none; }
+  .rules-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .rules-list li:last-child { border-bottom: 0; }
+  .rules-list strong { display: block; margin-bottom: 3px; font-size: 11px; }
+  .rules-list span { display: block; color: var(--muted); font-size: 10.5px; line-height: 1.5; }
+  .rules-notice {
+    margin: 4px 0 0;
+    padding: 10px;
+    border-left: 2px solid #f6c85f;
+    background: rgba(246, 200, 95, .06);
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+  }
   @keyframes holo-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @media (max-width: 820px) {
+    .main { display: block; }
+    .ad-rail { display: none; }
   }
 
   @media (max-width: 760px) {
@@ -984,6 +1717,15 @@
     .inv-row {
       flex-wrap: wrap;
     }
+    .trade-access {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .trade-access .back-btn {
+      width: 100%;
+      margin-left: 41px;
+      text-align: center;
+    }
     .trade-main,
     .inv-main {
       flex-basis: calc(100% - 46px);
@@ -1007,12 +1749,13 @@
       width: 100%;
       justify-content: center;
     }
-    .modal-overlay {
-      padding: 12px;
-    }
-    .modal-box {
-      height: min(620px, 88vh);
-    }
+    .cinema-modal { padding: 8px; }
+    .cinema-shell { height: min(720px, 96vh); }
+    .cinema-header { padding: 9px 10px; }
+    .cinema-tabs { padding: 8px 10px; }
+    .cinema-stage { padding: 12px 9px 14px; }
+    .film-rail { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); }
+    .settings-action { width: 100%; }
   }
 </style>
 </head>
@@ -1020,7 +1763,7 @@
 
 <div class="layout">
   <nav class="sidebar">
-    <button class="twitch-btn" title="Live on Twitch" aria-label="Watch live on Twitch">
+    <button class="twitch-btn" id="twitchPopupButton" type="button" title="Twitch" aria-label="Open Twitch popup" aria-haspopup="dialog" aria-expanded="false">
       <span class="twitch-live-dot" aria-hidden="true"></span>
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.3 2 3 5.4v14.2h5v2.4h2.8l2.4-2.4h3.6L21.6 15V2H4.3Zm15.3 12.1-3 3h-3.6l-2.4 2.4v-2.4H6.4V4h13.2v10.1Z"/><path d="M16.9 6.9h1.9v5.2h-1.9zM11.6 6.9h1.9v5.2h-1.9z"/></svg>
     </button>
@@ -1031,16 +1774,16 @@
     <button class="nav-item active" data-nav data-page="market" title="Marketplace" aria-label="Marketplace">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 9h16l-1.5 9.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>
     </button>
-    <button class="nav-item" data-nav data-page="inventory" title="Inventory" aria-label="Inventory">
+    <button class="nav-item" data-nav data-page="inventory" title="Inventory" aria-label="Inventory" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
     </button>
-    <button class="nav-item" data-nav data-page="trades" title="Trades" aria-label="Trades">
+    <button class="nav-item" data-nav data-page="trades" title="Trades" aria-label="Trades" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h11M11 4l4 4-4 4"/><path d="M20 16H9M13 20l-4-4 4-4"/></svg>
     </button>
     <button class="nav-item" data-nav data-page="settings" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
     </button>
-    <button class="nav-item nav-item-ad" data-nav data-page="advertise" title="Advertise Slot" aria-label="Advertise slot">
+    <button class="nav-item nav-item-ad" id="adPopupButton" type="button" title="My Referral" aria-label="Open advertising popup" aria-haspopup="dialog" aria-expanded="false">
       <span class="ad-mark">AD</span>
     </button>
     <div class="sidebar-bottom">
@@ -1054,26 +1797,22 @@
     <header class="topbar">
       <h1 id="pageTitle">Marketplace</h1>
       <input class="search" type="text" placeholder="Search skins..." aria-label="Search skins" />
-      <button class="market-toggle" aria-label="Browse full marketplace">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <path d="M12 2.5c-1.6 1.4-2.6 3-2.4 4.7.1 1-.5 1.5-1.3 2.1C6.7 10.4 5.5 12 5.5 14a6.5 6.5 0 0 0 13 0c0-2.1-1.3-3.7-2.9-4.8-.8-.6-1.3-1-1.2-2C14.6 5.4 13.6 3.8 12 2.5Z"/>
-        </svg>
-      </button>
       <div class="steam-auth" id="steamAuth">
         <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <svg id="steamConnectIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2a10 10 0 0 0-9.96 9.12l5.36 2.22a2.82 2.82 0 0 1 1.6-.49h.12l2.38-3.45v-.05a3.8 3.8 0 1 1 3.8 3.8h-.09l-3.39 2.42v.13A2.85 2.85 0 0 1 6.2 16.4l-3.83-1.58A10 10 0 1 0 12 2Zm-4.13 15.2a2.02 2.02 0 0 0 2.67-2.67 2.02 2.02 0 0 0-2.39-.95l1.2.5a1.49 1.49 0 1 1-1.14 2.75l-1.18-.49c.2.37.48.66.84.86Zm7.43-5.32a2.53 2.53 0 1 0 0-5.06 2.53 2.53 0 0 0 0 5.06Zm0-.63a1.9 1.9 0 1 1 0-3.8 1.9 1.9 0 0 1 0 3.8Z"/>
           </svg>
+          <img class="steam-connect-avatar" id="steamConnectAvatar" alt="" hidden>
           <span id="steamConnectLabel">Connect Steam</span>
         </button>
       </div>
     </header>
 
     <main class="content">
-      <div class="inv-banner">
-        <span class="inv-dot"></span>
-        <span>Inventory public &mdash; <strong>128</strong> items found.</span>
-        <a class="link" href="#">Manage privacy settings</a>
+      <div class="inv-banner" id="inventoryBanner">
+        <span class="inv-dot is-offline" id="inventoryStatusDot"></span>
+        <span id="inventorySummary">Connect Steam to scan your personal inventory.</span>
+        <a class="link" id="inventoryAction" href="/api/auth/steam/login">Connect Steam</a>
       </div>
 
       <section class="page" data-page="global" hidden>
@@ -1085,11 +1824,11 @@
           </span>
           <div>
             <p class="protect-title">Trade Protection</p>
-            <p class="protect-copy">The item is sent to you first. Funds are held for 7 days and only released to the seller once the trade is confirmed clean &mdash; protects both sides from scams.</p>
+            <p class="protect-copy">Listings and bids are recorded here. Confirm every Steam trade before completing payment; this site does not currently hold funds.</p>
           </div>
         </div>
 
-        <p class="page-copy">Sellers active on the platform right now.</p>
+        <p class="page-copy" id="sellerCopy">Connect Steam to show your account on the market.</p>
         <div class="seller-grid" id="sellerGrid"></div>
       </section>
 
@@ -1105,6 +1844,9 @@
           <button class="cat-tab" data-cat="pistols">Pistols</button>
           <button class="cat-tab" data-cat="knives">Knives</button>
           <button class="cat-tab" data-cat="gloves">Gloves</button>
+          <button class="cat-tab" data-cat="stickers">Stickers</button>
+          <button class="cat-tab" data-cat="charms">Charms</button>
+          <button class="cat-tab" data-cat="cases">Cases</button>
         </div>
 
         <div class="grid" id="grid"></div>
@@ -1112,13 +1854,27 @@
 
       <section class="page" data-page="inventory" hidden>
         <h2 class="page-title">Your Inventory</h2>
-        <p class="page-copy">Every tradable item across your Steam account, not just CS2. Toggle "List" to send an item to the marketplace.</p>
+        <p class="page-copy" id="inventoryCopy">Items from your connected Steam account.</p>
+        <div class="inventory-games" id="inventoryGames" hidden>
+          <div class="game-tabs" id="gameTabs" role="listbox" aria-label="Steam game inventory"></div>
+        </div>
         <div class="inv-list" id="invList"></div>
+        <button class="back-btn" id="loadMoreInventory" type="button" hidden>Load more</button>
       </section>
 
       <section class="page" data-page="trades" hidden>
         <h2 class="page-title">Trades</h2>
-        <p class="page-copy">Your recent trade history &mdash; where each item went.</p>
+        <p class="page-copy">Private trade history for the connected Steam account.</p>
+        <div class="trade-access">
+          <span class="trade-access-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          </span>
+          <div class="trade-access-copy">
+            <p class="trade-access-title" id="tradeAccessTitle">Steam connection required</p>
+            <p class="trade-access-sub" id="tradeAccessCopy">Trade records are never shown publicly.</p>
+          </div>
+          <a class="back-btn" id="steamTradeHistoryLink" href="/api/auth/steam/login">Connect Steam</a>
+        </div>
         <div class="trade-list" id="tradeList"></div>
       </section>
 
@@ -1134,7 +1890,7 @@
         <div class="settings-row">
           <div>
             <p class="settings-label">Currency</p>
-            <p class="settings-sub">Prices update across the marketplace</p>
+            <p class="settings-sub" id="currencyStatus">Loading latest reference rates...</p>
           </div>
           <select class="currency-select" id="currencySelect">
             <option value="USD">USD - US Dollar</option>
@@ -1145,44 +1901,25 @@
             <option value="AUD">AUD - Australian Dollar</option>
           </select>
         </div>
-        <div style="border-bottom: 1px solid var(--border); padding: 20px 0;">
-          <p class="settings-label">My Portfolio</p>
-          <p class="settings-sub" style="margin-bottom: 12px;">Check out my recent projects</p>
-          <div class="portfolio-grid" id="portfolioGrid">
-            <a href="#" class="portfolio-item" target="_blank" rel="noopener">
-              <div class="portfolio-thumb">📊</div>
-              <div class="portfolio-info">
-                <p class="portfolio-title">CS2 Market</p>
-                <p class="portfolio-desc">Marketplace platform</p>
-              </div>
-            </a>
-            <a href="https://fraxb.vercel.app" class="portfolio-item" target="_blank" rel="noopener">
-              <div class="portfolio-thumb">💼</div>
-              <div class="portfolio-info">
-                <p class="portfolio-title">Main Portfolio</p>
-                <p class="portfolio-desc">Full portfolio site</p>
-              </div>
-            </a>
-            <a href="#" class="portfolio-item" target="_blank" rel="noopener">
-              <div class="portfolio-thumb">🎮</div>
-              <div class="portfolio-info">
-                <p class="portfolio-title">Game Project</p>
-                <p class="portfolio-desc">Interactive project</p>
-              </div>
-            </a>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Portfolio &amp; Pictures</p>
+            <p class="settings-sub">Original projects, game captures, and certificates</p>
           </div>
+          <button class="settings-action" id="openPortfolio" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m7 15 3-3 3 2 3-4 2 3"/><circle cx="8" cy="9" r="1"/></svg>
+            Open portfolio
+          </button>
         </div>
-        <div style="border-bottom: 1px solid var(--border); padding: 20px 0;">
-          <p class="settings-label">Pictures</p>
-          <p class="settings-sub" style="margin-bottom: 12px;">Gallery of my work</p>
-          <div class="gallery-grid" id="galleryGrid">
-            <div class="gallery-item">📸</div>
-            <div class="gallery-item">🖼️</div>
-            <div class="gallery-item">📷</div>
-            <div class="gallery-item">🎨</div>
-            <div class="gallery-item">✨</div>
-            <div class="gallery-item">🌟</div>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label">Marketplace Rules</p>
+            <p class="settings-sub">Trading, account safety, and marketplace conduct</p>
           </div>
+          <button class="settings-action" id="openRules" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M8 20a3 3 0 0 1 3-3h8M9 8h6M9 12h6"/></svg>
+            View rules
+          </button>
         </div>
         <div class="settings-row" id="accountRow" hidden>
           <div>
@@ -1193,46 +1930,186 @@
         </div>
       </section>
 
-      <section class="page" data-page="advertise" hidden>
-        <h2 class="page-title">Advertise Slot</h2>
-        <p class="page-copy">My eReferrals and partner placements.</p>
-
-        <div class="ad-panel">
-          <div class="ad-panel-head">
-            <span class="ad-chip">Featured ad</span>
-            <span class="ad-open">Open slot</span>
-          </div>
-          <p class="ad-title">My eReferrals</p>
-          <p class="ad-copy">A clean spot for referral links, sponsor placements, and trusted community offers connected to the marketplace.</p>
-          <div class="ad-actions">
-            <a class="ad-link" href="https://discord.gg/Xg3Ecpz" target="_blank" rel="noopener">Advertise here</a>
-            <a class="ad-link ad-link-secondary" href="https://fraxb.vercel.app" target="_blank" rel="noopener">Main portfolio</a>
-          </div>
-        </div>
-
-        <div class="referral-grid">
-          <a class="referral-card" href="https://discord.gg/Xg3Ecpz" target="_blank" rel="noopener">
-            <span class="referral-tag">Community</span>
-            <p class="referral-name">Discord Giveaways</p>
-            <p class="referral-desc">Weekly skin drops, trade updates, and marketplace announcements.</p>
-          </a>
-          <a class="referral-card" href="https://steamcommunity.com/tradeoffer/new/?partner=1128574417&token=HPuh4-Hf" target="_blank" rel="noopener">
-            <span class="referral-tag">Steam</span>
-            <p class="referral-name">Trade Offers</p>
-            <p class="referral-desc">Fast route for direct Steam trade offers and item support.</p>
-          </a>
-          <a class="referral-card" href="https://fraxb.vercel.app" target="_blank" rel="noopener">
-            <span class="referral-tag">Portfolio</span>
-            <p class="referral-name">Fraxb</p>
-            <p class="referral-desc">Main portfolio, socials, film work, and creator links.</p>
-          </a>
-        </div>
-      </section>
     </main>
+    <aside class="ad-rail" aria-label="Advertisements">
+      <div class="ad-rail-inner">
+        <p class="ad-rail-label">Advertisement</p>
+        <div class="ad-rail-slot">Available ad slot</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<aside class="twitch-popover" id="twitchPopover" role="dialog" aria-modal="false" aria-labelledby="twitchPopoverTitle" hidden>
+  <header class="twitch-popover-header">
+    <span class="twitch-popover-brand" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.3 2 3 5.4v14.2h5v2.4h2.8l2.4-2.4h3.6L21.6 15V2H4.3Zm15.3 12.1-3 3h-3.6l-2.4 2.4v-2.4H6.4V4h13.2v10.1Z"/><path d="M16.9 6.9h1.9v5.2h-1.9zM11.6 6.9h1.9v5.2h-1.9z"/></svg>
+    </span>
+    <div class="twitch-popover-heading">
+      <h2 class="twitch-popover-title" id="twitchPopoverTitle">fraxbnezl_bevtvany</h2>
+      <p class="twitch-popover-subtitle">Streams, games, and live projects</p>
+    </div>
+    <button class="icon-button twitch-popover-close" id="closeTwitchPopover" type="button" title="Close Twitch popup" aria-label="Close Twitch popup">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+  </header>
+  <div class="twitch-preview">
+    <div class="twitch-preview-status">
+      <span class="twitch-channel-chip">Twitch channel</span>
+      <span class="twitch-equalizer" aria-hidden="true"><span></span><span></span><span></span></span>
+    </div>
+    <p class="twitch-preview-name">fraxbnezl_bevtvany</p>
+    <p class="twitch-preview-copy">Open the channel for current streams and recent broadcasts.</p>
+  </div>
+  <a class="twitch-open" href="https://www.twitch.tv/fraxbnezl_bevtvany" target="_blank" rel="noopener">
+    Open Twitch
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+  </a>
+</aside>
+
+<aside class="ad-popover" id="adPopover" role="dialog" aria-modal="false" aria-labelledby="adPopoverTitle" hidden>
+  <header class="ad-popover-header">
+    <div class="ad-popover-heading">
+      <h2 class="ad-popover-title" id="adPopoverTitle">My eReferrals</h2>
+      <p class="ad-popover-subtitle">Public advertising placements</p>
+    </div>
+    <button class="icon-button ad-popover-close" id="closeAdPopover" type="button" title="Close advertising" aria-label="Close advertising">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+  </header>
+  <div class="ad-panel">
+    <div class="ad-panel-head">
+      <span class="ad-chip">Featured ad</span>
+      <span class="ad-open">Open slot</span>
+    </div>
+    <p class="ad-title">Featured referral</p>
+    <p class="ad-copy">Primary placement for an approved referral partner.</p>
+  </div>
+  <div class="referral-grid">
+    <article class="referral-card">
+      <span class="referral-tag">Available</span>
+      <p class="referral-name">Partner placement</p>
+      <p class="referral-desc">Compact public placement for a marketplace partner.</p>
+    </article>
+    <article class="referral-card">
+      <span class="referral-tag">Available</span>
+      <p class="referral-name">Marketplace sponsor</p>
+      <p class="referral-desc">Reserved for a clearly labeled sponsor or campaign.</p>
+    </article>
+  </div>
+</aside>
+
+<div class="bid-modal rules-modal" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesDialogTitle" hidden>
+  <section class="bid-dialog rules-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="rulesDialogTitle">Marketplace Rules</h2>
+      <button class="icon-button bid-dialog-close" id="closeRulesModal" type="button" title="Close rules" aria-label="Close rules">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="rules-body">
+      <ol class="rules-list">
+        <li><strong>Use Steam-hosted login only</strong><span>Never share a Steam password, Steam Guard code, recovery code, or session cookie with a buyer or seller.</span></li>
+        <li><strong>List only owned, tradable items</strong><span>A public Steam inventory is required so each listing can be verified against the connected account.</span></li>
+        <li><strong>Keep bidding fair</strong><span>Self-bidding, coordinated price manipulation, fake offers, and misleading listing details are not allowed.</span></li>
+        <li><strong>Check every trade</strong><span>Verify the recipient, item, condition, and complete Steam trade contents before accepting an offer or sending payment.</span></li>
+        <li><strong>No scams or account abuse</strong><span>Impersonation, phishing, harassment, fraudulent chargebacks, and alternate-account abuse can result in marketplace removal.</span></li>
+      </ol>
+      <p class="rules-notice">The marketplace currently records public listings and bids. It does not process payments, hold funds, or guarantee a Steam trade.</p>
+    </div>
+  </section>
+</div>
+
+<div class="bid-modal" id="bidModal" role="dialog" aria-modal="true" aria-labelledby="bidDialogTitle" hidden>
+  <section class="bid-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="bidDialogTitle">Place bid</h2>
+      <button class="icon-button bid-dialog-close" id="closeBidModal" type="button" title="Close bid" aria-label="Close bid">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <form class="bid-dialog-body" id="bidForm">
+      <div class="bid-item-summary">
+        <img class="bid-item-image" id="bidItemImage" alt="" hidden>
+        <div>
+          <p class="bid-item-name" id="bidItemName"></p>
+          <p class="bid-item-seller" id="bidItemSeller"></p>
+        </div>
+      </div>
+      <div class="bid-current-row">
+        <div>
+          <p class="bid-current-label">Current bid</p>
+          <p class="bid-current-value" id="bidCurrentValue">No bids</p>
+        </div>
+        <p class="bid-current-user" id="bidCurrentUser"></p>
+      </div>
+      <label class="bid-field-label" for="bidAmount">Bid amount (USD)</label>
+      <div class="bid-input-wrap">
+        <span class="bid-input-prefix">$</span>
+        <input class="bid-input" id="bidAmount" name="bidAmount" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" required>
+      </div>
+      <p class="bid-minimum" id="bidMinimum"></p>
+      <p class="bid-error" id="bidError" role="alert" hidden></p>
+      <div class="bid-dialog-actions">
+        <button class="bid-cancel" id="cancelBid" type="button">Cancel</button>
+        <button class="bid-submit" id="submitBid" type="submit">Place bid</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="cinema-modal" id="portfolioModal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle" hidden>
+  <div class="cinema-shell">
+    <header class="cinema-header">
+      <div class="cinema-heading">
+        <h2 class="cinema-title" id="portfolioModalTitle">Fraxb Portfolio</h2>
+        <p class="cinema-meta" id="portfolioMeta">Loading original work...</p>
+      </div>
+      <button class="icon-button cinema-close" id="closePortfolio" type="button" title="Close portfolio" aria-label="Close portfolio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="cinema-tabs" role="tablist" aria-label="Portfolio collection">
+      <button class="cinema-tab active" type="button" role="tab" aria-selected="true" data-portfolio-tab="pictures">Pictures</button>
+      <button class="cinema-tab" type="button" role="tab" aria-selected="false" data-portfolio-tab="games">Game work</button>
+      <button class="cinema-tab" type="button" role="tab" aria-selected="false" data-portfolio-tab="certificates">Certificates</button>
+    </div>
+    <div class="cinema-stage" id="portfolioStage" tabindex="0" aria-label="Scrollable portfolio files">
+      <div class="film-rail" id="portfolioRail"></div>
+    </div>
+    <footer class="cinema-footer">
+      <span class="cinema-count" id="portfolioCount"></span>
+      <button class="cinema-more" id="loadMorePortfolio" type="button" hidden>Load more</button>
+    </footer>
+    <div class="media-viewer" id="mediaViewer" hidden>
+      <div class="media-viewer-bar">
+        <button class="icon-button" id="closeMediaViewer" type="button" title="Back to portfolio" aria-label="Back to portfolio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="media-viewer-title" id="mediaViewerTitle"></span>
+      </div>
+      <div class="media-viewer-content" id="mediaViewerContent"></div>
+    </div>
   </div>
 </div>
 
 <script>
+  // UI deterrent only. Server authorization must never depend on browser shortcut blocking.
+  document.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+  }, { capture: true });
+
+  document.addEventListener("keydown", (event) => {
+    const key = String(event.key || "").toLowerCase();
+    const functionKey = event.key === "F12" || event.key === "ContextMenu" || (event.shiftKey && event.key === "F10");
+    const windowsDevTools = event.ctrlKey && event.shiftKey && ["c", "e", "i", "j", "k", "m"].includes(key);
+    const macDevTools = event.metaKey && event.altKey && ["c", "i", "j", "k", "u"].includes(key);
+    const viewSource = (event.ctrlKey || event.metaKey) && key === "u";
+    if (!functionKey && !windowsDevTools && !macDevTools && !viewSource) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, { capture: true });
+
   const navItems = Array.from(document.querySelectorAll("[data-nav]"));
   const pages = Array.from(document.querySelectorAll(".page"));
   const pageTitle = document.getElementById("pageTitle");
@@ -1242,10 +2119,14 @@
     inventory: "Inventory",
     trades: "Trades",
     settings: "Settings",
-    advertise: "Advertise Slot",
   };
 
   let currentViewSeller = null;
+  let marketplaceSellers = [];
+  let marketplaceLoading = false;
+  let marketplaceLoaded = false;
+  let marketplaceError = "";
+  let marketplaceRequestVersion = 0;
 
   function activePageName() {
     return document.querySelector("[data-nav].active")?.dataset.page || "market";
@@ -1268,42 +2149,221 @@
   }
 
   function updateSidebarLogo(page) {
-    const sidebarLogo = document.getElementById('sidebarLogo');
-    // Steam SVG (simplified) to use as logo on Global Market
+    const sidebarLogo = document.getElementById("sidebarLogo");
     const steamSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="6.5" cy="12.5" r="2.5"/><path d="M8 12.5l6-3"/><circle cx="17" cy="9" r="2"/><path d="M15.5 10.5l-4 2" opacity=".9"/></svg>';
     if (!sidebarLogo) return;
-    if (page === 'global' && !currentViewSeller) {
+
+    sidebarLogo.classList.remove("is-seller-logo");
+    if (page === "global") {
       sidebarLogo.innerHTML = steamSVG;
-      sidebarLogo.style.color = 'var(--text)';
-    } else if (!currentViewSeller) {
-      sidebarLogo.textContent = 'FN';
-      sidebarLogo.style.color = '';
+      sidebarLogo.style.color = "var(--text)";
+      sidebarLogo.title = "Global Market - click to return to your store";
+      sidebarLogo.setAttribute("aria-label", "Global Market. Return to your store");
+      return;
     }
+
+    if (page === "market" && currentViewSeller) {
+      const avatar = trustedSteamImageUrl(currentViewSeller.avatar);
+      sidebarLogo.classList.add("is-seller-logo");
+      sidebarLogo.style.color = "";
+      sidebarLogo.replaceChildren();
+      if (avatar) {
+        const image = document.createElement("img");
+        image.src = avatar;
+        image.alt = "";
+        image.decoding = "async";
+        sidebarLogo.appendChild(image);
+      } else {
+        sidebarLogo.textContent = initials(currentViewSeller.name);
+      }
+      sidebarLogo.title = `${currentViewSeller.name}'s store - click to return to your store`;
+      sidebarLogo.setAttribute("aria-label", `Viewing ${currentViewSeller.name}'s store. Return to your store`);
+      return;
+    }
+
+    sidebarLogo.textContent = "FN";
+    sidebarLogo.style.color = "";
+    sidebarLogo.title = "Your FN marketplace";
+    sidebarLogo.setAttribute("aria-label", "Your FN marketplace");
   }
 
   navItems.forEach((item) => {
     item.addEventListener("click", () => {
+      hideAdPopover();
+      hideTwitchPopover({ immediate: true });
       navItems.forEach((i) => i.classList.remove("active"));
       item.classList.add("active");
       showPage(item.dataset.page);
+      if (item.dataset.page === "inventory" && steamUser) void loadSteamGameCatalog();
+      if (item.dataset.page === "trades" && steamUser) void loadSteamTrades();
     });
   });
 
-  const inventory = [
-    { id: 1, name: "AK-47 | Redline", tier: "normal", usd: 41.20, cat: "rifles", game: "CS2", forSale: true },
-    { id: 2, name: "AK-47 | Redline", tier: "stattrak", usd: 68.90, cat: "rifles", game: "CS2", forSale: true },
-    { id: 3, name: "M4A4 | Neo-Noir", tier: "holo", usd: 96.10, cat: "rifles", game: "CS2", forSale: true },
-    { id: 4, name: "Desert Eagle | Blaze", tier: "stattrak-holo", usd: 189.50, cat: "pistols", game: "CS2", forSale: true },
-    { id: 5, name: "AWP | Asiimov", tier: "normal", usd: 132.00, cat: "rifles", game: "CS2", forSale: false },
-    { id: 6, name: "Glock-18 | Fade", tier: "stattrak", usd: 210.00, cat: "pistols", game: "CS2", forSale: true },
-    { id: 7, name: "Karambit | Doppler", tier: "holo", usd: 980.00, cat: "knives", game: "CS2", forSale: false },
-    { id: 8, name: "Sport Gloves | Pandora's Box", tier: "normal", usd: 640.00, cat: "gloves", game: "CS2", forSale: false },
-    { id: 9, name: "USP-S | Kill Confirmed", tier: "normal", usd: 54.30, cat: "pistols", game: "CS2", forSale: true },
-    { id: 10, name: "Unusual Team Captain", tier: "normal", usd: 24.00, cat: null, game: "TF2", forSale: false },
-    { id: 11, name: "Arcana: Axe of Enlightenment", tier: "normal", usd: 18.50, cat: null, game: "Dota 2", forSale: false },
-    { id: 12, name: "Metal Facemask", tier: "normal", usd: 9.10, cat: null, game: "Rust", forSale: false },
-    { id: 13, name: "Booster Pack - Half-Life 2", tier: "normal", usd: 0.35, cat: null, game: "Steam", forSale: false },
-  ];
+  const adPopupButton = document.getElementById("adPopupButton");
+  const adPopover = document.getElementById("adPopover");
+  const closeAdPopoverButton = document.getElementById("closeAdPopover");
+  const twitchPopupButton = document.getElementById("twitchPopupButton");
+  const twitchPopover = document.getElementById("twitchPopover");
+  const closeTwitchPopoverButton = document.getElementById("closeTwitchPopover");
+  let twitchCloseTimer = null;
+
+  function positionTwitchPopover() {
+    if (twitchPopover.hidden) return;
+    const buttonRect = twitchPopupButton.getBoundingClientRect();
+    const margin = 10;
+    const left = Math.min(buttonRect.right + 10, window.innerWidth - twitchPopover.offsetWidth - margin);
+    const preferredTop = buttonRect.top - 8;
+    const top = Math.max(margin, Math.min(preferredTop, window.innerHeight - twitchPopover.offsetHeight - margin));
+    const arrowTop = Math.max(14, Math.min(buttonRect.top + buttonRect.height / 2 - top, twitchPopover.offsetHeight - 14));
+    twitchPopover.style.left = `${Math.max(margin, left)}px`;
+    twitchPopover.style.top = `${top}px`;
+    twitchPopover.style.setProperty("--twitch-arrow-top", `${arrowTop}px`);
+  }
+
+  function showTwitchPopover() {
+    hideAdPopover();
+    clearTimeout(twitchCloseTimer);
+    twitchPopover.hidden = false;
+    twitchPopupButton.classList.add("active");
+    twitchPopupButton.setAttribute("aria-expanded", "true");
+    positionTwitchPopover();
+    requestAnimationFrame(() => {
+      if (!twitchPopover.hidden) twitchPopover.classList.add("is-open");
+    });
+    closeTwitchPopoverButton.focus();
+  }
+
+  function hideTwitchPopover({ restoreFocus = false, immediate = false } = {}) {
+    if (!twitchPopover || twitchPopover.hidden) return;
+    clearTimeout(twitchCloseTimer);
+    twitchPopover.classList.remove("is-open");
+    twitchPopupButton.classList.remove("active");
+    twitchPopupButton.setAttribute("aria-expanded", "false");
+    if (immediate) twitchPopover.hidden = true;
+    else twitchCloseTimer = setTimeout(() => { twitchPopover.hidden = true; }, 220);
+    if (restoreFocus) twitchPopupButton.focus();
+  }
+
+  function positionAdPopover() {
+    if (adPopover.hidden) return;
+    const buttonRect = adPopupButton.getBoundingClientRect();
+    const margin = 10;
+    const left = Math.min(buttonRect.right + 10, window.innerWidth - adPopover.offsetWidth - margin);
+    const preferredTop = buttonRect.top - 16;
+    const top = Math.max(margin, Math.min(preferredTop, window.innerHeight - adPopover.offsetHeight - margin));
+    const arrowTop = Math.max(14, Math.min(buttonRect.top + buttonRect.height / 2 - top, adPopover.offsetHeight - 14));
+    adPopover.style.left = `${Math.max(margin, left)}px`;
+    adPopover.style.top = `${top}px`;
+    adPopover.style.setProperty("--ad-arrow-top", `${arrowTop}px`);
+  }
+
+  function showAdPopover() {
+    hideTwitchPopover({ immediate: true });
+    adPopover.hidden = false;
+    adPopupButton.classList.add("active");
+    adPopupButton.setAttribute("aria-expanded", "true");
+    positionAdPopover();
+    closeAdPopoverButton.focus();
+  }
+
+  function hideAdPopover({ restoreFocus = false } = {}) {
+    if (!adPopover || adPopover.hidden) return;
+    adPopover.hidden = true;
+    adPopupButton.classList.remove("active");
+    adPopupButton.setAttribute("aria-expanded", "false");
+    if (restoreFocus) adPopupButton.focus();
+  }
+
+  adPopupButton.addEventListener("click", () => {
+    if (adPopover.hidden) showAdPopover();
+    else hideAdPopover({ restoreFocus: true });
+  });
+  closeAdPopoverButton.addEventListener("click", () => hideAdPopover({ restoreFocus: true }));
+  twitchPopupButton.addEventListener("click", () => {
+    if (twitchPopupButton.getAttribute("aria-expanded") !== "true") showTwitchPopover();
+    else hideTwitchPopover({ restoreFocus: true });
+  });
+  closeTwitchPopoverButton.addEventListener("click", () => hideTwitchPopover({ restoreFocus: true }));
+  document.addEventListener("pointerdown", (event) => {
+    if (adPopover.hidden || adPopover.contains(event.target) || adPopupButton.contains(event.target)) return;
+    hideAdPopover();
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (twitchPopover.hidden || twitchPopover.contains(event.target) || twitchPopupButton.contains(event.target)) return;
+    hideTwitchPopover();
+  });
+  window.addEventListener("resize", positionAdPopover);
+  window.addEventListener("resize", positionTwitchPopover);
+  window.addEventListener("scroll", positionAdPopover, true);
+  window.addEventListener("scroll", positionTwitchPopover, true);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !adPopover.hidden) hideAdPopover({ restoreFocus: true });
+    if (event.key === "Escape" && !twitchPopover.hidden) hideTwitchPopover({ restoreFocus: true });
+  });
+
+  const rulesModal = document.getElementById("rulesModal");
+  const openRulesButton = document.getElementById("openRules");
+  const closeRulesButton = document.getElementById("closeRulesModal");
+  let rulesReturnFocus = null;
+  let rulesPreviousBodyOverflow = "";
+
+  function openRulesModal() {
+    hideAdPopover();
+    hideTwitchPopover();
+    rulesReturnFocus = document.activeElement;
+    rulesPreviousBodyOverflow = document.body.style.overflow;
+    rulesModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    closeRulesButton.focus();
+  }
+
+  function closeRulesModal() {
+    if (rulesModal.hidden) return;
+    rulesModal.hidden = true;
+    document.body.style.overflow = rulesPreviousBodyOverflow;
+    if (rulesReturnFocus instanceof HTMLElement) rulesReturnFocus.focus();
+    rulesReturnFocus = null;
+  }
+
+  openRulesButton.addEventListener("click", openRulesModal);
+  closeRulesButton.addEventListener("click", closeRulesModal);
+  rulesModal.addEventListener("click", (event) => {
+    if (event.target === rulesModal) closeRulesModal();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !rulesModal.hidden) closeRulesModal();
+  });
+
+  const INVENTORY_PAGE_SIZE = 150;
+  let inventory = [];
+  let steamUser = null;
+  let inventoryLoading = false;
+  let inventoryLoaded = false;
+  let inventoryPrivate = false;
+  let cs2InventoryPrivate = false;
+  let inventoryError = "";
+  let inventoryTotal = 0;
+  let inventoryNext = null;
+  let inventoryRequestVersion = 0;
+  const listedAssetIds = new Set();
+  const listedItems = new Map();
+  let listingSaveTimer = null;
+  let listingSaveVersion = 0;
+  let listingSyncSaving = false;
+  let listingSyncError = "";
+  function resetListingSyncState() {
+    clearTimeout(listingSaveTimer);
+    listingSaveTimer = null;
+    listingSaveVersion += 1;
+    listingSyncSaving = false;
+    listingSyncError = "";
+  }
+  const defaultSteamGame = { appid: "730", contextid: "2", name: "Counter-Strike 2", shortName: "CS2", count: null, icon: "" };
+  let selectedSteamGame = { ...defaultSteamGame };
+  let steamGames = [];
+  let gameCatalogLoading = false;
+  let gameCatalogLoaded = false;
+  let gameCatalogError = "";
   const tierLabel = { normal: "Normal", stattrak: "StatTrak\u2122", holo: "Holo", "stattrak-holo": "StatTrak\u2122 Holo" };
 
   const currencies = {
@@ -1320,15 +2380,37 @@
   const connectLabel = document.getElementById("steamConnectLabel");
   let steamLoggedIn = false;
 
-  function setSteamButton(loggedIn, name = "Steam User") {
+  function setSteamButton(loggedIn, name = "Steam User", avatar = "") {
     steamLoggedIn = loggedIn;
+    const privateNavItems = document.querySelectorAll(
+      '[data-nav][data-page="inventory"], [data-nav][data-page="trades"]',
+    );
+    const privatePageWasActive = Array.from(privateNavItems).some((item) => item.classList.contains("active"));
+    privateNavItems.forEach((item) => {
+      item.hidden = !loggedIn;
+    });
+    if (!loggedIn && privatePageWasActive) {
+      navItems.forEach((item) => item.classList.remove("active"));
+      const marketNav = document.querySelector('[data-nav][data-page="market"]');
+      marketNav?.classList.add("active");
+      showPage("market");
+    }
     if (!connectBtn) return;
 
+    const connectIcon = document.getElementById("steamConnectIcon");
+    const connectAvatar = document.getElementById("steamConnectAvatar");
+    const avatarUrl = loggedIn ? trustedSteamImageUrl(avatar) : "";
     connectBtn.hidden = false;
     connectBtn.classList.toggle("is-connected", loggedIn);
     connectBtn.setAttribute("aria-label", loggedIn ? `Steam connected as ${name}. Open Settings` : "Connect Steam");
     connectBtn.title = loggedIn ? `Steam connected as ${name}` : "Connect Steam";
-    if (connectLabel) connectLabel.textContent = loggedIn ? "Steam Connected" : "Connect Steam";
+    if (connectIcon) connectIcon.hidden = Boolean(avatarUrl);
+    if (connectAvatar) {
+      connectAvatar.hidden = !avatarUrl;
+      if (avatarUrl) connectAvatar.src = avatarUrl;
+      else connectAvatar.removeAttribute("src");
+    }
+    if (connectLabel) connectLabel.textContent = loggedIn ? name : "Connect Steam";
   }
 
   async function refreshSteamAuth() {
@@ -1341,19 +2423,51 @@
       const data = await res.json();
 
       if (data.loggedIn) {
-        setSteamButton(true, data.name || "Steam User");
-        // update settings account row
+        const accountChanged = steamUser?.steamid !== data.steamid;
+        if (accountChanged) {
+          inventoryRequestVersion += 1;
+          inventory = [];
+          inventoryLoaded = false;
+          inventoryPrivate = false;
+          cs2InventoryPrivate = false;
+          inventoryError = "";
+          inventoryTotal = 0;
+          inventoryNext = null;
+          listedAssetIds.clear();
+          listedItems.clear();
+          resetListingSyncState();
+          selectedSteamGame = { ...defaultSteamGame };
+          steamGames = [];
+          gameCatalogLoading = false;
+          gameCatalogLoaded = false;
+          gameCatalogError = "";
+          resetTradeState();
+        }
+        steamUser = {
+          steamid: data.steamid,
+          name: data.name || "Steam User",
+          avatar: data.avatar || "",
+        };
+        setSteamButton(true, data.name || "Steam User", data.avatar || "");
         const accountRow = document.getElementById('accountRow');
         const settingsName = document.getElementById('settingsSteamName');
         if (settingsName) settingsName.textContent = data.name || 'Steam User';
         if (accountRow) accountRow.hidden = false;
+        await loadMarketplaceStores({ hydrateOwnStore: true });
+        renderGameSelector();
+        renderTrades();
+        renderSellers();
+        updateInventoryStatus();
+        if (accountChanged || !inventoryLoaded) void loadSteamInventory({ reset: true });
       } else {
         setSteamButton(false);
-        const accountRow = document.getElementById('accountRow');
-        if (accountRow) accountRow.hidden = true;
+        clearSteamAccountState();
+        void loadMarketplaceStores();
       }
     } catch {
       setSteamButton(false);
+      clearSteamAccountState();
+      void loadMarketplaceStores();
     }
   }
 
@@ -1376,11 +2490,13 @@
     } catch (e) {
       console.warn('Logout request failed', e);
     }
-    refreshSteamAuth();
+    setSteamButton(false);
+    clearSteamAccountState();
   });
 
 
   function formatPrice(usd) {
+    if (!Number.isFinite(usd)) return "Unpriced";
     const c = currencies[currentCurrency];
     const amount = usd * c.rate;
     const decimals = amount >= 1000 ? 0 : 2;
@@ -1391,28 +2507,389 @@
     return `${c.symbol}${formatted}`;
   }
 
+  function escapeHtml(value) {
+    const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    return String(value ?? "").replace(/[&<>"']/g, (character) => entities[character]);
+  }
+
+  function trustedSteamImageUrl(value) {
+    if (!value) return "";
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && url.hostname.endsWith(".steamstatic.com") ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function normalizeAuction(value) {
+    const currentBidCents = Math.max(0, Number.parseInt(value?.currentBidCents || "0", 10) || 0);
+    const bidderSteamId = String(value?.bidder?.steamid || "");
+    const bidder = currentBidCents > 0 && /^\d{17}$/.test(bidderSteamId)
+      ? {
+          steamid: bidderSteamId,
+          name: String(value?.bidder?.name || "Steam User"),
+          avatar: trustedSteamImageUrl(value?.bidder?.avatar),
+        }
+      : null;
+    return {
+      currentBidCents: bidder ? currentBidCents : 0,
+      bidCount: bidder ? Math.max(1, Number.parseInt(value?.bidCount || "1", 10) || 1) : 0,
+      bidder,
+      updatedAt: bidder && Number.isFinite(Number(value?.updatedAt)) ? Number(value.updatedAt) : null,
+    };
+  }
+
+  function formatBid(auction) {
+    return auction.currentBidCents > 0 ? formatPrice(auction.currentBidCents / 100) : "No bids";
+  }
+
+  function normalizeMarketplaceStore(store) {
+    const steamid = String(store?.steamid || "");
+    if (!/^\d{17}$/.test(steamid)) return null;
+    const items = (Array.isArray(store.items) ? store.items : []).map((item) => {
+      const assetid = String(item?.assetid || "");
+      if (!/^\d{1,32}$/.test(assetid)) return null;
+      return {
+        id: `730:2:${assetid}`,
+        assetid,
+        appid: "730",
+        name: String(item.name || "Steam item"),
+        type: String(item.type || "CS2 item"),
+        icon: trustedSteamImageUrl(item.icon),
+        tradable: true,
+        marketable: Boolean(item.marketable),
+        tier: item.tier === "stattrak" ? "stattrak" : "normal",
+        cat: ["rifles", "pistols", "knives", "gloves", "stickers", "charms", "cases"].includes(item.cat)
+          ? item.cat
+          : null,
+        game: "Counter-Strike 2",
+        gameShort: "CS2",
+        usd: null,
+        forSale: true,
+        auction: normalizeAuction(item.auction),
+      };
+    }).filter(Boolean);
+    const rating = Number(store.rating);
+    return {
+      steamid,
+      name: String(store.name || "Steam User"),
+      avatar: trustedSteamImageUrl(store.avatar),
+      rating: Number.isFinite(rating) ? rating.toFixed(1) : null,
+      ratingCount: Number.parseInt(store.ratingCount || "0", 10) || 0,
+      listed: items.length,
+      items,
+      isCurrentUser: steamUser?.steamid === steamid,
+    };
+  }
+
+  function replaceMarketplaceStore(store) {
+    const normalized = normalizeMarketplaceStore(store);
+    if (!normalized) return null;
+    const index = marketplaceSellers.findIndex((seller) => seller.steamid === normalized.steamid);
+    if (index === -1) marketplaceSellers.unshift(normalized);
+    else marketplaceSellers[index] = normalized;
+    return normalized;
+  }
+
+  function hydrateOwnMarketplaceStore() {
+    if (!steamUser) return;
+    const ownStore = marketplaceSellers.find((seller) => seller.steamid === steamUser.steamid);
+    listedAssetIds.clear();
+    listedItems.clear();
+    for (const item of ownStore?.items || []) {
+      listedAssetIds.add(item.id);
+      listedItems.set(item.id, { ...item, forSale: true });
+    }
+    inventory.forEach((item) => {
+      const persistedListing = listedItems.get(item.id);
+      item.forSale = listedAssetIds.has(item.id);
+      item.auction = persistedListing?.auction || item.auction || normalizeAuction(null);
+      if (item.forSale) listedItems.set(item.id, item);
+    });
+  }
+
+  async function loadMarketplaceStores({ hydrateOwnStore = false } = {}) {
+    const requestVersion = ++marketplaceRequestVersion;
+    marketplaceLoading = true;
+    marketplaceError = "";
+    renderSellers();
+    try {
+      const endpoint = hydrateOwnStore
+        ? `/api/marketplace/stores?refresh=${Date.now()}`
+        : "/api/marketplace/stores";
+      const response = await fetch(endpoint, {
+        credentials: "same-origin",
+        cache: hydrateOwnStore ? "no-store" : "default",
+        headers: { Accept: "application/json" },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Marketplace stores are temporarily unavailable");
+      if (requestVersion !== marketplaceRequestVersion) return;
+      marketplaceSellers = (Array.isArray(data.stores) ? data.stores : [])
+        .map(normalizeMarketplaceStore)
+        .filter(Boolean);
+      marketplaceLoaded = true;
+      if (hydrateOwnStore) hydrateOwnMarketplaceStore();
+    } catch (error) {
+      if (requestVersion !== marketplaceRequestVersion) return;
+      marketplaceError = error?.message || "Marketplace stores are temporarily unavailable";
+      marketplaceLoaded = true;
+      if (hydrateOwnStore) hydrateOwnMarketplaceStore();
+    } finally {
+      if (requestVersion === marketplaceRequestVersion) {
+        marketplaceLoading = false;
+        renderInventory();
+        renderSellers();
+        renderGrid(currentCategory);
+      }
+    }
+  }
+
+  function scheduleMarketplaceListingSave() {
+    if (!steamUser) return;
+    clearTimeout(listingSaveTimer);
+    const saveVersion = ++listingSaveVersion;
+    listingSyncError = "";
+    listingSaveTimer = setTimeout(() => void persistMarketplaceListings(saveVersion), 500);
+    updateInventoryStatus();
+  }
+
+  async function persistMarketplaceListings(saveVersion) {
+    if (!steamUser || saveVersion !== listingSaveVersion) return;
+    const accountSteamId = steamUser.steamid;
+    const assetids = Array.from(listedItems.values())
+      .filter((item) => item.appid === "730" && item.tradable)
+      .map((item) => item.assetid);
+    listingSyncSaving = true;
+    listingSyncError = "";
+    updateInventoryStatus();
+
+    try {
+      const response = await fetch("/api/marketplace/stores", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ assetids }),
+      });
+      if (response.status === 401) {
+        setSteamButton(false);
+        clearSteamAccountState();
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Store listings could not be saved");
+      if (saveVersion !== listingSaveVersion || steamUser?.steamid !== accountSteamId) return;
+      replaceMarketplaceStore(data.store);
+      hydrateOwnMarketplaceStore();
+      marketplaceError = "";
+    } catch (error) {
+      if (saveVersion !== listingSaveVersion || steamUser?.steamid !== accountSteamId) return;
+      listingSyncError = error?.message || "Store listings could not be saved";
+      await loadMarketplaceStores({ hydrateOwnStore: true });
+    } finally {
+      if (saveVersion === listingSaveVersion && steamUser?.steamid === accountSteamId) {
+        listingSyncSaving = false;
+        updateInventoryStatus();
+        renderInventory();
+        renderSellers();
+        renderGrid(currentCategory);
+      }
+    }
+  }
+
   const grid = document.getElementById("grid");
+  const bidModal = document.getElementById("bidModal");
+  const bidForm = document.getElementById("bidForm");
+  const bidAmountInput = document.getElementById("bidAmount");
+  const bidError = document.getElementById("bidError");
+  const submitBidButton = document.getElementById("submitBid");
+  let activeBidItem = null;
+  let activeBidSeller = null;
+  let bidSubmitting = false;
+  let bidReturnFocus = null;
+
+  function updateBidDialogValues() {
+    if (!activeBidItem || !activeBidSeller) return;
+    const auction = normalizeAuction(activeBidItem.auction);
+    const image = document.getElementById("bidItemImage");
+    const imageUrl = trustedSteamImageUrl(activeBidItem.icon);
+    image.closest(".bid-item-summary").classList.toggle("no-image", !imageUrl);
+    image.hidden = !imageUrl;
+    if (imageUrl) image.src = imageUrl;
+    else image.removeAttribute("src");
+    document.getElementById("bidItemName").textContent = activeBidItem.name;
+    document.getElementById("bidItemSeller").textContent = `Seller: ${activeBidSeller.name}`;
+    document.getElementById("bidCurrentValue").textContent = formatBid(auction);
+    document.getElementById("bidCurrentUser").textContent = auction.bidder
+      ? `Highest bidder: ${auction.bidder.name}`
+      : "Open auction";
+    const minimumCents = auction.currentBidCents + 1;
+    const minimumUsd = (minimumCents / 100).toFixed(2);
+    bidAmountInput.min = minimumUsd;
+    bidAmountInput.value = minimumUsd;
+    document.getElementById("bidMinimum").textContent = `Minimum bid: $${minimumUsd}`;
+  }
+
+  function openBidModal(item, seller) {
+    if (!steamUser) {
+      window.location.href = "/api/auth/steam/login";
+      return;
+    }
+    if (!seller || seller.steamid === steamUser.steamid) return;
+    hideAdPopover();
+    hideTwitchPopover({ immediate: true });
+    bidReturnFocus = document.activeElement;
+    activeBidItem = item;
+    activeBidSeller = seller;
+    bidError.hidden = true;
+    bidError.textContent = "";
+    updateBidDialogValues();
+    bidModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => bidAmountInput.focus());
+  }
+
+  function closeBidModal() {
+    bidModal.hidden = true;
+    document.body.style.overflow = "";
+    activeBidItem = null;
+    activeBidSeller = null;
+    bidError.hidden = true;
+    if (bidReturnFocus instanceof HTMLElement && bidReturnFocus.isConnected) bidReturnFocus.focus();
+    bidReturnFocus = null;
+  }
+
+  function applyAuctionUpdate(sellerSteamId, assetid, auctionValue) {
+    const auction = normalizeAuction(auctionValue);
+    const storedSeller = marketplaceSellers.find((seller) => seller.steamid === sellerSteamId);
+    const storedItem = storedSeller?.items.find((item) => item.assetid === assetid);
+    if (storedItem) storedItem.auction = auction;
+    if (currentViewSeller?.steamid === sellerSteamId) {
+      const viewedItem = currentViewSeller.items.find((item) => item.assetid === assetid);
+      if (viewedItem) viewedItem.auction = auction;
+    }
+    renderSellers();
+    renderGrid(currentCategory);
+  }
+
+  async function submitMarketplaceBid(event) {
+    event.preventDefault();
+    if (!activeBidItem || !activeBidSeller || bidSubmitting) return;
+    const amountCents = Math.round(Number(bidAmountInput.value) * 100);
+    const currentBidCents = normalizeAuction(activeBidItem.auction).currentBidCents;
+    if (!Number.isSafeInteger(amountCents) || amountCents <= currentBidCents) {
+      bidError.textContent = "Enter an amount higher than the current bid.";
+      bidError.hidden = false;
+      return;
+    }
+
+    const sellerSteamId = activeBidSeller.steamid;
+    const assetid = activeBidItem.assetid;
+    bidSubmitting = true;
+    submitBidButton.disabled = true;
+    submitBidButton.textContent = "Placing bid...";
+    bidError.hidden = true;
+    try {
+      const response = await fetch("/api/marketplace/bids", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ sellerSteamId, assetid, amountCents }),
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        closeBidModal();
+        setSteamButton(false);
+        clearSteamAccountState();
+        window.location.href = "/api/auth/steam/login";
+        return;
+      }
+      if (!response.ok) {
+        if (data.code === "BID_TOO_LOW" && Number.isFinite(data.currentBidCents)) {
+          const minimumUsd = ((data.currentBidCents + 1) / 100).toFixed(2);
+          document.getElementById("bidCurrentValue").textContent = formatPrice(data.currentBidCents / 100);
+          document.getElementById("bidMinimum").textContent = `Minimum bid: $${minimumUsd}`;
+          bidAmountInput.min = minimumUsd;
+          bidAmountInput.value = minimumUsd;
+        }
+        throw new Error(data.error || "Bid could not be placed");
+      }
+      applyAuctionUpdate(sellerSteamId, assetid, data.auction);
+      closeBidModal();
+    } catch (error) {
+      if (!bidModal.hidden) {
+        bidError.textContent = error?.message || "Bid could not be placed";
+        bidError.hidden = false;
+      }
+    } finally {
+      bidSubmitting = false;
+      submitBidButton.disabled = false;
+      submitBidButton.textContent = "Place bid";
+    }
+  }
+
+  bidForm.addEventListener("submit", submitMarketplaceBid);
+  document.getElementById("closeBidModal").addEventListener("click", closeBidModal);
+  document.getElementById("cancelBid").addEventListener("click", closeBidModal);
+  bidModal.addEventListener("click", (event) => {
+    if (event.target === bidModal) closeBidModal();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !bidModal.hidden) closeBidModal();
+  });
 
   function cardEl(it) {
     const card = document.createElement("div");
     card.className = "variant-card";
     card.dataset.tier = it.tier;
+    const image = trustedSteamImageUrl(it.icon);
+    const isAuction = Boolean(it.forSale && it.appid === "730");
+    const auction = normalizeAuction(it.auction);
+    if (isAuction) card.classList.add("has-auction");
     card.innerHTML = `
       <span class="stat-badge" aria-hidden="true"><span class="holo-shine"></span><span class="stat-badge-text">ST</span></span>
       <span class="holo-fill" aria-hidden="true"></span>
       <span class="holo-shine holo-shine--holo" aria-hidden="true"></span>
+      ${image ? `<img class="item-art" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : ""}
       <div class="info">
-        <p class="info-name">${it.name}</p>
-        <div class="info-row"><span class="info-tier">${tierLabel[it.tier]}</span><span class="info-price">${formatPrice(it.usd)}</span></div>
+        <p class="info-name">${escapeHtml(it.name)}</p>
+        <div class="info-row"><span class="info-tier">${escapeHtml(tierLabel[it.tier] || "Standard")}</span><span class="info-price">${isAuction ? "Open auction" : formatPrice(it.usd)}</span></div>
       </div>
     `;
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const mx = ((e.clientX - rect.left) / rect.width) * 100;
-      const my = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty("--mx", `${mx}%`);
-      card.style.setProperty("--my", `${my}%`);
-    });
+    if (isAuction) {
+      const strip = document.createElement("div");
+      strip.className = "auction-strip";
+      const current = document.createElement("div");
+      current.className = "auction-current";
+      const label = document.createElement("span");
+      label.className = "auction-label";
+      label.textContent = auction.bidCount ? `${auction.bidCount} bid${auction.bidCount === 1 ? "" : "s"}` : "Open bidding";
+      const value = document.createElement("span");
+      value.className = "auction-value";
+      value.textContent = formatBid(auction);
+      current.append(label, value);
+      strip.appendChild(current);
+
+      const seller = currentViewSeller;
+      if (seller && !seller.isCurrentUser) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "bid-button";
+        button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg><span>Bid</span>';
+        button.querySelector("span").textContent = steamUser ? "Bid" : "Connect";
+        button.title = steamUser ? `Bid on ${it.name}` : "Connect Steam to bid";
+        button.setAttribute("aria-label", steamUser ? `Bid on ${it.name}` : "Connect Steam to bid");
+        button.addEventListener("click", () => openBidModal(it, seller));
+        strip.appendChild(button);
+      } else {
+        const owner = document.createElement("span");
+        owner.className = "auction-owner";
+        owner.textContent = "Your item";
+        strip.appendChild(owner);
+      }
+      card.appendChild(strip);
+    }
     return card;
   }
 
@@ -1420,11 +2897,15 @@
     grid.innerHTML = "";
 
     if (currentViewSeller) {
+      if (currentViewSeller.isCurrentUser) {
+        currentViewSeller.private = cs2InventoryPrivate;
+        currentViewSeller.items = Array.from(listedItems.values());
+      }
       if (currentViewSeller.private) {
         grid.innerHTML = `
           <div class="private-state">
             <strong>This inventory is private</strong>
-            <span>${currentViewSeller.name} hasn't made their Steam inventory public, so their items can't be shown here.</span>
+            <span>${escapeHtml(currentViewSeller.name)} hasn't made their Steam inventory public, so their items can't be shown here.</span>
           </div>`;
         return;
       }
@@ -1432,20 +2913,24 @@
         ? currentViewSeller.items
         : currentViewSeller.items.filter((it) => it.cat === category);
       if (sellerItems.length === 0) {
-        grid.innerHTML = `<p class="empty-state">${currentViewSeller.name} has nothing listed in this category.</p>`;
+        grid.innerHTML = `<p class="empty-state">${escapeHtml(currentViewSeller.name)} has nothing listed in this category.</p>`;
         return;
       }
-      sellerItems.forEach((it) => grid.appendChild(cardEl(it)));
+      const sellerFragment = document.createDocumentFragment();
+      sellerItems.forEach((it) => sellerFragment.appendChild(cardEl(it)));
+      grid.appendChild(sellerFragment);
       return;
     }
 
-    const forSale = inventory.filter((it) => it.game === "CS2" && it.forSale);
+    const forSale = Array.from(listedItems.values());
     const filtered = category === "all" ? forSale : forSale.filter((it) => it.cat === category);
     if (filtered.length === 0) {
       grid.innerHTML = `<p class="empty-state">Nothing listed in this category yet. Go to Inventory and toggle "List" on an item to sell it here.</p>`;
       return;
     }
-    filtered.forEach((it) => grid.appendChild(cardEl(it)));
+    const fragment = document.createDocumentFragment();
+    filtered.forEach((it) => fragment.appendChild(cardEl(it)));
+    grid.appendChild(fragment);
   }
 
   let currentCategory = "all";
@@ -1453,24 +2938,36 @@
   function invRowEl(it) {
     const row = document.createElement("div");
     row.className = "inv-row";
-    const isCS2 = it.game === "CS2";
+    const image = trustedSteamImageUrl(it.icon);
+    const canList = it.appid === "730" && it.tradable;
     row.innerHTML = `
-      <div class="inv-icon"></div>
+      ${image ? `<img class="inv-icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : '<div class="inv-icon"></div>'}
       <div class="inv-main">
-        <p class="inv-item">${it.name}${isCS2 ? ` <span style="color:var(--muted); font-weight:500;">&mdash; ${tierLabel[it.tier]}</span>` : ""}</p>
-        <p class="inv-meta">${it.game}</p>
+        <p class="inv-item">${escapeHtml(it.name)} <span style="color:var(--muted); font-weight:500;">&mdash; ${escapeHtml(tierLabel[it.tier] || "Standard")}</span></p>
+        <p class="inv-meta">${escapeHtml(it.type || "CS2 item")}</p>
       </div>
-      <span class="inv-game">${it.game}</span>
+      <span class="inv-game">${escapeHtml(it.gameShort)}</span>
       <span class="inv-price">${formatPrice(it.usd)}</span>
-      <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${isCS2 ? "" : "disabled title=\"Only CS2 items can be listed here\""}>
+      <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
         ${it.forSale ? "Listed" : "List"}
       </button>
     `;
-    if (isCS2) {
-      row.querySelector(".list-toggle").addEventListener("click", () => {
+    if (canList) {
+      const toggle = row.querySelector(".list-toggle");
+      toggle.addEventListener("click", () => {
         it.forSale = !it.forSale;
-        renderInventory();
+        if (it.forSale) {
+          listedAssetIds.add(it.id);
+          listedItems.set(it.id, it);
+        } else {
+          listedAssetIds.delete(it.id);
+          listedItems.delete(it.id);
+        }
+        toggle.classList.toggle("is-listed", it.forSale);
+        toggle.textContent = it.forSale ? "Listed" : "List";
         renderGrid(currentCategory);
+        renderSellers();
+        scheduleMarketplaceListingSave();
       });
     }
     return row;
@@ -1479,78 +2976,466 @@
   function renderInventory() {
     const list = document.getElementById("invList");
     list.innerHTML = "";
-    inventory.forEach((it) => list.appendChild(invRowEl(it)));
+    if (!steamUser) {
+      list.innerHTML = '<p class="empty-state">Connect Steam to load your personal inventory.</p>';
+      return;
+    }
+    if (inventoryLoading && inventory.length === 0) {
+      list.innerHTML = `<p class="empty-state">Loading your ${escapeHtml(selectedSteamGame.name)} inventory...</p>`;
+      return;
+    }
+    if (inventoryPrivate) {
+      list.innerHTML = `<p class="empty-state">Your ${escapeHtml(selectedSteamGame.name)} inventory is private. Set Game details and Inventory to Public in Steam privacy settings, then try again.</p>`;
+      return;
+    }
+    if (inventoryError && inventory.length === 0) {
+      list.innerHTML = `<p class="empty-state">${escapeHtml(inventoryError)}</p>`;
+      return;
+    }
+    if (inventoryLoaded && inventory.length === 0) {
+      list.innerHTML = `<p class="empty-state">No ${escapeHtml(selectedSteamGame.name)} items were found on this Steam account.</p>`;
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    inventory.forEach((it) => fragment.appendChild(invRowEl(it)));
+    list.appendChild(fragment);
   }
 
-  const sellers = [
-    {
-      name: "skinvault_market", rating: "4.9", listed: 312, private: false,
-      items: [
-        { name: "M4A1-S | Hyper Beast", tier: "stattrak", usd: 74.00, cat: "rifles" },
-        { name: "AWP | Asiimov", tier: "holo", usd: 310.00, cat: "rifles" },
-        { name: "Butterfly Knife | Fade", tier: "normal", usd: 1450.00, cat: "knives" },
-      ],
-    },
-    { name: "TradeBot #3821", rating: "4.7", listed: 128, private: true, items: [] },
-    {
-      name: "csgotrader22", rating: "4.8", listed: 64, private: false,
-      items: [
-        { name: "Glock-18 | Water Elemental", tier: "normal", usd: 22.40, cat: "pistols" },
-        { name: "Five-SeveN | Case Hardened", tier: "stattrak-holo", usd: 88.00, cat: "pistols" },
-      ],
-    },
-    {
-      name: "frostbyte.cs", rating: "5.0", listed: 41, private: false,
-      items: [
-        { name: "Sport Gloves | Vice", tier: "normal", usd: 720.00, cat: "gloves" },
-        { name: "AK-47 | Fire Serpent", tier: "holo", usd: 640.00, cat: "rifles" },
-      ],
-    },
-    { name: "nvk_skins", rating: "4.6", listed: 97, private: true, items: [] },
-    {
-      name: "redlinecase", rating: "4.9", listed: 205, private: false,
-      items: [
-        { name: "USP-S | Orion", tier: "stattrak", usd: 145.00, cat: "pistols" },
-        { name: "M4A4 | Poseidon", tier: "normal", usd: 480.00, cat: "rifles" },
-      ],
-    },
-  ];
-
   function initials(name) {
-    return name.replace(/[^a-zA-Z0-9]/g, " ").trim().split(/\s+/).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+    return name.replace(/[^a-zA-Z0-9]/g, " ").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "S";
+  }
+
+  function currentSteamSeller() {
+    if (!steamUser) return null;
+    return {
+      ...steamUser,
+      account: "You",
+      listed: listedItems.size,
+      private: cs2InventoryPrivate,
+      items: Array.from(listedItems.values()),
+      isCurrentUser: true,
+    };
   }
 
   function sellerCardEl(s) {
     const card = document.createElement("button");
     card.className = "seller-card";
     card.type = "button";
-    card.innerHTML = `
-      <div class="seller-icon">${initials(s.name)}</div>
-      <p class="seller-name">${s.name}</p>
-      <div class="seller-stats">
-        <div class="seller-stat"><span class="seller-stat-value">${s.rating}</span><span class="seller-stat-label">Rating</span></div>
-        <div class="seller-stat"><span class="seller-stat-value">${s.listed}</span><span class="seller-stat-label">Listed</span></div>
-      </div>
+    card.title = `Open ${s.name}'s store`;
+
+    const icon = document.createElement("div");
+    icon.className = "seller-icon";
+    const avatar = trustedSteamImageUrl(s.avatar);
+    if (avatar) {
+      const image = document.createElement("img");
+      image.src = avatar;
+      image.alt = `${s.name} Steam avatar`;
+      image.loading = "lazy";
+      image.decoding = "async";
+      icon.appendChild(image);
+    } else {
+      icon.textContent = initials(s.name);
+    }
+
+    const name = document.createElement("p");
+    name.className = "seller-name";
+    name.textContent = s.name;
+
+    const stats = document.createElement("div");
+    stats.className = "seller-stats";
+    const accountValue = s.isCurrentUser ? "You" : (s.rating || "New");
+    const accountLabel = s.isCurrentUser ? "Account" : "Rating";
+    stats.innerHTML = `
+      <div class="seller-stat"><span class="seller-stat-value">${escapeHtml(accountValue)}</span><span class="seller-stat-label">${accountLabel}</span></div>
+      <div class="seller-stat"><span class="seller-stat-value">${s.listed}</span><span class="seller-stat-label">Listed</span></div>
     `;
+    card.append(icon, name, stats);
     card.addEventListener("click", () => viewSeller(s));
     return card;
   }
 
   function renderSellers() {
     const sellerGrid = document.getElementById("sellerGrid");
-    sellerGrid.innerHTML = "";
-    sellers.forEach((s) => sellerGrid.appendChild(sellerCardEl(s)));
+    const sellerCopy = document.getElementById("sellerCopy");
+    sellerGrid.replaceChildren();
+
+    const currentSeller = currentSteamSeller();
+    const sellers = marketplaceSellers.map((seller) => {
+      if (!currentSeller || seller.steamid !== currentSeller.steamid) {
+        return { ...seller, isCurrentUser: false };
+      }
+      return {
+        ...seller,
+        ...currentSeller,
+        rating: seller.rating,
+        ratingCount: seller.ratingCount,
+      };
+    });
+    if (currentSeller && !sellers.some((seller) => seller.steamid === currentSeller.steamid)) {
+      sellers.unshift(currentSeller);
+    }
+
+    if (marketplaceLoading && sellers.length === 0) {
+      sellerCopy.textContent = "Loading marketplace stores...";
+      sellerGrid.innerHTML = '<p class="empty-state">Loading seller stores...</p>';
+      return;
+    }
+    if (marketplaceError && sellers.length === 0) {
+      sellerCopy.textContent = marketplaceError;
+      sellerGrid.innerHTML = '<p class="empty-state">Seller stores are temporarily unavailable.</p>';
+      return;
+    }
+    if (sellers.length === 0) {
+      sellerCopy.textContent = "No public seller stores yet.";
+      sellerGrid.innerHTML = '<p class="empty-state">Connect Steam to create the first store.</p>';
+      return;
+    }
+
+    sellerCopy.textContent = `${sellers.length} public seller store${sellers.length === 1 ? "" : "s"}.`;
+    const fragment = document.createDocumentFragment();
+    sellers.forEach((seller) => fragment.appendChild(sellerCardEl(seller)));
+    sellerGrid.appendChild(fragment);
   }
+
+  function gameShortName(game) {
+    const known = { "730": "CS2", "440": "TF2", "570": "Dota 2", "753": "Steam" };
+    if (known[game.appid]) return known[game.appid];
+    const words = String(game.name || "Steam").match(/[A-Za-z0-9]+/g) || [];
+    const initialsValue = words.slice(0, 3).map((word) => word[0]).join("").toUpperCase();
+    return initialsValue || `App ${game.appid}`;
+  }
+
+  function renderGameSelector() {
+    const picker = document.getElementById("inventoryGames");
+    const tabs = document.getElementById("gameTabs");
+    const copy = document.getElementById("inventoryCopy");
+    tabs.replaceChildren();
+
+    if (!steamUser) {
+      picker.hidden = true;
+      copy.textContent = "Connect Steam to load your personal inventory.";
+      return;
+    }
+
+    picker.hidden = false;
+    copy.textContent = selectedSteamGame.appid === "730"
+      ? "Choose a Steam game. Tradable CS2 items can be listed on the marketplace."
+      : `Viewing personal ${selectedSteamGame.name} items from your connected Steam account.`;
+
+    if (gameCatalogLoading) {
+      const loading = document.createElement("button");
+      loading.type = "button";
+      loading.className = "game-option active";
+      loading.disabled = true;
+      loading.innerHTML = '<span class="game-option-icon"></span><span class="game-option-name">Scanning Steam</span><span class="game-option-count">Reading game counts...</span>';
+      tabs.appendChild(loading);
+      return;
+    }
+
+    const games = steamGames.length ? steamGames : [selectedSteamGame];
+    for (const game of games) {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "game-option";
+      option.classList.toggle("active", game.appid === selectedSteamGame.appid && game.contextid === selectedSteamGame.contextid);
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", String(option.classList.contains("active")));
+      option.title = `${game.name}: ${Number.isFinite(game.count) ? game.count : "unknown"} items`;
+
+      const iconUrl = trustedSteamImageUrl(game.icon);
+      if (iconUrl) {
+        const icon = document.createElement("img");
+        icon.src = iconUrl;
+        icon.alt = "";
+        icon.loading = "lazy";
+        icon.decoding = "async";
+        option.appendChild(icon);
+      } else {
+        const icon = document.createElement("span");
+        icon.className = "game-option-icon";
+        option.appendChild(icon);
+      }
+
+      const name = document.createElement("span");
+      name.className = "game-option-name";
+      name.textContent = game.name;
+      const count = document.createElement("span");
+      count.className = "game-option-count";
+      count.textContent = Number.isFinite(game.count) ? `${game.count} items` : (gameCatalogError || "Count pending");
+      option.append(name, count);
+      option.addEventListener("click", () => {
+        if (game.appid === selectedSteamGame.appid && game.contextid === selectedSteamGame.contextid) return;
+        selectedSteamGame = { ...game, shortName: gameShortName(game) };
+        renderGameSelector();
+        void loadSteamInventory({ reset: true });
+      });
+      tabs.appendChild(option);
+    }
+  }
+
+  async function loadSteamGameCatalog() {
+    if (!steamUser || gameCatalogLoading || gameCatalogLoaded) return;
+    const accountSteamId = steamUser.steamid;
+    gameCatalogLoading = true;
+    gameCatalogError = "";
+    renderGameSelector();
+
+    try {
+      const response = await fetch("/api/steam/games", {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+      if (response.status === 401) {
+        setSteamButton(false);
+        clearSteamAccountState();
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Steam game list is temporarily unavailable");
+      if (steamUser?.steamid !== accountSteamId) return;
+
+      steamGames = (data.games || []).map((game) => ({ ...game, shortName: gameShortName(game) }));
+      const selected = steamGames.find((game) =>
+        game.appid === selectedSteamGame.appid && game.contextid === selectedSteamGame.contextid
+      );
+      if (selected) selectedSteamGame = selected;
+      gameCatalogLoaded = true;
+      gameCatalogError = "";
+    } catch (error) {
+      if (steamUser?.steamid !== accountSteamId) return;
+      gameCatalogError = error?.message || "Steam game list is temporarily unavailable";
+    } finally {
+      if (steamUser?.steamid === accountSteamId) {
+        gameCatalogLoading = false;
+        renderGameSelector();
+      }
+    }
+  }
+
+  function updateInventoryStatus() {
+    const dot = document.getElementById("inventoryStatusDot");
+    const summary = document.getElementById("inventorySummary");
+    const action = document.getElementById("inventoryAction");
+    const loadMore = document.getElementById("loadMoreInventory");
+    dot.className = "inv-dot";
+
+    if (!steamUser) {
+      dot.classList.add("is-offline");
+      summary.textContent = "Connect Steam to scan your personal inventory.";
+      action.textContent = "Connect Steam";
+      action.href = "/api/auth/steam/login";
+      action.removeAttribute("target");
+      action.removeAttribute("rel");
+      loadMore.hidden = true;
+      return;
+    }
+
+    action.textContent = "Manage privacy settings";
+    action.href = "https://steamcommunity.com/my/edit/settings?l=english";
+    action.target = "_blank";
+    action.rel = "noopener";
+
+    if (inventoryLoading) {
+      dot.classList.add("is-loading");
+      summary.textContent = inventory.length
+        ? `Loading more ${selectedSteamGame.name} items for ${steamUser.name}...`
+        : `Scanning ${steamUser.name}'s ${selectedSteamGame.name} inventory...`;
+    } else if (inventoryPrivate) {
+      dot.classList.add("is-error");
+      summary.textContent = `${steamUser.name}'s ${selectedSteamGame.name} inventory is private.`;
+    } else if (inventoryError) {
+      dot.classList.add("is-error");
+      summary.textContent = inventoryError;
+    } else if (listingSyncSaving) {
+      dot.classList.add("is-loading");
+      summary.textContent = `Saving ${listedItems.size} item${listedItems.size === 1 ? "" : "s"} to your store...`;
+    } else if (listingSyncError) {
+      dot.classList.add("is-error");
+      summary.textContent = listingSyncError;
+    } else if (inventoryLoaded) {
+      summary.textContent = `Inventory public - ${inventory.length} of ${inventoryTotal} ${selectedSteamGame.name} items loaded.`;
+    } else {
+      dot.classList.add("is-loading");
+      summary.textContent = `Preparing ${steamUser.name}'s ${selectedSteamGame.name} inventory...`;
+    }
+
+    const remaining = Math.max(inventoryTotal - inventory.length, 0);
+    loadMore.hidden = !inventoryNext || inventoryPrivate || inventoryLoading;
+    loadMore.textContent = remaining ? `Load more (${remaining} remaining)` : "Load more";
+  }
+
+  async function loadSteamInventory({ reset = false } = {}) {
+    if (!steamUser || (inventoryLoading && !reset)) return;
+
+    if (reset) {
+      inventoryRequestVersion += 1;
+      inventory = [];
+      inventoryLoaded = false;
+      inventoryPrivate = false;
+      inventoryError = "";
+      inventoryTotal = 0;
+      inventoryNext = null;
+    }
+
+    const requestVersion = inventoryRequestVersion;
+    const accountSteamId = steamUser.steamid;
+    const requestedGame = { ...selectedSteamGame };
+    const cursor = reset ? null : inventoryNext;
+    inventoryLoading = true;
+    updateInventoryStatus();
+    renderInventory();
+
+    try {
+      const params = new URLSearchParams({
+        count: String(INVENTORY_PAGE_SIZE),
+        appid: requestedGame.appid,
+        contextid: requestedGame.contextid,
+      });
+      if (cursor) params.set("start_assetid", cursor);
+      const response = await fetch(`/api/steam/inventory?${params}`, {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+
+      if (response.status === 401) {
+        setSteamButton(false);
+        clearSteamAccountState();
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Steam inventory is temporarily unavailable");
+      if (
+        requestVersion !== inventoryRequestVersion ||
+        steamUser?.steamid !== accountSteamId ||
+        selectedSteamGame.appid !== requestedGame.appid ||
+        selectedSteamGame.contextid !== requestedGame.contextid
+      ) return;
+
+      inventoryPrivate = Boolean(data.private);
+      if (requestedGame.appid === "730") {
+        cs2InventoryPrivate = inventoryPrivate;
+        if (inventoryPrivate) {
+          const hadListings = listedAssetIds.size > 0;
+          listedAssetIds.clear();
+          listedItems.clear();
+          if (hadListings) scheduleMarketplaceListingSave();
+        }
+      }
+      inventoryTotal = Number.isFinite(data.total) ? data.total : 0;
+      inventoryNext = data.more && data.next ? data.next : null;
+
+      const catalogGame = steamGames.find((game) =>
+        game.appid === requestedGame.appid && game.contextid === requestedGame.contextid
+      );
+      if (catalogGame) catalogGame.count = inventoryTotal;
+
+      const knownIds = new Set(inventory.map((item) => item.id));
+      for (const item of data.items || []) {
+        const itemId = `${requestedGame.appid}:${requestedGame.contextid}:${item.id}`;
+        if (!item.id || knownIds.has(itemId)) continue;
+        knownIds.add(itemId);
+        const persistedListing = listedItems.get(itemId);
+        const normalizedItem = {
+          id: itemId,
+          assetid: item.id,
+          appid: requestedGame.appid,
+          name: item.name,
+          type: item.type,
+          icon: item.icon,
+          tradable: Boolean(item.tradable),
+          marketable: Boolean(item.marketable),
+          tier: item.tier === "stattrak" ? "stattrak" : "normal",
+          cat: ["rifles", "pistols", "knives", "gloves", "stickers", "charms", "cases"].includes(item.category)
+            ? item.category
+            : null,
+          game: requestedGame.name,
+          gameShort: requestedGame.shortName || gameShortName(requestedGame),
+          usd: null,
+          forSale: listedAssetIds.has(itemId),
+          auction: persistedListing?.auction || normalizeAuction(null),
+        };
+        inventory.push(normalizedItem);
+        if (normalizedItem.forSale) listedItems.set(itemId, normalizedItem);
+      }
+      inventoryLoaded = true;
+      inventoryError = "";
+      renderGameSelector();
+    } catch (error) {
+      if (requestVersion !== inventoryRequestVersion) return;
+      inventoryError = error?.message || "Steam inventory is temporarily unavailable";
+    } finally {
+      if (
+        requestVersion === inventoryRequestVersion &&
+        steamUser?.steamid === accountSteamId &&
+        selectedSteamGame.appid === requestedGame.appid &&
+        selectedSteamGame.contextid === requestedGame.contextid
+      ) {
+        inventoryLoading = false;
+        updateInventoryStatus();
+        renderInventory();
+        renderSellers();
+        renderGrid(currentCategory);
+      }
+    }
+  }
+
+  function clearSteamAccountState() {
+    inventoryRequestVersion += 1;
+    steamUser = null;
+    inventory = [];
+    inventoryLoading = false;
+    inventoryLoaded = false;
+    inventoryPrivate = false;
+    cs2InventoryPrivate = false;
+    inventoryError = "";
+    inventoryTotal = 0;
+    inventoryNext = null;
+    listedAssetIds.clear();
+    listedItems.clear();
+    resetListingSyncState();
+    selectedSteamGame = { ...defaultSteamGame };
+    steamGames = [];
+    gameCatalogLoading = false;
+    gameCatalogLoaded = false;
+    gameCatalogError = "";
+    resetTradeState();
+    currentViewSeller = null;
+    if (!bidModal.hidden) closeBidModal();
+
+    const accountRow = document.getElementById("accountRow");
+    if (accountRow) accountRow.hidden = true;
+    viewingBanner.hidden = true;
+    updateSidebarLogo(activePageName());
+    updateInventoryStatus();
+    renderGameSelector();
+    renderInventory();
+    renderSellers();
+    renderTrades();
+    renderGrid(currentCategory);
+    syncPageTitle(activePageName());
+  }
+
+  document.getElementById("loadMoreInventory").addEventListener("click", () => {
+    void loadSteamInventory();
+  });
 
   const sidebarLogo = document.getElementById("sidebarLogo");
   const viewingBanner = document.getElementById("viewingBanner");
   const viewingText = document.getElementById("viewingText");
 
   function viewSeller(seller) {
+    if (seller.isCurrentUser) {
+      backToMyStore();
+      return;
+    }
     currentViewSeller = seller;
-    sidebarLogo.textContent = initials(seller.name);
     viewingBanner.hidden = false;
-    viewingText.innerHTML = `Viewing <strong>${seller.name}</strong>'s store`;
+    const sellerName = document.createElement("strong");
+    sellerName.textContent = seller.name;
+    viewingText.replaceChildren("Viewing ", sellerName, "'s store");
 
     const marketNav = document.querySelector('[data-nav][data-page="market"]');
     marketNav.click();
@@ -1564,43 +3449,171 @@
 
   function backToMyStore() {
     currentViewSeller = null;
-    sidebarLogo.textContent = "FN";
     viewingBanner.hidden = true;
+    const marketNav = document.querySelector('[data-nav][data-page="market"]');
+    if (marketNav && !marketNav.classList.contains("active")) {
+      marketNav.click();
+    }
     renderGrid(currentCategory);
     syncPageTitle(activePageName());
+    updateSidebarLogo(activePageName());
   }
 
   document.getElementById("backToMyStore").addEventListener("click", backToMyStore);
   sidebarLogo.addEventListener("click", backToMyStore);
 
-  const trades = [
-    { item: "AK-47 | Redline", tier: "stattrak", usd: 68.90, direction: "sent", who: "TradeBot #3821", date: "Aug 18" },
-    { item: "Karambit | Doppler", tier: "holo", usd: 980.00, direction: "received", who: "skinvault_market", date: "Aug 14" },
-    { item: "Desert Eagle | Blaze", tier: "stattrak-holo", usd: 189.50, direction: "sent", who: "u/csgotrader22", date: "Aug 9" },
-    { item: "USP-S | Kill Confirmed", tier: "normal", usd: 54.30, direction: "received", who: "TradeBot #3821", date: "Aug 3" },
-    { item: "Glock-18 | Fade", tier: "stattrak", usd: 210.00, direction: "sent", who: "skinvault_market", date: "Jul 27" },
-  ];
+  let trades = [];
+  let tradeHistoryLoading = false;
+  let tradeHistoryLoaded = false;
+  let tradeHistoryError = "";
+  let tradeHistoryTotal = 0;
 
-  function tradeRowEl(t) {
+  function resetTradeState() {
+    trades = [];
+    tradeHistoryLoading = false;
+    tradeHistoryLoaded = false;
+    tradeHistoryError = "";
+    tradeHistoryTotal = 0;
+  }
+
+  function tradeItemSummary(items) {
+    if (!Array.isArray(items) || items.length === 0) return "Nothing";
+    const names = items.slice(0, 2).map((item) => item.name || "Steam item");
+    const remaining = items.length - names.length;
+    return remaining > 0 ? `${names.join(", ")} +${remaining}` : names.join(", ");
+  }
+
+  function tradeRowEl(trade) {
     const row = document.createElement("div");
     row.className = "trade-row";
-    const going = t.direction === "sent" ? "To" : "From";
-    row.innerHTML = `
-      <div class="trade-icon"></div>
-      <div class="trade-main">
-        <p class="trade-item">${t.item} <span style="color:var(--muted); font-weight:500;">&mdash; ${tierLabel[t.tier]}</span></p>
-        <p class="trade-meta">${going} <strong>${t.who}</strong> &middot; ${formatPrice(t.usd)}</p>
-      </div>
-      <span class="trade-direction ${t.direction}">${t.direction}</span>
-      <span class="trade-date">${t.date}</span>
-    `;
+
+    const icon = document.createElement("div");
+    icon.className = "trade-icon";
+    const avatar = trustedSteamImageUrl(trade.partner?.avatar);
+    if (avatar) {
+      const image = document.createElement("img");
+      image.src = avatar;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      icon.appendChild(image);
+    }
+
+    const main = document.createElement("div");
+    main.className = "trade-main";
+    const item = document.createElement("p");
+    item.className = "trade-item";
+    item.textContent = `Sent: ${tradeItemSummary(trade.sent)} | Received: ${tradeItemSummary(trade.received)}`;
+    const meta = document.createElement("p");
+    meta.className = "trade-meta";
+    meta.append("With ");
+    const partnerSteamId = String(trade.partner?.steamid || "");
+    if (/^\d{17}$/.test(partnerSteamId)) {
+      const profile = document.createElement("a");
+      profile.href = `https://steamcommunity.com/profiles/${partnerSteamId}`;
+      profile.target = "_blank";
+      profile.rel = "noopener";
+      profile.textContent = trade.partner?.name || "Steam user";
+      meta.appendChild(profile);
+    } else {
+      const partner = document.createElement("strong");
+      partner.textContent = trade.partner?.name || "Steam user";
+      meta.appendChild(partner);
+    }
+
+    const status = document.createElement("span");
+    status.className = `trade-direction ${trade.status === "Complete" ? "received" : "sent"}`;
+    status.textContent = trade.status || "Unknown";
+    const date = document.createElement("span");
+    date.className = "trade-date";
+    date.textContent = trade.time
+      ? new Date(trade.time * 1000).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+      : "Unknown date";
+
+    main.append(item, meta);
+    row.append(icon, main, status, date);
     return row;
   }
 
   function renderTrades() {
     const list = document.getElementById("tradeList");
-    list.innerHTML = "";
-    trades.forEach((t) => list.appendChild(tradeRowEl(t)));
+    const accessTitle = document.getElementById("tradeAccessTitle");
+    const accessCopy = document.getElementById("tradeAccessCopy");
+    const steamLink = document.getElementById("steamTradeHistoryLink");
+    list.replaceChildren();
+
+    if (!steamUser) {
+      accessTitle.textContent = "Steam connection required";
+      accessCopy.textContent = "Trade records are never shown publicly.";
+      steamLink.textContent = "Connect Steam";
+      steamLink.href = "/api/auth/steam/login";
+      steamLink.removeAttribute("target");
+      steamLink.removeAttribute("rel");
+      list.innerHTML = '<p class="empty-state">Connect Steam to access your private trade history.</p>';
+      return;
+    }
+
+    accessTitle.textContent = `Private history for ${steamUser.name}`;
+    accessCopy.textContent = tradeHistoryLoaded && !tradeHistoryError
+      ? `${trades.length} of ${tradeHistoryTotal} recent trades loaded.`
+      : "Visible only to the connected account owner.";
+    steamLink.textContent = "Open on Steam";
+    steamLink.href = "https://steamcommunity.com/my/tradehistory/";
+    steamLink.target = "_blank";
+    steamLink.rel = "noopener";
+
+    if (tradeHistoryLoading) {
+      list.innerHTML = '<p class="empty-state">Loading private Steam trade history...</p>';
+      return;
+    }
+    if (tradeHistoryError) {
+      list.innerHTML = `<p class="empty-state">${escapeHtml(tradeHistoryError)}</p>`;
+      return;
+    }
+    if (trades.length === 0) {
+      list.innerHTML = '<p class="empty-state">No private Steam trades were returned.</p>';
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    trades.forEach((trade) => fragment.appendChild(tradeRowEl(trade)));
+    list.appendChild(fragment);
+  }
+
+  async function loadSteamTrades() {
+    if (!steamUser || tradeHistoryLoading || tradeHistoryLoaded) return;
+    const accountSteamId = steamUser.steamid;
+    tradeHistoryLoading = true;
+    tradeHistoryError = "";
+    renderTrades();
+
+    try {
+      const response = await fetch("/api/steam/trades?limit=25", {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+      if (response.status === 401) {
+        setSteamButton(false);
+        clearSteamAccountState();
+        return;
+      }
+
+      const data = await response.json();
+      if (steamUser?.steamid !== accountSteamId) return;
+      if (!response.ok) throw new Error(data.error || "Steam trade history is temporarily unavailable");
+
+      trades = Array.isArray(data.trades) ? data.trades : [];
+      tradeHistoryTotal = Number.isFinite(data.total) ? data.total : trades.length;
+      tradeHistoryError = "";
+    } catch (error) {
+      if (steamUser?.steamid !== accountSteamId) return;
+      tradeHistoryError = error?.message || "Steam trade history is temporarily unavailable";
+    } finally {
+      if (steamUser?.steamid === accountSteamId) {
+        tradeHistoryLoading = false;
+        tradeHistoryLoaded = true;
+        renderTrades();
+      }
+    }
   }
 
   document.querySelectorAll(".cat-tab").forEach((tab) => {
@@ -1619,12 +3632,230 @@
     renderInventory();
   });
 
-  // Portfolio is now inline in settings, no modal needed
+  async function loadCurrencyRates() {
+    const status = document.getElementById("currencyStatus");
+    try {
+      const response = await fetch("/api/currency", { headers: { Accept: "application/json" } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Currency rates are temporarily unavailable");
+
+      for (const [code, rate] of Object.entries(data.rates || {})) {
+        if (currencies[code] && Number.isFinite(rate) && rate > 0) currencies[code].rate = rate;
+      }
+      status.textContent = data.date ? `ECB reference rates from ${data.date}` : "Latest ECB reference rates";
+      renderGrid(currentCategory);
+      renderTrades();
+      renderInventory();
+    } catch {
+      status.textContent = "Reference rates temporarily unavailable";
+    }
+  }
+
+  const portfolioModal = document.getElementById("portfolioModal");
+  const portfolioStage = document.getElementById("portfolioStage");
+  const portfolioRail = document.getElementById("portfolioRail");
+  const portfolioMeta = document.getElementById("portfolioMeta");
+  const portfolioCount = document.getElementById("portfolioCount");
+  const loadMorePortfolio = document.getElementById("loadMorePortfolio");
+  const mediaViewer = document.getElementById("mediaViewer");
+  const mediaViewerTitle = document.getElementById("mediaViewerTitle");
+  const mediaViewerContent = document.getElementById("mediaViewerContent");
+  const PORTFOLIO_BATCH_SIZE = 24;
+  let portfolioManifest = null;
+  let portfolioCollection = "pictures";
+  let portfolioVisibleCount = PORTFOLIO_BATCH_SIZE;
+  let portfolioReturnFocus = null;
+
+  const portfolioLabels = {
+    pictures: "Picture",
+    games: "Game work",
+    certificates: "Certificate",
+  };
+
+  function safePortfolioPath(value) {
+    return typeof value === "string" && value.startsWith("/portfolio/") ? value : "";
+  }
+
+  async function loadPortfolioManifest() {
+    if (portfolioManifest) return portfolioManifest;
+    const response = await fetch("/portfolio/manifest.json", { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error("Portfolio archive is temporarily unavailable");
+    const data = await response.json();
+    portfolioManifest = {
+      pictures: Array.isArray(data.pictures) ? data.pictures : [],
+      games: Array.isArray(data.games) ? data.games : [],
+      certificates: Array.isArray(data.certificates) ? data.certificates : [],
+    };
+    return portfolioManifest;
+  }
+
+  function openPortfolioItem(item, collection) {
+    const src = safePortfolioPath(item.src);
+    if (!src) return;
+
+    mediaViewerTitle.textContent = item.title || portfolioLabels[collection];
+    mediaViewerContent.replaceChildren();
+    if (collection === "certificates") {
+      const frame = document.createElement("iframe");
+      frame.src = `${src}#toolbar=1&navpanes=0&view=FitH`;
+      frame.title = item.title || "Certificate";
+      mediaViewerContent.appendChild(frame);
+    } else {
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = item.title || portfolioLabels[collection];
+      image.decoding = "async";
+      mediaViewerContent.appendChild(image);
+    }
+    mediaViewer.hidden = false;
+    document.getElementById("closeMediaViewer").focus();
+  }
+
+  function portfolioFrame(item, collection) {
+    const frame = document.createElement("button");
+    frame.type = "button";
+    frame.className = "film-frame";
+    frame.title = item.title || portfolioLabels[collection];
+
+    const src = safePortfolioPath(item.src);
+    if (collection === "certificates") {
+      const thumbnail = safePortfolioPath(item.thumbnail);
+      if (thumbnail) {
+        const image = document.createElement("img");
+        image.className = "film-image certificate-preview";
+        image.src = thumbnail;
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        frame.appendChild(image);
+      } else {
+        const cover = document.createElement("span");
+        cover.className = "certificate-cover";
+        cover.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 13h6M9 17h5"/></svg>';
+        frame.appendChild(cover);
+      }
+    } else {
+      const image = document.createElement("img");
+      image.className = "film-image";
+      image.src = src;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      frame.appendChild(image);
+    }
+
+    const caption = document.createElement("span");
+    caption.className = "film-caption";
+    const title = document.createElement("span");
+    title.className = "film-name";
+    title.textContent = item.title || portfolioLabels[collection];
+    const kind = document.createElement("span");
+    kind.className = "film-kind";
+    kind.textContent = portfolioLabels[collection];
+    caption.append(title, kind);
+    frame.appendChild(caption);
+    frame.addEventListener("click", () => openPortfolioItem(item, collection));
+    return frame;
+  }
+
+  function renderPortfolioCollection({ append = false } = {}) {
+    if (!portfolioManifest) return;
+    const items = portfolioManifest[portfolioCollection] || [];
+    const visibleItems = items.slice(0, portfolioVisibleCount);
+    const renderedCount = append ? portfolioRail.querySelectorAll(".film-frame").length : 0;
+    if (!append) portfolioRail.replaceChildren();
+
+    if (visibleItems.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "cinema-empty";
+      empty.textContent = "No media is available in this collection.";
+      portfolioRail.appendChild(empty);
+    } else {
+      const fragment = document.createDocumentFragment();
+      visibleItems.slice(renderedCount).forEach((item) =>
+        fragment.appendChild(portfolioFrame(item, portfolioCollection))
+      );
+      portfolioRail.appendChild(fragment);
+    }
+
+    const label = portfolioLabels[portfolioCollection];
+    portfolioMeta.textContent = `${items.length} ${label.toLowerCase()}${items.length === 1 ? "" : "s"}`;
+    portfolioCount.textContent = items.length ? `${visibleItems.length} of ${items.length}` : "0 items";
+    loadMorePortfolio.hidden = visibleItems.length >= items.length;
+    loadMorePortfolio.textContent = `Load more (${items.length - visibleItems.length} remaining)`;
+  }
+
+  async function openPortfolioModal() {
+    portfolioReturnFocus = document.activeElement;
+    portfolioModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    portfolioStage.scrollTop = 0;
+    portfolioRail.innerHTML = '<p class="cinema-empty">Loading original work...</p>';
+    document.getElementById("closePortfolio").focus();
+    try {
+      await loadPortfolioManifest();
+      renderPortfolioCollection();
+    } catch (error) {
+      portfolioMeta.textContent = "Archive unavailable";
+      portfolioCount.textContent = "";
+      loadMorePortfolio.hidden = true;
+      portfolioRail.innerHTML = `<p class="cinema-empty">${escapeHtml(error?.message || "Portfolio archive is temporarily unavailable")}</p>`;
+    }
+  }
+
+  function closeMediaViewer() {
+    mediaViewer.hidden = true;
+    mediaViewerContent.replaceChildren();
+  }
+
+  function closePortfolioModal() {
+    closeMediaViewer();
+    portfolioModal.hidden = true;
+    document.body.style.overflow = "";
+    if (portfolioReturnFocus instanceof HTMLElement) portfolioReturnFocus.focus();
+  }
+
+  document.getElementById("openPortfolio").addEventListener("click", () => void openPortfolioModal());
+  document.getElementById("closePortfolio").addEventListener("click", closePortfolioModal);
+  document.getElementById("closeMediaViewer").addEventListener("click", closeMediaViewer);
+  portfolioModal.addEventListener("click", (event) => {
+    if (event.target === portfolioModal) closePortfolioModal();
+  });
+  document.querySelectorAll("[data-portfolio-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      portfolioCollection = tab.dataset.portfolioTab;
+      portfolioVisibleCount = PORTFOLIO_BATCH_SIZE;
+      portfolioStage.scrollTop = 0;
+      document.querySelectorAll("[data-portfolio-tab]").forEach((candidate) => {
+        const active = candidate === tab;
+        candidate.classList.toggle("active", active);
+        candidate.setAttribute("aria-selected", String(active));
+      });
+      renderPortfolioCollection();
+    });
+  });
+  function appendPortfolioBatch() {
+    if (loadMorePortfolio.hidden) return;
+    portfolioVisibleCount += PORTFOLIO_BATCH_SIZE;
+    renderPortfolioCollection({ append: true });
+  }
+  loadMorePortfolio.addEventListener("click", appendPortfolioBatch);
+  portfolioStage.addEventListener("scroll", () => {
+    const remaining = portfolioStage.scrollHeight - portfolioStage.scrollTop - portfolioStage.clientHeight;
+    if (remaining < 180) appendPortfolioBatch();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || portfolioModal.hidden) return;
+    if (!mediaViewer.hidden) closeMediaViewer();
+    else closePortfolioModal();
+  });
+
   renderGrid(currentCategory);
   renderInventory();
   renderSellers();
   renderTrades();
   refreshSteamAuth();
+  void loadCurrencyRates();
 
   const initialNav = document.querySelector("[data-nav].active") || navItems[0];
   showPage(initialNav.dataset.page);

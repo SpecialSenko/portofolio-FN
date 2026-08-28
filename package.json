@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "node scripts/local-auth-server.mjs --host 0.0.0.0 --port 4321",
     "dev:vite": "vite --host 127.0.0.1 --port 4321",
+    "assets:manifest": "node scripts/generate-portfolio-manifest.mjs",
+    "prebuild": "npm run assets:manifest",
     "build": "vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4321"
+    "preview": "vite preview --host 127.0.0.1 --port 4321",
+    "test": "node --test"
   },
   "devDependencies": {
     "vite": "^6.4.2"

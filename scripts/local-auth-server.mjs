@@ -20,17 +20,26 @@ const host = args.get("--host") || process.env.HOST || "0.0.0.0";
 const port = Number(args.get("--port") || process.env.PORT || 4321);
 
 const routes = new Map([
+  ["/api/currency", path.join(root, "api/currency.js")],
+  ["/api/marketplace/stores", path.join(root, "api/marketplace/stores.js")],
+  ["/api/marketplace/bids", path.join(root, "api/marketplace/bids.js")],
   ["/api/auth/me", path.join(root, "api/auth/me.js")],
   ["/api/auth/steam/login", path.join(root, "api/auth/steam/login.js")],
   ["/api/auth/steam/callback", path.join(root, "api/auth/steam/callback.js")],
+  ["/api/steam/games", path.join(root, "api/steam/games.js")],
+  ["/api/steam/inventory", path.join(root, "api/steam/inventory.js")],
+  ["/api/steam/trades", path.join(root, "api/steam/trades.js")],
 ]);
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".pdf": "application/pdf",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
@@ -90,11 +99,13 @@ server.listen(port, host, () => {
 async function serveStatic(urlPath, res) {
   const decodedPath = decodeURIComponent(urlPath);
   const requested = decodedPath === "/" ? "index.html" : decodedPath.replace(/^\/+/, "");
-  const filePath = path.resolve(root, requested);
-  const allowed = filePath === root || filePath.startsWith(`${root}${path.sep}`);
-  const finalPath = allowed && fs.existsSync(filePath) && fs.statSync(filePath).isFile()
-    ? filePath
-    : path.join(root, "index.html");
+  const publicRoot = path.join(root, "public");
+  const candidates = [path.resolve(root, requested), path.resolve(publicRoot, requested)];
+  const finalPath = candidates.find((candidate, index) => {
+    const base = index === 0 ? root : publicRoot;
+    const allowed = candidate === base || candidate.startsWith(`${base}${path.sep}`);
+    return allowed && fs.existsSync(candidate) && fs.statSync(candidate).isFile();
+  }) || path.join(root, "index.html");
 
   const ext = path.extname(finalPath).toLowerCase();
   res.statusCode = 200;

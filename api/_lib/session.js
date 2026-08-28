@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
 const COOKIE_NAME = "session";
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
 
 function getSecret() {
   const secret = process.env.SESSION_SECRET;
@@ -30,6 +30,7 @@ export function createSessionCookie(data) {
     "HttpOnly",
     ...cookieSecurityAttributes(),
     "SameSite=Lax",
+    "Priority=High",
     `Max-Age=${MAX_AGE_SECONDS}`,
   ].join("; ");
 }
@@ -41,6 +42,7 @@ export function clearSessionCookie() {
     "HttpOnly",
     ...cookieSecurityAttributes(),
     "SameSite=Lax",
+    "Priority=High",
     "Max-Age=0",
   ].join("; ");
 }
