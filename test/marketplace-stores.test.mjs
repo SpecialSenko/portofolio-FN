@@ -109,19 +109,31 @@ test("marketplace stores persist and listings are verified against the signed St
     const saved = await invoke({
       method: "PUT",
       cookie: sessionCookie(),
-      body: { assetids: ["9001"] },
+      body: { listings: [{ assetid: "9001", priceCents: 12345 }] },
     });
     assert.equal(saved.status, 200);
     assert.equal(saved.body.store.steamid, ownerSteamId);
     assert.equal(saved.body.store.listed, 1);
     assert.equal(saved.body.store.items[0].name, "AK-47 | Persistent Test");
+    assert.equal(saved.body.store.items[0].priceCents, 12345);
+    assert.equal(saved.body.store.items[0].usd, 123.45);
     assert.equal(fetchCalls, 1);
 
     const publicStores = await invoke();
     assert.equal(publicStores.status, 200);
     assert.equal(publicStores.body.stores[0].listed, 1);
     assert.equal(publicStores.body.stores[0].items[0].assetid, "9001");
+    assert.equal(publicStores.body.stores[0].items[0].priceCents, 12345);
     assert.match(publicStores.headers.get("cache-control"), /s-maxage=15/);
+
+    const invalidPrice = await invoke({
+      method: "PUT",
+      cookie: sessionCookie(),
+      body: { listings: [{ assetid: "9001", priceCents: 0 }] },
+    });
+    assert.equal(invalidPrice.status, 400);
+    assert.equal(invalidPrice.body.code, "INVALID_LISTINGS");
+    assert.equal(fetchCalls, 1);
   } finally {
     globalThis.fetch = originalFetch;
     if (originalNodeEnv === undefined) delete process.env.NODE_ENV;

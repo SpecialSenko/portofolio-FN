@@ -81,6 +81,10 @@ function normalizeAuction(value) {
 function normalizeListing(item) {
   const assetid = String(item?.assetid || "");
   if (!/^\d{1,32}$/.test(assetid)) return null;
+  const parsedPriceCents = Number(item?.priceCents);
+  const priceCents = Number.isSafeInteger(parsedPriceCents) && parsedPriceCents >= 1 && parsedPriceCents <= 100_000_000
+    ? parsedPriceCents
+    : null;
   const category = ["rifles", "pistols", "knives", "gloves", "stickers", "charms", "cases"].includes(item?.cat)
     ? item.cat
     : null;
@@ -97,7 +101,8 @@ function normalizeListing(item) {
     cat: category,
     game: "Counter-Strike 2",
     gameShort: "CS2",
-    usd: null,
+    priceCents,
+    usd: priceCents === null ? null : priceCents / 100,
     forSale: true,
     auction: normalizeAuction(item?.auction),
   };

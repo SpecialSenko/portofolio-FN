@@ -1309,9 +1309,18 @@
     font-size: 12px;
     font-weight: 600;
     width: 70px;
+    padding: 4px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
     text-align: right;
     flex-shrink: 0;
+    cursor: pointer;
   }
+  .inv-price:hover,
+  .inv-price:focus-visible { color: var(--accent); }
+  .inv-price.is-unpriced { color: #f6c85f; }
+  .inv-price:disabled { color: var(--muted); cursor: default; opacity: 1; }
   .list-toggle {
     flex-shrink: 0;
     padding: 6px 12px;
@@ -1631,6 +1640,7 @@
     font-size: 10px;
     line-height: 1.5;
   }
+  #priceForm .bid-field-label { margin-top: 13px; }
   @keyframes holo-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -2017,6 +2027,37 @@
       </ol>
       <p class="rules-notice">The marketplace currently records public listings and bids. It does not process payments, hold funds, or guarantee a Steam trade.</p>
     </div>
+  </section>
+</div>
+
+<div class="bid-modal" id="priceModal" role="dialog" aria-modal="true" aria-labelledby="priceDialogTitle" hidden>
+  <section class="bid-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="priceDialogTitle">Set item price</h2>
+      <button class="icon-button bid-dialog-close" id="closePriceModal" type="button" title="Close price editor" aria-label="Close price editor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <form class="bid-dialog-body" id="priceForm">
+      <div class="bid-item-summary" id="priceItemSummary">
+        <img class="bid-item-image" id="priceItemImage" alt="" hidden>
+        <div>
+          <p class="bid-item-name" id="priceItemName"></p>
+          <p class="bid-item-seller">Your fixed Buy Now price</p>
+        </div>
+      </div>
+      <label class="bid-field-label" for="priceAmount">Price (USD)</label>
+      <div class="bid-input-wrap">
+        <span class="bid-input-prefix">$</span>
+        <input class="bid-input" id="priceAmount" name="priceAmount" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" required>
+      </div>
+      <p class="bid-minimum">Displayed currencies are converted automatically from this USD price.</p>
+      <p class="bid-error" id="priceError" role="alert" hidden></p>
+      <div class="bid-dialog-actions">
+        <button class="bid-cancel" id="cancelPrice" type="button">Cancel</button>
+        <button class="bid-submit" id="savePrice" type="submit">Save price</button>
+      </div>
+    </form>
   </section>
 </div>
 
@@ -2544,12 +2585,20 @@
     return auction.currentBidCents > 0 ? formatPrice(auction.currentBidCents / 100) : "No bids";
   }
 
+  function normalizePriceCents(value) {
+    const priceCents = Number(value);
+    return Number.isSafeInteger(priceCents) && priceCents >= 1 && priceCents <= 100_000_000
+      ? priceCents
+      : null;
+  }
+
   function normalizeMarketplaceStore(store) {
     const steamid = String(store?.steamid || "");
     if (!/^\d{17}$/.test(steamid)) return null;
     const items = (Array.isArray(store.items) ? store.items : []).map((item) => {
       const assetid = String(item?.assetid || "");
       if (!/^\d{1,32}$/.test(assetid)) return null;
+      const priceCents = normalizePriceCents(item.priceCents);
       return {
         id: `730:2:${assetid}`,
         assetid,
@@ -2565,7 +2614,8 @@
           : null,
         game: "Counter-Strike 2",
         gameShort: "CS2",
-        usd: null,
+        priceCents,
+        usd: priceCents === null ? null : priceCents / 100,
         forSale: true,
         auction: normalizeAuction(item.auction),
       };
@@ -2605,6 +2655,8 @@
       const persistedListing = listedItems.get(item.id);
       item.forSale = listedAssetIds.has(item.id);
       item.auction = persistedListing?.auction || item.auction || normalizeAuction(null);
+      item.priceCents = normalizePriceCents(persistedListing?.priceCents ?? item.priceCents);
+      item.usd = item.priceCents === null ? null : item.priceCents / 100;
       if (item.forSale) listedItems.set(item.id, item);
     });
   }
@@ -2658,9 +2710,12 @@
   async function persistMarketplaceListings(saveVersion) {
     if (!steamUser || saveVersion !== listingSaveVersion) return;
     const accountSteamId = steamUser.steamid;
-    const assetids = Array.from(listedItems.values())
+    const listings = Array.from(listedItems.values())
       .filter((item) => item.appid === "730" && item.tradable)
-      .map((item) => item.assetid);
+      .map((item) => ({
+        assetid: item.assetid,
+        priceCents: normalizePriceCents(item.priceCents),
+      }));
     listingSyncSaving = true;
     listingSyncError = "";
     updateInventoryStatus();
@@ -2670,7 +2725,7 @@
         method: "PUT",
         credentials: "same-origin",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ assetids }),
+        body: JSON.stringify({ listings }),
       });
       if (response.status === 401) {
         setSteamButton(false);
@@ -2699,6 +2754,88 @@
   }
 
   const grid = document.getElementById("grid");
+  const priceModal = document.getElementById("priceModal");
+  const priceForm = document.getElementById("priceForm");
+  const priceAmountInput = document.getElementById("priceAmount");
+  const priceError = document.getElementById("priceError");
+  const savePriceButton = document.getElementById("savePrice");
+  let activePriceItem = null;
+  let listAfterPriceSave = false;
+  let priceReturnFocus = null;
+
+  function openPriceModal(item, { listAfterSave = false } = {}) {
+    if (!steamUser || item?.appid !== "730" || !item.tradable) return;
+    hideAdPopover();
+    hideTwitchPopover({ immediate: true });
+    priceReturnFocus = document.activeElement;
+    activePriceItem = item;
+    listAfterPriceSave = listAfterSave;
+    priceError.hidden = true;
+    priceError.textContent = "";
+
+    const image = document.getElementById("priceItemImage");
+    const imageUrl = trustedSteamImageUrl(item.icon);
+    document.getElementById("priceItemSummary").classList.toggle("no-image", !imageUrl);
+    image.hidden = !imageUrl;
+    if (imageUrl) image.src = imageUrl;
+    else image.removeAttribute("src");
+    document.getElementById("priceItemName").textContent = item.name;
+
+    const currentPriceCents = normalizePriceCents(item.priceCents);
+    priceAmountInput.value = currentPriceCents === null ? "" : (currentPriceCents / 100).toFixed(2);
+    savePriceButton.textContent = listAfterSave ? "Save and list" : "Save price";
+    priceModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => priceAmountInput.focus());
+  }
+
+  function closePriceModal() {
+    if (priceModal.hidden) return;
+    priceModal.hidden = true;
+    document.body.style.overflow = "";
+    activePriceItem = null;
+    listAfterPriceSave = false;
+    priceError.hidden = true;
+    if (priceReturnFocus instanceof HTMLElement && priceReturnFocus.isConnected) priceReturnFocus.focus();
+    priceReturnFocus = null;
+  }
+
+  function saveItemPrice(event) {
+    event.preventDefault();
+    if (!activePriceItem) return;
+    const priceCents = Math.round(Number(priceAmountInput.value) * 100);
+    if (!Number.isSafeInteger(priceCents) || priceCents < 1 || priceCents > 100_000_000) {
+      priceError.textContent = "Enter a price between $0.01 and $1,000,000.00 USD.";
+      priceError.hidden = false;
+      return;
+    }
+
+    const item = activePriceItem;
+    item.priceCents = priceCents;
+    item.usd = priceCents / 100;
+    if (listAfterPriceSave) item.forSale = true;
+    if (item.forSale) {
+      listedAssetIds.add(item.id);
+      listedItems.set(item.id, item);
+    }
+    const shouldPersist = item.forSale;
+    closePriceModal();
+    renderInventory();
+    renderGrid(currentCategory);
+    renderSellers();
+    if (shouldPersist) scheduleMarketplaceListingSave();
+  }
+
+  priceForm.addEventListener("submit", saveItemPrice);
+  document.getElementById("closePriceModal").addEventListener("click", closePriceModal);
+  document.getElementById("cancelPrice").addEventListener("click", closePriceModal);
+  priceModal.addEventListener("click", (event) => {
+    if (event.target === priceModal) closePriceModal();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !priceModal.hidden) closePriceModal();
+  });
+
   const bidModal = document.getElementById("bidModal");
   const bidForm = document.getElementById("bidForm");
   const bidAmountInput = document.getElementById("bidAmount");
@@ -2854,7 +2991,7 @@
       ${image ? `<img class="item-art" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : ""}
       <div class="info">
         <p class="info-name">${escapeHtml(it.name)}</p>
-        <div class="info-row"><span class="info-tier">${escapeHtml(tierLabel[it.tier] || "Standard")}</span><span class="info-price">${isAuction ? "Open auction" : formatPrice(it.usd)}</span></div>
+        <div class="info-row"><span class="info-tier">${escapeHtml(tierLabel[it.tier] || "Standard")}</span><span class="info-price">${formatPrice(it.usd)}</span></div>
       </div>
     `;
     if (isAuction) {
@@ -2940,6 +3077,7 @@
     row.className = "inv-row";
     const image = trustedSteamImageUrl(it.icon);
     const canList = it.appid === "730" && it.tradable;
+    const hasPrice = normalizePriceCents(it.priceCents) !== null;
     row.innerHTML = `
       ${image ? `<img class="inv-icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : '<div class="inv-icon"></div>'}
       <div class="inv-main">
@@ -2947,14 +3085,20 @@
         <p class="inv-meta">${escapeHtml(it.type || "CS2 item")}</p>
       </div>
       <span class="inv-game">${escapeHtml(it.gameShort)}</span>
-      <span class="inv-price">${formatPrice(it.usd)}</span>
+      <button type="button" class="inv-price ${hasPrice ? "" : "is-unpriced"}" ${canList ? 'title="Set item price" aria-label="Set item price"' : 'disabled title="Only tradable CS2 items can be priced"'}>${formatPrice(it.usd)}</button>
       <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
         ${it.forSale ? "Listed" : "List"}
       </button>
     `;
     if (canList) {
+      const priceButton = row.querySelector(".inv-price");
       const toggle = row.querySelector(".list-toggle");
+      priceButton.addEventListener("click", () => openPriceModal(it));
       toggle.addEventListener("click", () => {
+        if (!it.forSale && normalizePriceCents(it.priceCents) === null) {
+          openPriceModal(it, { listAfterSave: true });
+          return;
+        }
         it.forSale = !it.forSale;
         if (it.forSale) {
           listedAssetIds.add(it.id);
@@ -3338,6 +3482,7 @@
         if (!item.id || knownIds.has(itemId)) continue;
         knownIds.add(itemId);
         const persistedListing = listedItems.get(itemId);
+        const persistedPriceCents = normalizePriceCents(persistedListing?.priceCents);
         const normalizedItem = {
           id: itemId,
           assetid: item.id,
@@ -3353,7 +3498,8 @@
             : null,
           game: requestedGame.name,
           gameShort: requestedGame.shortName || gameShortName(requestedGame),
-          usd: null,
+          priceCents: persistedPriceCents,
+          usd: persistedPriceCents === null ? null : persistedPriceCents / 100,
           forSale: listedAssetIds.has(itemId),
           auction: persistedListing?.auction || normalizeAuction(null),
         };
@@ -3403,6 +3549,7 @@
     gameCatalogError = "";
     resetTradeState();
     currentViewSeller = null;
+    if (!priceModal.hidden) closePriceModal();
     if (!bidModal.hidden) closeBidModal();
 
     const accountRow = document.getElementById("accountRow");

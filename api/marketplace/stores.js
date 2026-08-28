@@ -10,6 +10,7 @@ import { readSession } from "../_lib/session.js";
 const MAX_LISTINGS = 100;
 const MAX_BODY_BYTES = 16_384;
 const MAX_INVENTORY_PAGES = 20;
+const MAX_PRICE_CENTS = 100_000_000;
 
 function sendJson(res, status, data, { cache = "no-store", headers = {} } = {}) {
   res.statusCode = status;
@@ -37,12 +38,41 @@ async function readJsonBody(req) {
   return bodyText ? JSON.parse(bodyText) : {};
 }
 
-function parseAssetIds(body) {
+function parseListings(body) {
   if (body?.steamid !== undefined) {
     const error = new Error("Steam account is selected from the signed session");
     error.code = "SESSION_ACCOUNT_ONLY";
     throw error;
   }
+  if (body?.listings !== undefined) {
+    if (!Array.isArray(body.listings) || body.listings.length > MAX_LISTINGS) {
+      const error = new Error(`listings must be an array with no more than ${MAX_LISTINGS} items`);
+      error.code = "INVALID_LISTINGS";
+      throw error;
+    }
+    const listings = body.listings.map((listing) => {
+      const assetid = String(listing?.assetid || "");
+      const priceCents = listing?.priceCents === null ? null : Number(listing?.priceCents);
+      if (!/^\d{1,32}$/.test(assetid)) {
+        const error = new Error("Every listing must contain a valid Steam asset ID");
+        error.code = "INVALID_LISTINGS";
+        throw error;
+      }
+      if (priceCents !== null && (!Number.isSafeInteger(priceCents) || priceCents < 1 || priceCents > MAX_PRICE_CENTS)) {
+        const error = new Error("Every price must be between $0.01 and $1,000,000.00 USD");
+        error.code = "INVALID_LISTINGS";
+        throw error;
+      }
+      return { assetid, priceCents };
+    });
+    if (new Set(listings.map((listing) => listing.assetid)).size !== listings.length) {
+      const error = new Error("Each Steam asset can only appear once");
+      error.code = "INVALID_LISTINGS";
+      throw error;
+    }
+    return listings;
+  }
+
   if (!Array.isArray(body?.assetids) || body.assetids.length > MAX_LISTINGS) {
     const error = new Error(`assetids must be an array with no more than ${MAX_LISTINGS} items`);
     error.code = "INVALID_LISTINGS";
@@ -54,7 +84,7 @@ function parseAssetIds(body) {
     error.code = "INVALID_LISTINGS";
     throw error;
   }
-  return assetids;
+  return assetids.map((assetid) => ({ assetid, priceCents: null }));
 }
 
 function marketplaceItem(item) {
@@ -137,8 +167,13 @@ export default async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
-    const assetids = parseAssetIds(body);
-    const items = await verifyListings(session.steamid, assetids);
+    const requestedListings = parseListings(body);
+    const assetids = requestedListings.map((listing) => listing.assetid);
+    const prices = new Map(requestedListings.map((listing) => [listing.assetid, listing.priceCents]));
+    const items = (await verifyListings(session.steamid, assetids)).map((item) => ({
+      ...item,
+      priceCents: prices.get(item.assetid) ?? null,
+    }));
     const store = await saveMarketplaceListings(session, items);
     sendJson(res, 200, { store }, { headers: { Vary: "Cookie" } });
   } catch (error) {
