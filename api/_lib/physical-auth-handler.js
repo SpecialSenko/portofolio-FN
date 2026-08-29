@@ -1,12 +1,15 @@
 import { createPhysicalSession, physicalSessionCookie, readPhysicalSession } from "./physical-session.js";
 import { hashPhysicalPassword, verifyPhysicalPassword } from "./physical-password.js";
+import { googleSignInConfigured, verifyGoogleIdToken } from "./google-id-token.js";
 import {
   clearPhysicalAuthAttempts,
   consumePhysicalAuthAttempt,
   createPhysicalAccount,
+  getOrCreateGooglePhysicalAccount,
   getPhysicalAccountByEmail,
   getPhysicalAccountById,
   PhysicalAccountExistsError,
+  PhysicalGoogleAccountConflictError,
   PhysicalStorageUnavailableError,
   updatePhysicalProfile,
 } from "./physical-store.js";
@@ -61,6 +64,15 @@ function paymentStatus() {
   return Boolean(String(process.env.MIDTRANS_SERVER_KEY || "").trim());
 }
 
+function authStatus(account = null) {
+  return {
+    loggedIn: Boolean(account),
+    account,
+    paymentsConfigured: paymentStatus(),
+    googleClientId: googleSignInConfigured() ? String(process.env.GOOGLE_CLIENT_ID).trim() : "",
+  };
+}
+
 function requestAddress(req) {
   const forwarded = String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
   return forwarded || String(req.socket?.remoteAddress || "unknown");
@@ -71,9 +83,9 @@ export default async function handler(req, res) {
     try {
       const session = readPhysicalSession(req);
       const account = session ? await getPhysicalAccountById(session.accountId) : null;
-      sendJson(res, 200, { loggedIn: Boolean(account), account, paymentsConfigured: paymentStatus() });
+      sendJson(res, 200, authStatus(account));
     } catch {
-      sendJson(res, 200, { loggedIn: false, account: null, paymentsConfigured: paymentStatus() });
+      sendJson(res, 200, authStatus());
     }
     return;
   }
@@ -102,7 +114,27 @@ export default async function handler(req, res) {
         sendJson(res, 401, { error: "Seller session expired", code: "AUTH_REQUIRED" });
         return;
       }
-      sendJson(res, 200, { loggedIn: true, account, paymentsConfigured: paymentStatus() });
+      sendJson(res, 200, authStatus(account));
+      return;
+    }
+
+    if (action === "google") {
+      if (!googleSignInConfigured()) {
+        sendJson(res, 503, { error: "Google sign-in is not configured", code: "GOOGLE_NOT_CONFIGURED" });
+        return;
+      }
+      const rateIdentifier = `${requestAddress(req)}:google`;
+      const rate = await consumePhysicalAuthAttempt(rateIdentifier, { limit: 20 });
+      if (!rate.allowed) {
+        res.setHeader("Retry-After", String(rate.retryAfter));
+        sendJson(res, 429, { error: "Too many sign-in attempts. Try again later.", code: "RATE_LIMITED" });
+        return;
+      }
+      const identity = await verifyGoogleIdToken(body?.credential);
+      const account = await getOrCreateGooglePhysicalAccount(identity);
+      res.setHeader("Set-Cookie", physicalSessionCookie(createPhysicalSession(account.id)));
+      await clearPhysicalAuthAttempts(rateIdentifier);
+      sendJson(res, 200, authStatus(account));
       return;
     }
 
@@ -134,7 +166,7 @@ export default async function handler(req, res) {
       });
     } else if (action === "login") {
       const stored = await getPhysicalAccountByEmail(normalizedEmail, { includeSecrets: true });
-      const valid = stored ? await verifyPhysicalPassword(normalizedPassword, stored.passwordHash) : false;
+      const valid = stored?.passwordHash ? await verifyPhysicalPassword(normalizedPassword, stored.passwordHash) : false;
       if (!valid) {
         sendJson(res, 401, { error: "Email or password is incorrect", code: "LOGIN_FAILED" });
         return;
@@ -147,10 +179,14 @@ export default async function handler(req, res) {
 
     res.setHeader("Set-Cookie", physicalSessionCookie(createPhysicalSession(account.id)));
     await clearPhysicalAuthAttempts(rateIdentifier);
-    sendJson(res, 200, { loggedIn: true, account, paymentsConfigured: paymentStatus() });
+    sendJson(res, 200, authStatus(account));
   } catch (error) {
     if (error instanceof PhysicalAccountExistsError) {
       sendJson(res, 409, { error: error.message, code: "ACCOUNT_EXISTS" });
+      return;
+    }
+    if (error instanceof PhysicalGoogleAccountConflictError) {
+      sendJson(res, 409, { error: error.message, code: "GOOGLE_ACCOUNT_CONFLICT" });
       return;
     }
     if (error instanceof PhysicalStorageUnavailableError) {

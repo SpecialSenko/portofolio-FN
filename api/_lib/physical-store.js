@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const ACCOUNT_KEY_PREFIX = "fraxb:physical:account:";
 const EMAIL_KEY_PREFIX = "fraxb:physical:email:";
+const GOOGLE_KEY_PREFIX = "fraxb:physical:google:";
 const LISTING_KEY_PREFIX = "fraxb:physical:listing:";
 const LISTING_INDEX_KEY = "fraxb:physical:listings";
 const PAYMENT_KEY_PREFIX = "fraxb:physical:payment:";
@@ -26,6 +27,13 @@ export class PhysicalAccountExistsError extends Error {
   constructor() {
     super("An account already exists for this email address");
     this.name = "PhysicalAccountExistsError";
+  }
+}
+
+export class PhysicalGoogleAccountConflictError extends Error {
+  constructor() {
+    super("This email is already used by another seller account");
+    this.name = "PhysicalGoogleAccountConflictError";
   }
 }
 
@@ -61,6 +69,15 @@ function emailKey(email) {
   return crypto.createHash("sha256").update(email).digest("hex");
 }
 
+function googleKey(sub) {
+  return crypto.createHash("sha256").update(sub).digest("hex");
+}
+
+function normalizeGoogleSub(value) {
+  const sub = String(value || "").trim();
+  return /^[A-Za-z0-9_-]{6,255}$/.test(sub) ? sub : "";
+}
+
 function safeUrl(value, { image = false } = {}) {
   if (!value) return "";
   try {
@@ -84,14 +101,17 @@ function isVerifiedBusiness(account) {
 function normalizeAccount(value) {
   const id = String(value?.id || "");
   const email = normalizeEmail(value?.email);
-  if (!/^[a-f0-9-]{36}$/.test(id) || !email || !value?.passwordHash) return null;
+  const passwordHash = String(value?.passwordHash || "");
+  const googleSub = normalizeGoogleSub(value?.googleSub);
+  if (!/^[a-f0-9-]{36}$/.test(id) || !email || (!passwordHash && !googleSub)) return null;
   const supporterUntil = Number(value?.supporterUntil);
   const createdAt = Number(value?.createdAt);
   const updatedAt = Number(value?.updatedAt);
   return {
     id,
     email,
-    passwordHash: String(value.passwordHash),
+    passwordHash,
+    googleSub,
     displayName: cleanText(value?.displayName, "Local seller", 80),
     storeName: cleanText(value?.storeName, "Local store", 100),
     city: cleanText(value?.city, "", 80),
@@ -155,7 +175,14 @@ function publicAccount(account) {
 function privateAccount(account) {
   const publicValue = publicAccount(account);
   const normalized = normalizeAccount(account);
-  return publicValue && normalized ? { ...publicValue, email: normalized.email, supporterPlan: normalized.supporterPlan } : null;
+  return publicValue && normalized
+    ? {
+        ...publicValue,
+        email: normalized.email,
+        supporterPlan: normalized.supporterPlan,
+        signInMethod: normalized.googleSub ? "google" : "password",
+      }
+    : null;
 }
 
 async function redisFetch(url, token, body) {
@@ -197,10 +224,18 @@ async function readLocalData() {
   try {
     const value = JSON.parse(await fs.readFile(localFilePath(), "utf8"));
     return value && typeof value === "object"
-      ? { accounts: value.accounts || {}, emailIndex: value.emailIndex || {}, listings: value.listings || {}, payments: value.payments || {} }
-      : { accounts: {}, emailIndex: {}, listings: {}, payments: {} };
+      ? {
+          accounts: value.accounts || {},
+          emailIndex: value.emailIndex || {},
+          googleIndex: value.googleIndex || {},
+          listings: value.listings || {},
+          payments: value.payments || {},
+        }
+      : { accounts: {}, emailIndex: {}, googleIndex: {}, listings: {}, payments: {} };
   } catch (error) {
-    if (error?.code === "ENOENT" || error instanceof SyntaxError) return { accounts: {}, emailIndex: {}, listings: {}, payments: {} };
+    if (error?.code === "ENOENT" || error instanceof SyntaxError) {
+      return { accounts: {}, emailIndex: {}, googleIndex: {}, listings: {}, payments: {} };
+    }
     throw error;
   }
 }
@@ -278,6 +313,96 @@ export async function createPhysicalAccount(input) {
     if (data.emailIndex[lookupKey]) throw new PhysicalAccountExistsError();
     data.emailIndex[lookupKey] = account.id;
     data.accounts[account.id] = account;
+    await writeLocalData(data);
+    return privateAccount(account);
+  });
+}
+
+export async function getOrCreateGooglePhysicalAccount(identity) {
+  const sub = normalizeGoogleSub(identity?.sub);
+  const email = normalizeEmail(identity?.email);
+  if (!sub || !email) throw new TypeError("Invalid verified Google account");
+  const mode = storageMode();
+  if (mode === "disabled" || mode === "unavailable") throw new PhysicalStorageUnavailableError();
+  const googleLookupKey = googleKey(sub);
+  const emailLookupKey = emailKey(email);
+  const displayName = cleanText(identity?.name, email.split("@")[0], 80);
+
+  if (mode === "redis") {
+    const existingGoogleId = await redisCommand(["GET", `${GOOGLE_KEY_PREFIX}${googleLookupKey}`]);
+    if (existingGoogleId) return getPhysicalAccountById(existingGoogleId);
+
+    const existingEmailId = await redisCommand(["GET", `${EMAIL_KEY_PREFIX}${emailLookupKey}`]);
+    if (existingEmailId) {
+      if (!identity.authoritativeEmail) throw new PhysicalGoogleAccountConflictError();
+      const existing = await getPhysicalAccountById(existingEmailId, { includeSecrets: true });
+      if (!existing) throw new TypeError("Invalid physical seller account");
+      if (existing.googleSub && existing.googleSub !== sub) throw new PhysicalGoogleAccountConflictError();
+      const linked = normalizeAccount({ ...existing, googleSub: sub, updatedAt: Date.now() });
+      const result = await redisCommand([
+        "EVAL",
+        "local owner = redis.call('GET', KEYS[1]) if owner and owner ~= ARGV[1] then return 0 end redis.call('SET', KEYS[1], ARGV[1]) redis.call('SET', KEYS[2], ARGV[2]) return 1",
+        2,
+        `${GOOGLE_KEY_PREFIX}${googleLookupKey}`,
+        `${ACCOUNT_KEY_PREFIX}${linked.id}`,
+        linked.id,
+        JSON.stringify(linked),
+      ]);
+      if (Number(result) !== 1) throw new PhysicalGoogleAccountConflictError();
+      return privateAccount(linked);
+    }
+
+    const account = normalizeAccount({
+      id: crypto.randomUUID(),
+      email,
+      googleSub: sub,
+      displayName,
+      storeName: `${displayName}'s Store`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    const result = await redisCommand([
+      "EVAL",
+      "if redis.call('EXISTS', KEYS[1]) == 1 or redis.call('EXISTS', KEYS[2]) == 1 then return 0 end redis.call('SET', KEYS[1], ARGV[1]) redis.call('SET', KEYS[2], ARGV[1]) redis.call('SET', KEYS[3], ARGV[2]) return 1",
+      3,
+      `${GOOGLE_KEY_PREFIX}${googleLookupKey}`,
+      `${EMAIL_KEY_PREFIX}${emailLookupKey}`,
+      `${ACCOUNT_KEY_PREFIX}${account.id}`,
+      account.id,
+      JSON.stringify(account),
+    ]);
+    if (Number(result) !== 1) return getOrCreateGooglePhysicalAccount(identity);
+    return privateAccount(account);
+  }
+
+  return withLocalWrite(async () => {
+    const data = await readLocalData();
+    const googleAccountId = data.googleIndex[googleLookupKey];
+    if (googleAccountId) return privateAccount(data.accounts[googleAccountId]);
+    const emailAccountId = data.emailIndex[emailLookupKey];
+    if (emailAccountId) {
+      if (!identity.authoritativeEmail) throw new PhysicalGoogleAccountConflictError();
+      const existing = normalizeAccount(data.accounts[emailAccountId]);
+      if (!existing) throw new TypeError("Invalid physical seller account");
+      if (existing.googleSub && existing.googleSub !== sub) throw new PhysicalGoogleAccountConflictError();
+      const linked = normalizeAccount({ ...existing, googleSub: sub, updatedAt: Date.now() });
+      data.accounts[linked.id] = linked;
+      data.googleIndex[googleLookupKey] = linked.id;
+      await writeLocalData(data);
+      return privateAccount(linked);
+    }
+    const account = normalizeAccount({
+      id: crypto.randomUUID(),
+      email,
+      googleSub: sub,
+      displayName,
+      storeName: `${displayName}'s Store`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    data.accounts[account.id] = account;
+    data.emailIndex[emailLookupKey] = account.id;
+    data.googleIndex[googleLookupKey] = account.id;
     await writeLocalData(data);
     return privateAccount(account);
   });

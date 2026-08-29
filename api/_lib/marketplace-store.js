@@ -7,6 +7,11 @@ const STORE_KEY_PREFIX = "fraxb:marketplace:store:";
 const MAX_STORES = 100;
 const MAX_LISTINGS = 100;
 const STORAGE_TIMEOUT_MS = 4_000;
+const TESTER_ROLES = new Map([
+  ["76561199181595673", "first"],
+  ["76561198451781674", "second"],
+  ["76561199069715428", "special"],
+]);
 const defaultLocalFile = fileURLToPath(new URL("../../.data/marketplace.json", import.meta.url));
 let localWriteQueue = Promise.resolve();
 
@@ -63,6 +68,10 @@ function isMarkedAltAccount(steamid) {
   return String(process.env.MARKETPLACE_ALT_STEAM_IDS || "")
     .split(/[\s,]+/)
     .some((candidate) => candidate === steamid);
+}
+
+function testerRole(steamid) {
+  return TESTER_ROLES.get(steamid) || null;
 }
 
 function normalizeAuction(value) {
@@ -130,6 +139,7 @@ function normalizeStore(value) {
     name: cleanText(value?.name, "Steam User", 80),
     avatar: safeSteamImage(value?.avatar),
     isAlt: isMarkedAltAccount(steamid),
+    testerRole: testerRole(steamid),
     rating: Number.isFinite(rating) && rating >= 0 && rating <= 5 ? rating : null,
     ratingCount: Math.max(0, Number.parseInt(value?.ratingCount || "0", 10) || 0),
     listed: items.length,

@@ -1,0 +1,753 @@
+const CART_KEY = "fraxb_physical_cart_v1";
+const CATEGORY_LABELS = {
+  food: "Food",
+  daily: "Daily needs",
+  fashion: "Fashion",
+  electronics: "Electronics",
+  services: "Services",
+  other: "Other",
+};
+const FULFILLMENT_LABELS = {
+  pickup: "Pickup",
+  local_delivery: "Local delivery",
+  shipping: "Shipping",
+};
+
+let account = null;
+let paymentsConfigured = false;
+let googleClientId = "";
+let googleLibraryPromise = null;
+let listings = [];
+let listingsLoading = false;
+let category = "all";
+let searchQuery = "";
+let authMode = "login";
+let cart = readCart();
+let currencyRates = { USD: 1, EUR: .92, GBP: .79, IDR: 15800, JPY: 157, AUD: 1.52 };
+let returnFocus = null;
+
+function element(id) {
+  return document.getElementById(id);
+}
+
+function readCart() {
+  try {
+    const value = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    return (Array.isArray(value) ? value : [])
+      .map((entry) => ({ id: String(entry?.id || ""), quantity: Number.parseInt(entry?.quantity || "0", 10) }))
+      .filter((entry) => /^[a-f0-9-]{36}$/.test(entry.id) && entry.quantity > 0)
+      .slice(0, 100);
+  } catch {
+    return [];
+  }
+}
+
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  renderCartCount();
+}
+
+function safeHttpsUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function formatIdr(value) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
+}
+
+function selectedCurrency() {
+  const value = element("currencySelect")?.value || "IDR";
+  return currencyRates[value] ? value : "IDR";
+}
+
+function convertedPrice(priceIdr) {
+  const currency = selectedCurrency();
+  if (currency === "IDR" || !currencyRates.IDR || !currencyRates[currency]) return "";
+  const amount = (priceIdr / currencyRates.IDR) * currencyRates[currency];
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: amount >= 1000 ? 0 : 2,
+  }).format(amount);
+}
+
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) },
+    ...options,
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+function badge(text, className = "") {
+  const value = document.createElement("span");
+  value.className = `physical-badge ${className}`.trim();
+  value.textContent = text;
+  return value;
+}
+
+function normalizeListing(value) {
+  const id = String(value?.id || "");
+  const sellerId = String(value?.seller?.id || "");
+  const priceIdr = Number(value?.priceIdr);
+  const stock = Number(value?.stock);
+  if (!/^[a-f0-9-]{36}$/.test(id) || !/^[a-f0-9-]{36}$/.test(sellerId) || !Number.isSafeInteger(priceIdr)) return null;
+  return {
+    id,
+    title: String(value?.title || "Local item").slice(0, 120),
+    description: String(value?.description || "").slice(0, 600),
+    category: CATEGORY_LABELS[value?.category] ? value.category : "other",
+    priceIdr,
+    stock: Number.isSafeInteger(stock) && stock >= 0 ? stock : 0,
+    fulfillment: (Array.isArray(value?.fulfillment) ? value.fulfillment : []).filter((item) => FULFILLMENT_LABELS[item]),
+    area: String(value?.area || "").slice(0, 100),
+    imageUrl: safeHttpsUrl(value?.imageUrl),
+    seller: {
+      id: sellerId,
+      displayName: String(value?.seller?.displayName || "Local seller").slice(0, 80),
+      storeName: String(value?.seller?.storeName || "Local store").slice(0, 100),
+      city: String(value?.seller?.city || "").slice(0, 80),
+      contactUrl: safeHttpsUrl(value?.seller?.contactUrl),
+      isSupporter: Boolean(value?.seller?.isSupporter),
+      isVerified: Boolean(value?.seller?.isVerified),
+    },
+  };
+}
+
+function installDialogs() {
+  const host = document.createElement("div");
+  host.innerHTML = `
+    <div class="bid-modal" id="physicalAuthModal" role="dialog" aria-modal="true" aria-labelledby="physicalAuthTitle" hidden>
+      <section class="bid-dialog physical-modal">
+        <header class="bid-dialog-header">
+          <h2 class="bid-dialog-title" id="physicalAuthTitle">Seller sign in</h2>
+          <button class="icon-button bid-dialog-close" data-close-physical="physicalAuthModal" type="button" title="Close" aria-label="Close seller sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </header>
+        <div class="cat-tabs physical-auth-tabs" role="tablist" aria-label="Seller account mode">
+          <button class="cat-tab active" id="physicalLoginTab" type="button" role="tab" aria-selected="true">Sign in</button>
+          <button class="cat-tab" id="physicalRegisterTab" type="button" role="tab" aria-selected="false">Create account</button>
+        </div>
+        <div class="physical-google-zone" id="physicalGoogleZone"><p class="physical-google-status">Google sign-in unavailable</p></div>
+        <div class="physical-auth-divider">or use email</div>
+        <form class="bid-dialog-body physical-form-grid" id="physicalAuthForm">
+          <label class="physical-field is-wide"><span>Email</span><input class="physical-input" id="physicalEmail" type="email" autocomplete="email" maxlength="254" required></label>
+          <label class="physical-field is-wide"><span>Password</span><input class="physical-input" id="physicalPassword" type="password" autocomplete="current-password" minlength="10" maxlength="128" required></label>
+          <label class="physical-field physical-register-field"><span>Your name</span><input class="physical-input" id="physicalDisplayName" maxlength="80"></label>
+          <label class="physical-field physical-register-field"><span>Store name</span><input class="physical-input" id="physicalRegisterStoreName" maxlength="100"></label>
+          <label class="physical-field physical-register-field is-wide"><span>City</span><input class="physical-input" id="physicalRegisterCity" maxlength="80"></label>
+          <p class="bid-error is-wide" id="physicalAuthError" role="alert" hidden></p>
+          <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalAuthModal" type="button">Cancel</button><button class="bid-submit" id="physicalAuthSubmit" type="submit">Sign in</button></div>
+        </form>
+      </section>
+    </div>
+    <div class="bid-modal" id="physicalProfileModal" role="dialog" aria-modal="true" aria-labelledby="physicalProfileTitle" hidden>
+      <section class="bid-dialog physical-modal">
+        <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalProfileTitle">Store settings</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalProfileModal" type="button" title="Close" aria-label="Close store settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+        <form class="bid-dialog-body physical-form-grid" id="physicalProfileForm">
+          <label class="physical-field"><span>Your name</span><input class="physical-input" id="physicalProfileName" maxlength="80" required></label>
+          <label class="physical-field"><span>Store name</span><input class="physical-input" id="physicalProfileStore" maxlength="100" required></label>
+          <label class="physical-field is-wide"><span>City</span><input class="physical-input" id="physicalProfileCity" maxlength="80" required></label>
+          <label class="physical-field is-wide"><span>Description</span><textarea class="physical-textarea" id="physicalProfileDescription" maxlength="300"></textarea></label>
+          <label class="physical-field is-wide"><span>Order/contact link</span><input class="physical-input" id="physicalProfileContact" type="url" inputmode="url" maxlength="800" placeholder="https://..."></label>
+          <p class="bid-error is-wide" id="physicalProfileError" role="alert" hidden></p>
+          <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalProfileModal" type="button">Cancel</button><button class="bid-submit" id="physicalProfileSubmit" type="submit">Save store</button></div>
+        </form>
+      </section>
+    </div>
+    <div class="bid-modal" id="physicalListingModal" role="dialog" aria-modal="true" aria-labelledby="physicalListingTitle" hidden>
+      <section class="bid-dialog physical-modal">
+        <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalListingTitle">List a physical item</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalListingModal" type="button" title="Close" aria-label="Close physical listing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+        <form class="bid-dialog-body physical-form-grid" id="physicalListingForm">
+          <label class="physical-field is-wide"><span>Item name</span><input class="physical-input" id="physicalListingName" maxlength="120" required></label>
+          <label class="physical-field"><span>Category</span><select class="physical-select" id="physicalListingCategory"><option value="food">Food</option><option value="daily">Daily needs</option><option value="fashion">Fashion</option><option value="electronics">Electronics</option><option value="services">Services</option><option value="other">Other</option></select></label>
+          <label class="physical-field"><span>Price (IDR)</span><input class="physical-input" id="physicalListingPrice" type="number" inputmode="numeric" min="1000" max="1000000000" step="1000" required></label>
+          <label class="physical-field"><span>Stock</span><input class="physical-input" id="physicalListingStock" type="number" inputmode="numeric" min="0" max="100000" step="1" value="1" required></label>
+          <label class="physical-field"><span>Area</span><input class="physical-input" id="physicalListingArea" maxlength="100"></label>
+          <label class="physical-field is-wide"><span>Description</span><textarea class="physical-textarea" id="physicalListingDescription" maxlength="600"></textarea></label>
+          <label class="physical-field is-wide"><span>Image URL</span><input class="physical-input" id="physicalListingImage" type="url" inputmode="url" maxlength="800" placeholder="https://..."></label>
+          <fieldset class="physical-field is-wide" style="border:0;padding:0;margin:0"><span>Fulfillment</span><div class="physical-checks"><label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="pickup" checked> Pickup</label><label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="local_delivery"> Local delivery</label><label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="shipping"> Shipping</label></div></fieldset>
+          <p class="bid-error is-wide" id="physicalListingError" role="alert" hidden></p>
+          <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalListingModal" type="button">Cancel</button><button class="bid-submit" id="physicalListingSubmit" type="submit">Publish item</button></div>
+        </form>
+      </section>
+    </div>
+    <div class="bid-modal" id="supporterModal" role="dialog" aria-modal="true" aria-labelledby="supporterTitle" hidden>
+      <section class="bid-dialog physical-modal">
+        <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="supporterTitle">Supporter placement</h2><button class="icon-button bid-dialog-close" data-close-physical="supporterModal" type="button" title="Close" aria-label="Close supporter plans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+        <div class="bid-dialog-body"><div class="supporter-plans"><button class="supporter-plan" data-supporter-plan="week" type="button"><strong>1 week</strong><span>Supporter badge and placement</span><b>Rp10,000</b></button><button class="supporter-plan" data-supporter-plan="month" type="button"><strong>1 month</strong><span>Supporter badge and placement</span><b>Rp100,000</b></button><button class="supporter-plan" data-supporter-plan="year" type="button"><strong>1 year</strong><span>Supporter badge and placement</span><b>Rp1,000,000</b></button></div><p class="bid-error" id="supporterError" role="alert" hidden></p></div>
+      </section>
+    </div>
+    <div class="bid-modal" id="physicalCartModal" role="dialog" aria-modal="true" aria-labelledby="physicalCartTitle" hidden>
+      <section class="bid-dialog physical-cart-modal">
+        <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalCartTitle">Cart</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalCartModal" type="button" title="Close" aria-label="Close cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+        <div class="bid-dialog-body" id="physicalCartBody"></div>
+      </section>
+    </div>`;
+  document.body.append(...host.children);
+}
+
+function openModal(modal) {
+  returnFocus = document.activeElement;
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  modal.querySelector("input, button")?.focus();
+}
+
+function closeModal(modal) {
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  if (!document.querySelector(".bid-modal:not([hidden])")) document.body.style.overflow = "";
+  if (returnFocus instanceof HTMLElement && returnFocus.isConnected) returnFocus.focus();
+  returnFocus = null;
+}
+
+function setAuthMode(mode) {
+  authMode = mode === "register" ? "register" : "login";
+  const registering = authMode === "register";
+  element("physicalAuthTitle").textContent = registering ? "Create seller account" : "Seller sign in";
+  element("physicalAuthSubmit").textContent = registering ? "Create account" : "Sign in";
+  element("physicalPassword").autocomplete = registering ? "new-password" : "current-password";
+  document.querySelectorAll(".physical-register-field").forEach((field) => {
+    field.hidden = !registering;
+    field.querySelector("input").required = registering;
+  });
+  element("physicalLoginTab").classList.toggle("active", !registering);
+  element("physicalRegisterTab").classList.toggle("active", registering);
+  element("physicalLoginTab").setAttribute("aria-selected", String(!registering));
+  element("physicalRegisterTab").setAttribute("aria-selected", String(registering));
+  element("physicalAuthError").hidden = true;
+}
+
+function renderAccount() {
+  const band = element("physicalAccountBand");
+  const addButton = element("addPhysicalListing");
+  const accountButton = element("physicalAccountButton");
+  const settingsRow = element("physicalAccountRow");
+  band.hidden = !account;
+  addButton.hidden = !account;
+  settingsRow.hidden = !account;
+  accountButton.textContent = account ? "Store settings" : "Seller sign in";
+  if (!account) return;
+  element("physicalStoreName").textContent = account.storeName;
+  element("physicalStoreMeta").textContent = [account.city, account.description].filter(Boolean).join(" - ") || account.email;
+  element("settingsPhysicalStore").textContent = account.storeName;
+  const badges = element("physicalAccountBadges");
+  badges.replaceChildren();
+  if (account.isVerified) badges.appendChild(badge("Verified business", "is-verified"));
+  if (account.isSupporter) badges.appendChild(badge("Supporter", "is-supporter"));
+  if (account.signInMethod === "google") badges.appendChild(badge("Google account"));
+}
+
+function listingCard(listing) {
+  const card = document.createElement("article");
+  card.className = "physical-card";
+  let image;
+  if (listing.imageUrl) {
+    image = document.createElement("img");
+    image.src = listing.imageUrl;
+    image.alt = "";
+    image.loading = "lazy";
+    image.decoding = "async";
+  } else {
+    image = document.createElement("div");
+    image.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>';
+  }
+  image.className = "physical-card-image";
+
+  const body = document.createElement("div");
+  body.className = "physical-card-body";
+  const top = document.createElement("div");
+  top.className = "physical-card-top";
+  const title = document.createElement("h3");
+  title.className = "physical-card-title";
+  title.textContent = listing.title;
+  const priceBox = document.createElement("div");
+  const price = document.createElement("div");
+  price.className = "physical-card-price";
+  price.textContent = formatIdr(listing.priceIdr);
+  const converted = document.createElement("p");
+  converted.className = "physical-card-converted";
+  converted.textContent = convertedPrice(listing.priceIdr);
+  priceBox.append(price, converted);
+  top.append(title, priceBox);
+  const description = document.createElement("p");
+  description.className = "physical-card-desc";
+  description.textContent = listing.description || CATEGORY_LABELS[listing.category];
+  const store = document.createElement("p");
+  store.className = "physical-card-store";
+  store.textContent = listing.seller.storeName;
+  const area = document.createElement("p");
+  area.className = "physical-card-area";
+  area.textContent = listing.area || listing.seller.city || "Area not specified";
+  const tags = document.createElement("div");
+  tags.className = "physical-card-tags";
+  if (listing.seller.isVerified) tags.appendChild(badge("Verified business", "is-verified"));
+  if (listing.seller.isSupporter) tags.appendChild(badge("Supporter", "is-supporter"));
+  listing.fulfillment.forEach((value) => tags.appendChild(badge(FULFILLMENT_LABELS[value])));
+  const actions = document.createElement("div");
+  actions.className = "physical-card-actions";
+  const stock = document.createElement("span");
+  stock.className = "physical-stock";
+  stock.textContent = `${listing.stock.toLocaleString()} in stock`;
+  const add = document.createElement("button");
+  add.className = "physical-primary";
+  add.type = "button";
+  const ownListing = listing.seller.id === account?.id;
+  add.disabled = ownListing || listing.stock < 1;
+  add.textContent = ownListing ? "Your listing" : listing.stock < 1 ? "Unavailable" : "Add to cart";
+  if (!add.disabled) add.addEventListener("click", () => addToCart(listing, add));
+  actions.append(stock, add);
+  body.append(top, description, store, area, tags, actions);
+  card.append(image, body);
+  return card;
+}
+
+function renderListings() {
+  const grid = element("physicalGrid");
+  const status = element("physicalMarketStatus");
+  grid.replaceChildren();
+  if (listingsLoading && listings.length === 0) {
+    status.textContent = "Loading local listings...";
+    return;
+  }
+  const query = searchQuery.toLowerCase();
+  const filtered = listings.filter((listing) => {
+    if (category !== "all" && listing.category !== category) return false;
+    return !query || [listing.title, listing.description, listing.area, listing.seller.storeName]
+      .some((value) => value.toLowerCase().includes(query));
+  });
+  status.textContent = `${filtered.length} local listing${filtered.length === 1 ? "" : "s"}.`;
+  if (filtered.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "No local items match this view.";
+    grid.appendChild(empty);
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((listing) => fragment.appendChild(listingCard(listing)));
+  grid.appendChild(fragment);
+}
+
+async function loadListings() {
+  if (listingsLoading) return;
+  listingsLoading = true;
+  renderListings();
+  try {
+    const data = await fetchJson("/api/physical/listings");
+    listings = (Array.isArray(data.listings) ? data.listings : []).map(normalizeListing).filter(Boolean);
+    reconcileCart();
+  } catch (error) {
+    element("physicalMarketStatus").textContent = error.message || "Local listings are unavailable";
+  } finally {
+    listingsLoading = false;
+    renderListings();
+  }
+}
+
+async function loadAuth() {
+  try {
+    const data = await fetchJson("/api/physical/auth");
+    account = data.loggedIn ? data.account : null;
+    paymentsConfigured = Boolean(data.paymentsConfigured);
+    googleClientId = String(data.googleClientId || "");
+  } catch {
+    account = null;
+    paymentsConfigured = false;
+    googleClientId = "";
+  }
+  renderAccount();
+  renderListings();
+}
+
+async function loadRates() {
+  try {
+    const data = await fetchJson("/api/currency");
+    if (data?.base === "USD" && data.rates && Number(data.rates.IDR) > 0) currencyRates = { ...currencyRates, ...data.rates };
+  } catch {}
+  renderListings();
+  if (!element("physicalCartModal").hidden) renderCart();
+}
+
+function addToCart(listing, button) {
+  const entry = cart.find((item) => item.id === listing.id);
+  if (entry) entry.quantity = Math.min(listing.stock, entry.quantity + 1);
+  else cart.push({ id: listing.id, quantity: 1 });
+  saveCart();
+  button.textContent = "Added";
+  setTimeout(() => { if (button.isConnected) button.textContent = "Add to cart"; }, 900);
+}
+
+function reconcileCart() {
+  cart = cart.flatMap((entry) => {
+    const listing = listings.find((item) => item.id === entry.id);
+    return listing && listing.stock > 0 ? [{ ...entry, quantity: Math.min(listing.stock, entry.quantity) }] : [];
+  });
+  saveCart();
+}
+
+function renderCartCount() {
+  const count = cart.reduce((sum, entry) => sum + entry.quantity, 0);
+  const value = element("physicalCartCount");
+  value.textContent = String(count);
+  value.hidden = count === 0;
+}
+
+function updateCartQuantity(id, change) {
+  const entry = cart.find((item) => item.id === id);
+  const listing = listings.find((item) => item.id === id);
+  if (!entry || !listing) return;
+  entry.quantity = Math.max(0, Math.min(listing.stock, entry.quantity + change));
+  if (entry.quantity === 0) cart = cart.filter((item) => item.id !== id);
+  saveCart();
+  renderCart();
+}
+
+function orderSummary(group) {
+  const lines = group.map(({ listing, quantity }) => `${quantity} x ${listing.title} - ${formatIdr(listing.priceIdr * quantity)}`);
+  const total = group.reduce((sum, item) => sum + item.listing.priceIdr * item.quantity, 0);
+  return `${group[0].listing.seller.storeName}\n${lines.join("\n")}\nTotal: ${formatIdr(total)}`;
+}
+
+function cartLine(listing, quantity) {
+  const line = document.createElement("div");
+  line.className = "physical-cart-line";
+  const copy = document.createElement("div");
+  const name = document.createElement("p");
+  name.className = "physical-cart-line-name";
+  name.textContent = listing.title;
+  const unit = document.createElement("span");
+  unit.className = "physical-cart-line-price";
+  unit.textContent = formatIdr(listing.priceIdr);
+  copy.append(name, unit);
+  const quantityControl = document.createElement("div");
+  quantityControl.className = "physical-quantity";
+  const minus = document.createElement("button");
+  minus.type = "button";
+  minus.textContent = "-";
+  minus.title = "Decrease quantity";
+  const number = document.createElement("span");
+  number.textContent = String(quantity);
+  const plus = document.createElement("button");
+  plus.type = "button";
+  plus.textContent = "+";
+  plus.title = "Increase quantity";
+  plus.disabled = quantity >= listing.stock;
+  minus.addEventListener("click", () => updateCartQuantity(listing.id, -1));
+  plus.addEventListener("click", () => updateCartQuantity(listing.id, 1));
+  quantityControl.append(minus, number, plus);
+  const subtotal = document.createElement("span");
+  subtotal.className = "physical-cart-subtotal";
+  subtotal.textContent = formatIdr(listing.priceIdr * quantity);
+  const remove = document.createElement("button");
+  remove.className = "physical-cart-remove";
+  remove.type = "button";
+  remove.textContent = "Remove";
+  remove.addEventListener("click", () => updateCartQuantity(listing.id, -quantity));
+  line.append(copy, quantityControl, subtotal, remove);
+  return line;
+}
+
+function renderCart() {
+  const body = element("physicalCartBody");
+  body.replaceChildren();
+  const entries = cart.map((entry) => ({ ...entry, listing: listings.find((item) => item.id === entry.id) })).filter((entry) => entry.listing);
+  if (entries.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "physical-cart-empty";
+    empty.textContent = "Your physical cart is empty.";
+    body.appendChild(empty);
+    return;
+  }
+  const groups = new Map();
+  entries.forEach((entry) => {
+    const current = groups.get(entry.listing.seller.id) || [];
+    current.push(entry);
+    groups.set(entry.listing.seller.id, current);
+  });
+  groups.forEach((group) => {
+    const section = document.createElement("section");
+    section.className = "physical-cart-group";
+    const head = document.createElement("div");
+    head.className = "physical-cart-store";
+    const name = document.createElement("h3");
+    name.textContent = group[0].listing.seller.storeName;
+    const area = document.createElement("span");
+    area.textContent = group[0].listing.seller.city || "Local seller";
+    head.append(name, area);
+    section.appendChild(head);
+    group.forEach(({ listing, quantity }) => section.appendChild(cartLine(listing, quantity)));
+    const footer = document.createElement("div");
+    footer.className = "physical-cart-group-footer";
+    const copy = document.createElement("button");
+    copy.className = "physical-secondary";
+    copy.type = "button";
+    copy.textContent = "Copy order";
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(orderSummary(group));
+        copy.textContent = "Copied";
+      } catch {
+        copy.textContent = "Copy unavailable";
+      }
+    });
+    const contactUrl = group[0].listing.seller.contactUrl;
+    const contact = document.createElement(contactUrl ? "a" : "button");
+    contact.className = "physical-primary";
+    contact.textContent = contactUrl ? "Order from store" : "Contact unavailable";
+    if (contactUrl) {
+      contact.href = contactUrl;
+      contact.target = "_blank";
+      contact.rel = "noopener";
+    } else {
+      contact.type = "button";
+      contact.disabled = true;
+    }
+    footer.append(copy, contact);
+    section.appendChild(footer);
+    body.appendChild(section);
+  });
+  const total = entries.reduce((sum, entry) => sum + entry.listing.priceIdr * entry.quantity, 0);
+  const totalRow = document.createElement("div");
+  totalRow.className = "physical-cart-total";
+  const label = document.createElement("span");
+  label.textContent = "Cart total";
+  const value = document.createElement("span");
+  value.textContent = formatIdr(total);
+  totalRow.append(label, value);
+  const cardButton = document.createElement("button");
+  cardButton.className = "physical-primary";
+  cardButton.type = "button";
+  cardButton.disabled = true;
+  cardButton.textContent = "Card checkout unavailable";
+  const note = document.createElement("p");
+  note.className = "physical-payment-note";
+  note.textContent = "Orders are completed with each seller. Card checkout will activate only after seller payouts, refunds, and disputes are handled by a marketplace payment provider.";
+  body.append(totalRow, cardButton, note);
+}
+
+function openProfile() {
+  if (!account) return;
+  element("physicalProfileName").value = account.displayName || "";
+  element("physicalProfileStore").value = account.storeName || "";
+  element("physicalProfileCity").value = account.city || "";
+  element("physicalProfileDescription").value = account.description || "";
+  element("physicalProfileContact").value = account.contactUrl || "";
+  element("physicalProfileError").hidden = true;
+  openModal(element("physicalProfileModal"));
+}
+
+function loadGoogleLibrary() {
+  if (window.google?.accounts?.id) return Promise.resolve(window.google);
+  if (googleLibraryPromise) return googleLibraryPromise;
+  googleLibraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.onload = () => resolve(window.google);
+    script.onerror = () => reject(new Error("Google sign-in could not be loaded"));
+    document.head.appendChild(script);
+  });
+  return googleLibraryPromise;
+}
+
+async function renderGoogleButton() {
+  const zone = element("physicalGoogleZone");
+  zone.replaceChildren();
+  if (!googleClientId) {
+    const status = document.createElement("p");
+    status.className = "physical-google-status";
+    status.textContent = "Google sign-in is not configured yet";
+    zone.appendChild(status);
+    return;
+  }
+  try {
+    const google = await loadGoogleLibrary();
+    google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
+    google.accounts.id.renderButton(zone, { type: "standard", theme: "outline", size: "large", text: "continue_with", shape: "rectangular", width: Math.min(360, zone.clientWidth || 360) });
+  } catch (error) {
+    const status = document.createElement("p");
+    status.className = "physical-google-status";
+    status.textContent = error.message;
+    zone.appendChild(status);
+  }
+}
+
+async function handleGoogleCredential(response) {
+  const error = element("physicalAuthError");
+  error.hidden = true;
+  try {
+    const data = await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify({ action: "google", credential: response?.credential }) });
+    account = data.account;
+    paymentsConfigured = Boolean(data.paymentsConfigured);
+    closeModal(element("physicalAuthModal"));
+    renderAccount();
+    renderListings();
+  } catch (failure) {
+    error.textContent = failure.message || "Google sign-in failed";
+    error.hidden = false;
+  }
+}
+
+function bindEvents() {
+  document.querySelector('[data-nav][data-page="physical"]')?.addEventListener("click", () => {
+    searchQuery = "";
+    if (!listings.length) void loadListings();
+  });
+  document.querySelectorAll("[data-close-physical]").forEach((button) => button.addEventListener("click", () => closeModal(element(button.dataset.closePhysical))));
+  document.querySelectorAll(".bid-modal").forEach((modal) => modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(modal); }));
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeModal(document.querySelector(".bid-modal:not([hidden])"));
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key === CART_KEY) { cart = readCart(); renderCartCount(); }
+  });
+  document.querySelector(".search")?.addEventListener("input", (event) => {
+    if (!document.querySelector('[data-nav][data-page="physical"]')?.classList.contains("active")) return;
+    searchQuery = event.target.value.trim();
+    renderListings();
+  });
+  element("currencySelect")?.addEventListener("change", () => { renderListings(); if (!element("physicalCartModal").hidden) renderCart(); });
+  element("physicalCategories").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-physical-cat]");
+    if (!button) return;
+    category = button.dataset.physicalCat;
+    document.querySelectorAll("[data-physical-cat]").forEach((item) => item.classList.toggle("active", item === button));
+    renderListings();
+  });
+  element("physicalAccountButton").addEventListener("click", () => {
+    if (account) openProfile();
+    else { setAuthMode("login"); openModal(element("physicalAuthModal")); void renderGoogleButton(); }
+  });
+  element("physicalLoginTab").addEventListener("click", () => setAuthMode("login"));
+  element("physicalRegisterTab").addEventListener("click", () => setAuthMode("register"));
+  element("physicalCartButton").addEventListener("click", () => { renderCart(); openModal(element("physicalCartModal")); });
+  element("addPhysicalListing").addEventListener("click", () => { element("physicalListingError").hidden = true; openModal(element("physicalListingModal")); });
+  element("openSupporterPlans").addEventListener("click", () => {
+    const error = element("supporterError");
+    error.hidden = paymentsConfigured;
+    error.textContent = paymentsConfigured ? "" : "Supporter payments are not configured yet.";
+    document.querySelectorAll("[data-supporter-plan]").forEach((button) => { button.disabled = !paymentsConfigured; });
+    openModal(element("supporterModal"));
+  });
+
+  element("physicalAuthForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = element("physicalAuthError");
+    const submit = element("physicalAuthSubmit");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const payload = {
+        action: authMode,
+        email: element("physicalEmail").value,
+        password: element("physicalPassword").value,
+        displayName: element("physicalDisplayName").value,
+        storeName: element("physicalRegisterStoreName").value,
+        city: element("physicalRegisterCity").value,
+      };
+      const data = await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify(payload) });
+      account = data.account;
+      paymentsConfigured = Boolean(data.paymentsConfigured);
+      event.currentTarget.reset();
+      closeModal(element("physicalAuthModal"));
+      renderAccount();
+      renderListings();
+    } catch (failure) {
+      error.textContent = failure.message || "Seller sign-in failed";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  element("physicalProfileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = element("physicalProfileError");
+    const submit = element("physicalProfileSubmit");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const data = await fetchJson("/api/physical/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "profile", displayName: element("physicalProfileName").value, storeName: element("physicalProfileStore").value, city: element("physicalProfileCity").value, description: element("physicalProfileDescription").value, contactUrl: element("physicalProfileContact").value }),
+      });
+      account = data.account;
+      closeModal(element("physicalProfileModal"));
+      renderAccount();
+      await loadListings();
+    } catch (failure) {
+      error.textContent = failure.message || "Store settings could not be saved";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  element("physicalListingForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = element("physicalListingError");
+    const submit = element("physicalListingSubmit");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const fulfillment = [...document.querySelectorAll('input[name="physicalFulfillment"]:checked')].map((input) => input.value);
+      const data = await fetchJson("/api/physical/listings", {
+        method: "POST",
+        body: JSON.stringify({ title: element("physicalListingName").value, category: element("physicalListingCategory").value, priceIdr: Number(element("physicalListingPrice").value), stock: Number(element("physicalListingStock").value), area: element("physicalListingArea").value, description: element("physicalListingDescription").value, imageUrl: element("physicalListingImage").value, fulfillment }),
+      });
+      const listing = normalizeListing(data.listing);
+      if (listing) listings.unshift(listing);
+      event.currentTarget.reset();
+      element("physicalListingStock").value = "1";
+      document.querySelector('input[name="physicalFulfillment"][value="pickup"]').checked = true;
+      closeModal(element("physicalListingModal"));
+      renderListings();
+    } catch (failure) {
+      error.textContent = failure.message || "Physical item could not be listed";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  document.querySelectorAll("[data-supporter-plan]").forEach((button) => button.addEventListener("click", async () => {
+    const error = element("supporterError");
+    error.hidden = true;
+    button.disabled = true;
+    try {
+      const data = await fetchJson("/api/physical/supporter", { method: "POST", body: JSON.stringify({ plan: button.dataset.supporterPlan }) });
+      const redirect = new URL(data.redirectUrl);
+      if (redirect.protocol !== "https:" || !redirect.hostname.endsWith(".midtrans.com")) throw new Error("Payment provider returned an invalid checkout link");
+      window.location.href = redirect.href;
+    } catch (failure) {
+      error.textContent = failure.message || "Supporter checkout could not be started";
+      error.hidden = false;
+      button.disabled = false;
+    }
+  }));
+
+  element("physicalLogoutButton").addEventListener("click", async () => {
+    if (!confirm("Log out of the local seller account?")) return;
+    try { await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify({ action: "logout" }) }); } catch {}
+    account = null;
+    renderAccount();
+    renderListings();
+  });
+}
+
+installDialogs();
+setAuthMode("login");
+bindEvents();
+renderCartCount();
+renderAccount();
+renderListings();
+void Promise.all([loadAuth(), loadListings(), loadRates()]);
