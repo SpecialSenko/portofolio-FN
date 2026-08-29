@@ -1,10 +1,10 @@
-import { notifyMarketplaceDiscord } from "../_lib/discord-notify.js";
-import { readPhysicalSession } from "../_lib/physical-session.js";
+import { notifyMarketplaceDiscord } from "./discord-notify.js";
+import { readPhysicalSession } from "./physical-session.js";
 import {
   listPhysicalListings,
   PhysicalStorageUnavailableError,
   savePhysicalListing,
-} from "../_lib/physical-store.js";
+} from "./physical-store.js";
 
 const MAX_BODY_BYTES = 24_576;
 

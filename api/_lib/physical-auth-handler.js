@@ -1,5 +1,5 @@
-import { createPhysicalSession, physicalSessionCookie, readPhysicalSession } from "../_lib/physical-session.js";
-import { hashPhysicalPassword, verifyPhysicalPassword } from "../_lib/physical-password.js";
+import { createPhysicalSession, physicalSessionCookie, readPhysicalSession } from "./physical-session.js";
+import { hashPhysicalPassword, verifyPhysicalPassword } from "./physical-password.js";
 import {
   clearPhysicalAuthAttempts,
   consumePhysicalAuthAttempt,
@@ -9,7 +9,7 @@ import {
   PhysicalAccountExistsError,
   PhysicalStorageUnavailableError,
   updatePhysicalProfile,
-} from "../_lib/physical-store.js";
+} from "./physical-store.js";
 
 const MAX_BODY_BYTES = 16_384;
 

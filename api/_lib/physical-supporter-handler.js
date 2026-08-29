@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
-import { readPhysicalSession } from "../_lib/physical-session.js";
+import { readPhysicalSession } from "./physical-session.js";
 import {
   getPhysicalAccountById,
   PhysicalStorageUnavailableError,
   saveSupporterPayment,
-} from "../_lib/physical-store.js";
+} from "./physical-store.js";
 
 const PLANS = {
   week: { amountIdr: 10_000, label: "1 week" },

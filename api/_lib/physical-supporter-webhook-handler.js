@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
-import { notifyMarketplaceDiscord } from "../_lib/discord-notify.js";
+import { notifyMarketplaceDiscord } from "./discord-notify.js";
 import {
   activateSupporterPayment,
   getSupporterPayment,
   PhysicalStorageUnavailableError,
   saveSupporterPayment,
-} from "../_lib/physical-store.js";
+} from "./physical-store.js";
 
 const DURATIONS = {
   week: 7 * 24 * 60 * 60 * 1_000,

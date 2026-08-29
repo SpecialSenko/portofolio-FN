@@ -5,10 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import authHandler from "../api/physical/auth.js";
-import listingsHandler from "../api/physical/listings.js";
-import supporterHandler from "../api/physical/supporter.js";
-import supporterWebhookHandler from "../api/physical/supporter-webhook.js";
+import physicalHandler from "../api/physical/[action].js";
 
 process.env.SESSION_SECRET = "physical-marketplace-test-secret-with-enough-entropy";
 
@@ -54,8 +51,9 @@ test("physical seller accounts keep credentials private and publish account-boun
   delete process.env.KV_REST_API_TOKEN;
 
   try {
-    const registration = await invoke(authHandler, {
+    const registration = await invoke(physicalHandler, {
       method: "POST",
+      url: "/api/physical/auth",
       body: {
         action: "register",
         email: "seller@example.com",
@@ -72,18 +70,20 @@ test("physical seller accounts keep credentials private and publish account-boun
     const cookie = cookieFrom(registration);
     assert.match(cookie, /^fraxb_physical_session=/);
 
-    const me = await invoke(authHandler, { cookie });
+    const me = await invoke(physicalHandler, { cookie, url: "/api/physical/auth" });
     assert.equal(me.body.loggedIn, true);
     assert.equal(me.body.account.storeName, "Daily Corner");
 
-    const anonymousListing = await invoke(listingsHandler, {
+    const anonymousListing = await invoke(physicalHandler, {
       method: "POST",
+      url: "/api/physical/listings",
       body: { title: "Rice bowl", priceIdr: 20_000, stock: 5, fulfillment: ["local_delivery"] },
     });
     assert.equal(anonymousListing.status, 401);
 
-    const created = await invoke(listingsHandler, {
+    const created = await invoke(physicalHandler, {
       method: "POST",
+      url: "/api/physical/listings",
       cookie,
       body: {
         title: "Rice bowl",
@@ -99,16 +99,17 @@ test("physical seller accounts keep credentials private and publish account-boun
     assert.equal(created.body.listing.seller.storeName, "Daily Corner");
     assert.equal(created.body.listing.seller.email, undefined);
 
-    const publicListings = await invoke(listingsHandler);
+    const publicListings = await invoke(physicalHandler, { url: "/api/physical/listings" });
     assert.equal(publicListings.status, 200);
     assert.equal(publicListings.body.listings.length, 1);
     assert.equal(publicListings.body.listings[0].title, "Rice bowl");
     assert.equal(publicListings.body.listings[0].seller.email, undefined);
 
-    const logout = await invoke(authHandler, { method: "POST", cookie, body: { action: "logout" } });
+    const logout = await invoke(physicalHandler, { method: "POST", cookie, body: { action: "logout" }, url: "/api/physical/auth" });
     assert.equal(logout.status, 200);
-    const login = await invoke(authHandler, {
+    const login = await invoke(physicalHandler, {
       method: "POST",
+      url: "/api/physical/auth",
       body: { action: "login", email: "seller@example.com", password: "correct horse battery staple" },
     });
     assert.equal(login.status, 200);
@@ -154,8 +155,9 @@ test("supporter checkout verifies the paid amount and activates only once", asyn
   };
 
   try {
-    const registration = await invoke(authHandler, {
+    const registration = await invoke(physicalHandler, {
       method: "POST",
+      url: "/api/physical/auth",
       body: {
         action: "register",
         email: "supporter@example.com",
@@ -166,7 +168,7 @@ test("supporter checkout verifies the paid amount and activates only once", asyn
       },
     });
     const cookie = cookieFrom(registration);
-    const checkout = await invoke(supporterHandler, { method: "POST", cookie, body: { plan: "week" } });
+    const checkout = await invoke(physicalHandler, { method: "POST", cookie, body: { plan: "week" }, url: "/api/physical/supporter" });
     assert.equal(checkout.status, 201);
     assert.equal(checkout.body.amountIdr, 10_000);
 
@@ -182,16 +184,16 @@ test("supporter checkout verifies the paid amount and activates only once", asyn
       .createHash("sha512")
       .update(`${notification.order_id}${notification.status_code}${notification.gross_amount}${process.env.MIDTRANS_SERVER_KEY}`)
       .digest("hex");
-    const first = await invoke(supporterWebhookHandler, { method: "POST", body: notification });
+    const first = await invoke(physicalHandler, { method: "POST", body: notification, url: "/api/physical/supporter-webhook" });
     assert.equal(first.status, 200);
     assert.equal(first.body.activated, true);
-    const afterFirst = await invoke(authHandler, { cookie });
+    const afterFirst = await invoke(physicalHandler, { cookie, url: "/api/physical/auth" });
     assert.equal(afterFirst.body.account.isSupporter, true);
     const supporterUntil = afterFirst.body.account.supporterUntil;
 
-    const repeated = await invoke(supporterWebhookHandler, { method: "POST", body: notification });
+    const repeated = await invoke(physicalHandler, { method: "POST", body: notification, url: "/api/physical/supporter-webhook" });
     assert.equal(repeated.status, 200);
-    const afterRepeat = await invoke(authHandler, { cookie });
+    const afterRepeat = await invoke(physicalHandler, { cookie, url: "/api/physical/auth" });
     assert.equal(afterRepeat.body.account.supporterUntil, supporterUntil);
   } finally {
     globalThis.fetch = originalFetch;
