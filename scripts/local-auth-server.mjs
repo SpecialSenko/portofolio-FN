@@ -23,6 +23,10 @@ const routes = new Map([
   ["/api/currency", path.join(root, "api/currency.js")],
   ["/api/marketplace/stores", path.join(root, "api/marketplace/stores.js")],
   ["/api/marketplace/bids", path.join(root, "api/marketplace/bids.js")],
+  ["/api/physical/auth", path.join(root, "api/physical/auth.js")],
+  ["/api/physical/listings", path.join(root, "api/physical/listings.js")],
+  ["/api/physical/supporter", path.join(root, "api/physical/supporter.js")],
+  ["/api/physical/supporter-webhook", path.join(root, "api/physical/supporter-webhook.js")],
   ["/api/auth/me", path.join(root, "api/auth/me.js")],
   ["/api/auth/steam/login", path.join(root, "api/auth/steam/login.js")],
   ["/api/auth/steam/callback", path.join(root, "api/auth/steam/callback.js")],
@@ -94,6 +98,7 @@ server.listen(port, host, () => {
   }
   console.log("Steam auth API: /api/auth/steam/login");
   console.log("Note: this local server serves plain HTTP. If you access it via https://<lan-ip> your browser will show ERR_SSL_PROTOCOL_ERROR. Use http:// or configure TLS separately.");
+  console.log("Local seller API: /api/physical/auth");
 });
 
 async function serveStatic(urlPath, res) {

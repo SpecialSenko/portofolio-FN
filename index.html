@@ -1747,6 +1747,168 @@
     line-height: 1.5;
   }
   #priceForm .bid-field-label { margin-top: 13px; }
+  .physical-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .physical-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+  .physical-account-band {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 11px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .physical-account-mark {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--panel-2);
+    color: var(--text);
+  }
+  .physical-account-mark svg { width: 17px; height: 17px; }
+  .physical-account-copy { min-width: 0; flex: 1; }
+  .physical-account-name { margin: 0; font-size: 12px; font-weight: 800; }
+  .physical-account-meta { margin: 3px 0 0; color: var(--muted); font-size: 10.5px; }
+  .physical-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+  .physical-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    background: var(--panel-2);
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .physical-badge.is-supporter { border-color: rgba(246, 200, 95, .42); color: #f6c85f; background: rgba(246, 200, 95, .08); }
+  .physical-badge.is-verified { border-color: rgba(67, 229, 255, .38); color: #43e5ff; background: rgba(67, 229, 255, .07); }
+  .physical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+  }
+  .physical-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+  }
+  .physical-card-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+  }
+  .physical-card-image svg { width: 28px; height: 28px; }
+  .physical-card-body { padding: 11px; }
+  .physical-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .physical-card-title { margin: 0; min-width: 0; font-size: 12px; font-weight: 800; overflow-wrap: anywhere; }
+  .physical-card-price { flex: 0 0 auto; font-size: 11px; font-weight: 900; white-space: nowrap; }
+  .physical-card-converted { margin: 2px 0 0; color: var(--muted); font-size: 9px; text-align: right; }
+  .physical-card-desc {
+    min-height: 34px;
+    margin: 7px 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .physical-card-store { margin: 0; font-size: 10px; font-weight: 700; }
+  .physical-card-area { margin: 3px 0 0; color: var(--muted); font-size: 9.5px; }
+  .physical-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 9px 0; }
+  .physical-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .physical-stock { color: var(--muted); font-size: 9px; }
+  .physical-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 6px 10px;
+    border: 1px solid var(--text);
+    border-radius: 5px;
+    background: var(--text);
+    color: var(--bg);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .physical-order:disabled { border-color: var(--border); background: var(--panel); color: var(--muted); cursor: not-allowed; }
+  .physical-modal { width: min(590px, 100%); }
+  .physical-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .physical-form-grid .is-wide { grid-column: 1 / -1; }
+  .physical-field { display: grid; gap: 6px; }
+  .physical-input,
+  .physical-textarea,
+  .physical-select {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    outline: none;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+  }
+  .physical-input:focus,
+  .physical-textarea:focus,
+  .physical-select:focus { border-color: var(--nav-hover-border); }
+    .physical-head,
+    .physical-account-band { align-items: flex-start; flex-wrap: wrap; }
+    .physical-actions { width: 100%; justify-content: flex-start; }
+    .physical-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .physical-form-grid,
+    .supporter-plans { grid-template-columns: 1fr; }
+  .physical-textarea { min-height: 78px; resize: vertical; }
+  .physical-checks { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+  .physical-check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10.5px; }
+  .physical-check input { accent-color: var(--text); }
+  .physical-auth-tabs { margin: 0 16px 14px; }
+  .supporter-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .supporter-plan {
+    display: grid;
+    gap: 5px;
+    min-height: 104px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    <button class="nav-item" data-nav data-page="physical" title="Local Market" aria-label="Local Market">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6M4 10c1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0"/></svg>
+    </button>
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+  }
+  .supporter-plan:hover { border-color: #f6c85f; }
+  .supporter-plan:disabled { opacity: .55; cursor: not-allowed; }
+  .supporter-plan strong { font-size: 12px; }
+  .supporter-plan span { color: var(--muted); font-size: 10px; }
+  .supporter-plan b { margin-top: auto; color: #f6c85f; font-size: 12px; }
   @keyframes holo-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -1811,6 +1973,41 @@
       flex-basis: 100%;
       max-width: none;
     }
+      <section class="page" data-page="physical" hidden>
+        <div class="physical-head">
+          <div>
+            <h2 class="page-title">Local Market</h2>
+            <p class="page-copy">Food, daily needs, services, and physical products available by area.</p>
+          </div>
+          <div class="physical-actions">
+            <button class="back-btn" id="physicalAccountButton" type="button">Seller sign in</button>
+            <button class="physical-order" id="addPhysicalListing" type="button" hidden>Add listing</button>
+          </div>
+        </div>
+        <div class="physical-account-band" id="physicalAccountBand" hidden>
+          <span class="physical-account-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>
+          </span>
+          <div class="physical-account-copy">
+            <p class="physical-account-name" id="physicalStoreName">Your local store</p>
+            <p class="physical-account-meta" id="physicalStoreMeta"></p>
+          </div>
+          <div class="physical-badges" id="physicalAccountBadges"></div>
+          <button class="back-btn" id="openSupporterPlans" type="button">Supporter plans</button>
+        </div>
+        <div class="cat-tabs" id="physicalCategories" aria-label="Local product categories">
+          <button class="cat-tab active" type="button" data-physical-cat="all">All</button>
+          <button class="cat-tab" type="button" data-physical-cat="food">Food</button>
+          <button class="cat-tab" type="button" data-physical-cat="daily">Daily needs</button>
+          <button class="cat-tab" type="button" data-physical-cat="fashion">Fashion</button>
+          <button class="cat-tab" type="button" data-physical-cat="electronics">Electronics</button>
+          <button class="cat-tab" type="button" data-physical-cat="services">Services</button>
+          <button class="cat-tab" type="button" data-physical-cat="other">Other</button>
+        </div>
+        <p class="page-copy" id="physicalMarketStatus">Loading local listings...</p>
+        <div class="physical-grid" id="physicalGrid"></div>
+      </section>
+
     .steam-btn {
       margin-left: 0;
     }
@@ -1862,6 +2059,13 @@
     .currency-select {
       width: 100%;
     }
+        <div class="settings-row" id="physicalAccountRow" hidden>
+          <div>
+            <p class="settings-label">Local seller account</p>
+            <p class="settings-sub">Signed in to <span id="settingsPhysicalStore">your local store</span></p>
+          </div>
+          <button class="steam-btn" id="physicalLogoutButton" type="button">Log out</button>
+        </div>
     .ad-panel-head {
       align-items: flex-start;
       flex-direction: column;
@@ -1904,7 +2108,7 @@
     <button class="nav-item" data-nav data-page="settings" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
     </button>
-    <button class="nav-item nav-item-ad" id="adPopupButton" type="button" title="My Referral" aria-label="Open advertising popup" aria-haspopup="dialog" aria-expanded="false">
+    <button class="nav-item nav-item-ad" id="adPopupButton" type="button" title="Advertisement" aria-label="Open advertising popup" aria-haspopup="dialog" aria-expanded="false">
       <span class="ad-mark">AD</span>
     </button>
     <div class="sidebar-bottom">
@@ -2020,6 +2224,178 @@
         </div>
         <div class="settings-row">
           <div>
+<div class="bid-modal" id="physicalAuthModal" role="dialog" aria-modal="true" aria-labelledby="physicalAuthTitle" hidden>
+  <section class="bid-dialog physical-modal">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="physicalAuthTitle">Seller sign in</h2>
+      <button class="icon-button bid-dialog-close" id="closePhysicalAuth" type="button" title="Close seller account" aria-label="Close seller account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="cat-tabs physical-auth-tabs" role="tablist" aria-label="Seller account mode">
+      <button class="cat-tab active" id="physicalLoginTab" type="button" role="tab" aria-selected="true">Sign in</button>
+      <button class="cat-tab" id="physicalRegisterTab" type="button" role="tab" aria-selected="false">Create account</button>
+    </div>
+    <form class="bid-dialog-body physical-form-grid" id="physicalAuthForm">
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Email</span>
+        <input class="physical-input" id="physicalEmail" name="email" type="email" autocomplete="email" maxlength="254" required>
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Password</span>
+        <input class="physical-input" id="physicalPassword" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required>
+      </label>
+      <label class="physical-field physical-register-field">
+        <span class="bid-field-label">Your name</span>
+        <input class="physical-input" id="physicalDisplayName" name="displayName" maxlength="80">
+      </label>
+      <label class="physical-field physical-register-field">
+        <span class="bid-field-label">Store name</span>
+        <input class="physical-input" id="physicalRegisterStoreName" name="storeName" maxlength="100">
+      </label>
+      <label class="physical-field physical-register-field is-wide">
+        <span class="bid-field-label">City or regency</span>
+        <input class="physical-input" id="physicalRegisterCity" name="city" maxlength="80">
+      </label>
+      <p class="bid-error is-wide" id="physicalAuthError" role="alert" hidden></p>
+      <div class="bid-dialog-actions is-wide">
+        <button class="bid-cancel" id="cancelPhysicalAuth" type="button">Cancel</button>
+        <button class="bid-submit" id="submitPhysicalAuth" type="submit">Sign in</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="bid-modal" id="physicalProfileModal" role="dialog" aria-modal="true" aria-labelledby="physicalProfileTitle" hidden>
+  <section class="bid-dialog physical-modal">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="physicalProfileTitle">Store settings</h2>
+      <button class="icon-button bid-dialog-close" id="closePhysicalProfile" type="button" title="Close store settings" aria-label="Close store settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <form class="bid-dialog-body physical-form-grid" id="physicalProfileForm">
+      <label class="physical-field">
+        <span class="bid-field-label">Your name</span>
+        <input class="physical-input" id="physicalProfileName" maxlength="80" required>
+      </label>
+      <label class="physical-field">
+  const marketplaceSearch = document.querySelector(".search");
+        <span class="bid-field-label">Store name</span>
+        <input class="physical-input" id="physicalProfileStore" maxlength="100" required>
+    physical: "Local Market",
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">City or regency</span>
+        <input class="physical-input" id="physicalProfileCity" maxlength="80" required>
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Store description</span>
+        <textarea class="physical-textarea" id="physicalProfileDescription" maxlength="300"></textarea>
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Order/contact web link</span>
+        <input class="physical-input" id="physicalProfileContact" type="url" inputmode="url" maxlength="800" placeholder="https://...">
+      </label>
+      <p class="bid-minimum is-wide">Your email remains private. Buyers only see your store details and contact link.</p>
+      <p class="bid-error is-wide" id="physicalProfileError" role="alert" hidden></p>
+      <div class="bid-dialog-actions is-wide">
+        <button class="bid-cancel" id="cancelPhysicalProfile" type="button">Cancel</button>
+        <button class="bid-submit" id="savePhysicalProfile" type="submit">Save store</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="bid-modal" id="physicalListingModal" role="dialog" aria-modal="true" aria-labelledby="physicalListingTitle" hidden>
+  <section class="bid-dialog physical-modal">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="physicalListingTitle">List a physical item</h2>
+      <button class="icon-button bid-dialog-close" id="closePhysicalListing" type="button" title="Close physical listing" aria-label="Close physical listing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    document.getElementById("inventoryBanner").hidden = name === "physical";
+    marketplaceSearch.placeholder = name === "physical" ? "Search local products..." : "Search skins...";
+    if (name === "physical") {
+      renderPhysicalMarket();
+      if (!physicalListingsLoaded) void loadPhysicalListings();
+    }
+    marketplaceSearch.setAttribute("aria-label", name === "physical" ? "Search local products" : "Search skins");
+    marketplaceSearch.value = name === "physical" ? physicalSearchQuery : "";
+    </header>
+    <form class="bid-dialog-body physical-form-grid" id="physicalListingForm">
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Item or service name</span>
+        <input class="physical-input" id="physicalListingName" maxlength="120" required>
+      </label>
+      <label class="physical-field">
+        <span class="bid-field-label">Category</span>
+        <select class="physical-select" id="physicalListingCategory">
+          <option value="food">Food</option>
+          <option value="daily">Daily needs</option>
+          <option value="fashion">Fashion</option>
+          <option value="electronics">Electronics</option>
+          <option value="services">Services</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label class="physical-field">
+        <span class="bid-field-label">Price (IDR)</span>
+        <input class="physical-input" id="physicalListingPrice" type="number" inputmode="numeric" min="1000" max="1000000000" step="1000" required>
+      </label>
+      <label class="physical-field">
+        <span class="bid-field-label">Stock</span>
+        <input class="physical-input" id="physicalListingStock" type="number" inputmode="numeric" min="0" max="100000" step="1" value="1" required>
+      </label>
+      <label class="physical-field">
+        <span class="bid-field-label">Service area</span>
+        <input class="physical-input" id="physicalListingArea" maxlength="100" placeholder="District, city, or nationwide">
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Description</span>
+        <textarea class="physical-textarea" id="physicalListingDescription" maxlength="600"></textarea>
+      </label>
+      <label class="physical-field is-wide">
+        <span class="bid-field-label">Image URL (optional)</span>
+        <input class="physical-input" id="physicalListingImage" type="url" inputmode="url" maxlength="800" placeholder="https://.../photo.jpg">
+      </label>
+      <fieldset class="physical-field is-wide" style="border:0;padding:0;margin:0;">
+        <legend class="bid-field-label">Fulfillment</legend>
+        <div class="physical-checks">
+          <label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="pickup" checked> Pickup</label>
+          <label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="local_delivery"> Local delivery</label>
+          <label class="physical-check"><input type="checkbox" name="physicalFulfillment" value="shipping"> Shipping</label>
+        </div>
+      </fieldset>
+      <p class="bid-error is-wide" id="physicalListingError" role="alert" hidden></p>
+      <div class="bid-dialog-actions is-wide">
+        <button class="bid-cancel" id="cancelPhysicalListing" type="button">Cancel</button>
+        <button class="bid-submit" id="savePhysicalListing" type="submit">Publish listing</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="bid-modal" id="supporterModal" role="dialog" aria-modal="true" aria-labelledby="supporterTitle" hidden>
+  <section class="bid-dialog physical-modal">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="supporterTitle">Store Supporter</h2>
+      <button class="icon-button bid-dialog-close" id="closeSupporterModal" type="button" title="Close Supporter plans" aria-label="Close Supporter plans">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="bid-dialog-body">
+      <p class="bid-minimum">Supporter is a paid marketplace badge. Verified Business is separate and requires an identity or business review.</p>
+      <div class="supporter-plans">
+        <button class="supporter-plan" type="button" data-supporter-plan="week"><strong>1 week</strong><span>Supporter badge and priority placement</span><b>Rp10,000</b></button>
+        <button class="supporter-plan" type="button" data-supporter-plan="month"><strong>1 month</strong><span>Supporter badge and priority placement</span><b>Rp100,000</b></button>
+        <button class="supporter-plan" type="button" data-supporter-plan="year"><strong>1 year</strong><span>Supporter badge and priority placement</span><b>Rp1,000,000</b></button>
+      </div>
+      <p class="bid-error" id="supporterError" role="alert" hidden></p>
+    </div>
+  </section>
+</div>
+
             <p class="settings-label">Currency</p>
             <p class="settings-sub" id="currencyStatus">Loading latest reference rates...</p>
           </div>
@@ -3591,6 +3967,7 @@
     } else if (inventoryLoaded) {
       summary.textContent = `Inventory public - ${inventory.length} of ${inventoryTotal} ${selectedSteamGame.name} items loaded.`;
     } else {
+    renderPhysicalMarket();
       dot.classList.add("is-loading");
       summary.textContent = `Preparing ${steamUser.name}'s ${selectedSteamGame.name} inventory...`;
     }
@@ -3606,10 +3983,490 @@
     if (reset) {
       inventoryRequestVersion += 1;
       inventory = [];
+      renderPhysicalMarket();
       inventoryLoaded = false;
       inventoryPrivate = false;
       inventoryError = "";
       inventoryTotal = 0;
+  let physicalAccount = null;
+  let physicalPaymentsConfigured = false;
+  let physicalListings = [];
+  let physicalListingsLoaded = false;
+  let physicalListingsLoading = false;
+  let physicalListingsError = "";
+  let physicalCategory = "all";
+  let physicalSearchQuery = "";
+  let physicalAuthMode = "login";
+  let physicalReturnFocus = null;
+
+  const fulfillmentLabels = {
+    pickup: "Pickup",
+    local_delivery: "Local delivery",
+    shipping: "Shipping",
+  };
+
+  function safePhysicalUrl(value, { image = false } = {}) {
+    if (!value) return "";
+    try {
+      const url = new URL(String(value));
+      if (url.protocol !== "https:") return "";
+      if (image && !/\.(?:avif|gif|jpe?g|png|webp)(?:$|\?)/i.test(url.pathname + url.search)) return "";
+      return url.href;
+    } catch {
+      return "";
+    }
+  }
+
+  function formatIdr(value) {
+    return `Rp${Number(value || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
+  }
+
+  function physicalConvertedPrice(priceIdr) {
+    if (currentCurrency === "IDR" || !Number.isFinite(currencies.IDR.rate) || currencies.IDR.rate <= 0) return "";
+    return formatPrice(Number(priceIdr) / currencies.IDR.rate);
+  }
+
+  function normalizePhysicalListing(value) {
+    const id = String(value?.id || "");
+    const sellerId = String(value?.sellerId || "");
+    const priceIdr = Number(value?.priceIdr);
+    const stock = Number(value?.stock);
+    if (!/^[a-f0-9-]{36}$/.test(id) || !/^[a-f0-9-]{36}$/.test(sellerId) || !Number.isSafeInteger(priceIdr)) return null;
+    return {
+      id,
+      sellerId,
+      title: String(value?.title || "Local item").slice(0, 120),
+      description: String(value?.description || "").slice(0, 600),
+      category: ["food", "daily", "fashion", "electronics", "services", "other"].includes(value?.category) ? value.category : "other",
+      priceIdr,
+      stock: Number.isSafeInteger(stock) ? stock : 0,
+      fulfillment: (Array.isArray(value?.fulfillment) ? value.fulfillment : []).filter((item) => fulfillmentLabels[item]),
+      area: String(value?.area || "").slice(0, 100),
+      imageUrl: safePhysicalUrl(value?.imageUrl, { image: true }),
+      updatedAt: Number(value?.updatedAt) || 0,
+      seller: {
+        id: sellerId,
+        displayName: String(value?.seller?.displayName || "Local seller").slice(0, 80),
+        storeName: String(value?.seller?.storeName || "Local store").slice(0, 100),
+        city: String(value?.seller?.city || "").slice(0, 80),
+        contactUrl: safePhysicalUrl(value?.seller?.contactUrl),
+        isSupporter: Boolean(value?.seller?.isSupporter),
+        isVerified: Boolean(value?.seller?.isVerified),
+      },
+    };
+  }
+
+  function physicalBadge(text, className = "") {
+    const badge = document.createElement("span");
+    badge.className = `physical-badge ${className}`.trim();
+    badge.textContent = text;
+    return badge;
+  }
+
+  function physicalCard(listing) {
+    const card = document.createElement("article");
+    card.className = "physical-card";
+    const image = listing.imageUrl ? document.createElement("img") : document.createElement("div");
+    image.className = "physical-card-image";
+    if (listing.imageUrl) {
+      image.src = listing.imageUrl;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+    } else {
+      image.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M9 14h6"/></svg>';
+    }
+
+    const body = document.createElement("div");
+    body.className = "physical-card-body";
+    const top = document.createElement("div");
+    top.className = "physical-card-top";
+    const title = document.createElement("h3");
+    title.className = "physical-card-title";
+    title.textContent = listing.title;
+    const priceWrap = document.createElement("div");
+    const price = document.createElement("div");
+    price.className = "physical-card-price";
+    price.textContent = formatIdr(listing.priceIdr);
+    const converted = document.createElement("p");
+    converted.className = "physical-card-converted";
+    converted.textContent = physicalConvertedPrice(listing.priceIdr);
+    converted.hidden = !converted.textContent;
+    priceWrap.append(price, converted);
+    top.append(title, priceWrap);
+
+    const description = document.createElement("p");
+    description.className = "physical-card-desc";
+    description.textContent = listing.description || "Contact the store for current item details.";
+    const store = document.createElement("p");
+    store.className = "physical-card-store";
+    store.textContent = listing.seller.storeName;
+    const area = document.createElement("p");
+    area.className = "physical-card-area";
+    area.textContent = [listing.area, listing.seller.city].filter(Boolean).join(" - ") || "Area not specified";
+    const tags = document.createElement("div");
+    tags.className = "physical-card-tags";
+    if (listing.seller.isVerified) tags.appendChild(physicalBadge("Verified business", "is-verified"));
+    if (listing.seller.isSupporter) tags.appendChild(physicalBadge("Supporter", "is-supporter"));
+    listing.fulfillment.forEach((value) => tags.appendChild(physicalBadge(fulfillmentLabels[value])));
+
+    const actions = document.createElement("div");
+    actions.className = "physical-card-actions";
+    const stock = document.createElement("span");
+    stock.className = "physical-stock";
+    stock.textContent = listing.stock > 0 ? `${listing.stock.toLocaleString()} available` : "Out of stock";
+    let order;
+    if (listing.seller.contactUrl && listing.stock > 0 && listing.seller.id !== physicalAccount?.id) {
+      order = document.createElement("a");
+      order.href = listing.seller.contactUrl;
+      order.target = "_blank";
+      order.rel = "noopener noreferrer";
+      order.textContent = "Order";
+    } else {
+      order = document.createElement("button");
+      order.type = "button";
+      order.disabled = true;
+      order.textContent = listing.seller.id === physicalAccount?.id ? "Your listing" : listing.stock > 0 ? "Contact unavailable" : "Unavailable";
+    }
+    order.className = "physical-order";
+    actions.append(stock, order);
+    body.append(top, description, store, area, tags, actions);
+    card.append(image, body);
+    return card;
+  }
+
+  function renderPhysicalAccount() {
+    const band = document.getElementById("physicalAccountBand");
+    const addButton = document.getElementById("addPhysicalListing");
+    const accountButton = document.getElementById("physicalAccountButton");
+    const settingsRow = document.getElementById("physicalAccountRow");
+    band.hidden = !physicalAccount;
+    addButton.hidden = !physicalAccount;
+    settingsRow.hidden = !physicalAccount;
+    accountButton.textContent = physicalAccount ? "Store settings" : "Seller sign in";
+    if (!physicalAccount) return;
+    document.getElementById("physicalStoreName").textContent = physicalAccount.storeName;
+    document.getElementById("physicalStoreMeta").textContent = [physicalAccount.city, physicalAccount.description].filter(Boolean).join(" - ") || "Store profile ready";
+    document.getElementById("settingsPhysicalStore").textContent = physicalAccount.storeName;
+    const badges = document.getElementById("physicalAccountBadges");
+    badges.replaceChildren();
+    if (physicalAccount.isVerified) badges.appendChild(physicalBadge("Verified business", "is-verified"));
+    if (physicalAccount.isSupporter) badges.appendChild(physicalBadge("Supporter", "is-supporter"));
+  }
+
+  function renderPhysicalMarket() {
+    const grid = document.getElementById("physicalGrid");
+    const status = document.getElementById("physicalMarketStatus");
+    if (!grid || !status) return;
+    renderPhysicalAccount();
+    grid.replaceChildren();
+    if (physicalListingsLoading && physicalListings.length === 0) {
+      status.textContent = "Loading local listings...";
+      grid.innerHTML = '<p class="empty-state">Loading nearby products and services...</p>';
+      return;
+    }
+    if (physicalListingsError && physicalListings.length === 0) {
+      status.textContent = physicalListingsError;
+      grid.innerHTML = '<p class="empty-state">Local listings are temporarily unavailable.</p>';
+      return;
+    }
+    const query = physicalSearchQuery.toLowerCase();
+    const filtered = physicalListings
+      .filter((listing) => physicalCategory === "all" || listing.category === physicalCategory)
+      .filter((listing) => !query || [listing.title, listing.description, listing.area, listing.seller.storeName, listing.seller.city]
+        .some((value) => String(value || "").toLowerCase().includes(query)))
+      .sort((a, b) => Number(b.seller.isSupporter) - Number(a.seller.isSupporter) || b.updatedAt - a.updatedAt);
+    status.textContent = `${filtered.length} local listing${filtered.length === 1 ? "" : "s"}${physicalCategory === "all" ? "" : ` in ${physicalCategory.replace("_", " ")}`}.`;
+    if (filtered.length === 0) {
+      grid.innerHTML = '<p class="empty-state">Nothing matches this category and area yet.</p>';
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    filtered.forEach((listing) => fragment.appendChild(physicalCard(listing)));
+    grid.appendChild(fragment);
+  }
+
+  async function loadPhysicalListings() {
+    if (physicalListingsLoading) return;
+    physicalListingsLoading = true;
+    physicalListingsError = "";
+    renderPhysicalMarket();
+  renderPhysicalMarket();
+  void refreshPhysicalAuth();
+  void loadPhysicalListings();
+    try {
+      const response = await fetch("/api/physical/listings", { headers: { Accept: "application/json" } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Local listings are temporarily unavailable");
+      physicalListings = (Array.isArray(data.listings) ? data.listings : []).map(normalizePhysicalListing).filter(Boolean);
+      physicalListingsLoaded = true;
+    } catch (error) {
+      physicalListingsError = error?.message || "Local listings are temporarily unavailable";
+      physicalListingsLoaded = true;
+    } finally {
+      physicalListingsLoading = false;
+      renderPhysicalMarket();
+    }
+  }
+
+  async function refreshPhysicalAuth() {
+    try {
+      const response = await fetch("/api/physical/auth", { credentials: "same-origin", headers: { Accept: "application/json" } });
+      const data = await response.json();
+      physicalAccount = response.ok && data.loggedIn ? data.account : null;
+      physicalPaymentsConfigured = Boolean(data.paymentsConfigured);
+    } catch {
+      physicalAccount = null;
+      physicalPaymentsConfigured = false;
+    }
+    renderPhysicalMarket();
+  }
+
+  function openPhysicalModal(modal) {
+    physicalReturnFocus = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    modal.querySelector("input, button")?.focus();
+  }
+
+  function closePhysicalModal(modal) {
+    if (modal.hidden) return;
+    modal.hidden = true;
+    document.body.style.overflow = "";
+    if (physicalReturnFocus instanceof HTMLElement && physicalReturnFocus.isConnected) physicalReturnFocus.focus();
+    physicalReturnFocus = null;
+  }
+
+  const physicalAuthModal = document.getElementById("physicalAuthModal");
+  const physicalProfileModal = document.getElementById("physicalProfileModal");
+  const physicalListingModal = document.getElementById("physicalListingModal");
+  const supporterModal = document.getElementById("supporterModal");
+
+  function setPhysicalAuthMode(mode) {
+    physicalAuthMode = mode === "register" ? "register" : "login";
+    const registering = physicalAuthMode === "register";
+    document.getElementById("physicalAuthTitle").textContent = registering ? "Create seller account" : "Seller sign in";
+    document.getElementById("submitPhysicalAuth").textContent = registering ? "Create account" : "Sign in";
+    document.getElementById("physicalPassword").autocomplete = registering ? "new-password" : "current-password";
+    document.querySelectorAll(".physical-register-field").forEach((field) => { field.hidden = !registering; });
+    document.getElementById("physicalLoginTab").classList.toggle("active", !registering);
+    document.getElementById("physicalRegisterTab").classList.toggle("active", registering);
+    document.getElementById("physicalLoginTab").setAttribute("aria-selected", String(!registering));
+    document.getElementById("physicalRegisterTab").setAttribute("aria-selected", String(registering));
+    document.getElementById("physicalAuthError").hidden = true;
+  }
+
+  function openPhysicalProfile() {
+    if (!physicalAccount) return;
+    document.getElementById("physicalProfileName").value = physicalAccount.displayName || "";
+    document.getElementById("physicalProfileStore").value = physicalAccount.storeName || "";
+    document.getElementById("physicalProfileCity").value = physicalAccount.city || "";
+    document.getElementById("physicalProfileDescription").value = physicalAccount.description || "";
+    document.getElementById("physicalProfileContact").value = physicalAccount.contactUrl || "";
+    document.getElementById("physicalProfileError").hidden = true;
+    openPhysicalModal(physicalProfileModal);
+  }
+
+  document.getElementById("physicalAccountButton").addEventListener("click", () => {
+    if (physicalAccount) openPhysicalProfile();
+    else {
+      setPhysicalAuthMode("login");
+      openPhysicalModal(physicalAuthModal);
+    }
+  });
+  document.getElementById("physicalLoginTab").addEventListener("click", () => setPhysicalAuthMode("login"));
+  document.getElementById("physicalRegisterTab").addEventListener("click", () => setPhysicalAuthMode("register"));
+  document.getElementById("closePhysicalAuth").addEventListener("click", () => closePhysicalModal(physicalAuthModal));
+  document.getElementById("cancelPhysicalAuth").addEventListener("click", () => closePhysicalModal(physicalAuthModal));
+  document.getElementById("physicalAuthForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = document.getElementById("physicalAuthError");
+    const submit = document.getElementById("submitPhysicalAuth");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const response = await fetch("/api/physical/auth", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: physicalAuthMode,
+          email: document.getElementById("physicalEmail").value,
+          password: document.getElementById("physicalPassword").value,
+          displayName: document.getElementById("physicalDisplayName").value,
+          storeName: document.getElementById("physicalRegisterStoreName").value,
+          city: document.getElementById("physicalRegisterCity").value,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Seller account request failed");
+      physicalAccount = data.account;
+      physicalPaymentsConfigured = Boolean(data.paymentsConfigured);
+      closePhysicalModal(physicalAuthModal);
+      document.getElementById("physicalAuthForm").reset();
+      renderPhysicalMarket();
+      void loadPhysicalListings();
+    } catch (failure) {
+      error.textContent = failure?.message || "Seller account request failed";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  document.getElementById("closePhysicalProfile").addEventListener("click", () => closePhysicalModal(physicalProfileModal));
+  document.getElementById("cancelPhysicalProfile").addEventListener("click", () => closePhysicalModal(physicalProfileModal));
+  document.getElementById("physicalProfileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = document.getElementById("physicalProfileError");
+    const submit = document.getElementById("savePhysicalProfile");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const response = await fetch("/api/physical/auth", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "profile",
+          displayName: document.getElementById("physicalProfileName").value,
+          storeName: document.getElementById("physicalProfileStore").value,
+          city: document.getElementById("physicalProfileCity").value,
+          description: document.getElementById("physicalProfileDescription").value,
+          contactUrl: document.getElementById("physicalProfileContact").value,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Store profile could not be saved");
+      physicalAccount = data.account;
+      closePhysicalModal(physicalProfileModal);
+      await loadPhysicalListings();
+    } catch (failure) {
+      error.textContent = failure?.message || "Store profile could not be saved";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  document.getElementById("addPhysicalListing").addEventListener("click", () => {
+    document.getElementById("physicalListingForm").reset();
+    document.querySelector('input[name="physicalFulfillment"][value="pickup"]').checked = true;
+    document.getElementById("physicalListingStock").value = "1";
+    document.getElementById("physicalListingArea").value = physicalAccount?.city || "";
+    document.getElementById("physicalListingError").hidden = true;
+    openPhysicalModal(physicalListingModal);
+  });
+  document.getElementById("closePhysicalListing").addEventListener("click", () => closePhysicalModal(physicalListingModal));
+  document.getElementById("cancelPhysicalListing").addEventListener("click", () => closePhysicalModal(physicalListingModal));
+  document.getElementById("physicalListingForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const error = document.getElementById("physicalListingError");
+    const submit = document.getElementById("savePhysicalListing");
+    error.hidden = true;
+    submit.disabled = true;
+    try {
+      const fulfillment = Array.from(document.querySelectorAll('input[name="physicalFulfillment"]:checked')).map((input) => input.value);
+      const response = await fetch("/api/physical/listings", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: document.getElementById("physicalListingName").value,
+          category: document.getElementById("physicalListingCategory").value,
+          priceIdr: Number(document.getElementById("physicalListingPrice").value),
+          stock: Number(document.getElementById("physicalListingStock").value),
+          area: document.getElementById("physicalListingArea").value,
+          description: document.getElementById("physicalListingDescription").value,
+          imageUrl: document.getElementById("physicalListingImage").value,
+          fulfillment,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Physical item could not be listed");
+      const listing = normalizePhysicalListing(data.listing);
+      if (listing) physicalListings.unshift(listing);
+      physicalListingsLoaded = true;
+      closePhysicalModal(physicalListingModal);
+      renderPhysicalMarket();
+    } catch (failure) {
+      error.textContent = failure?.message || "Physical item could not be listed";
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  document.getElementById("openSupporterPlans").addEventListener("click", () => {
+    const error = document.getElementById("supporterError");
+    error.hidden = physicalPaymentsConfigured;
+    error.textContent = physicalPaymentsConfigured ? "" : "Payments are not configured yet. Your listings still work normally.";
+    document.querySelectorAll("[data-supporter-plan]").forEach((button) => { button.disabled = !physicalPaymentsConfigured; });
+    openPhysicalModal(supporterModal);
+  });
+  document.getElementById("closeSupporterModal").addEventListener("click", () => closePhysicalModal(supporterModal));
+  document.querySelectorAll("[data-supporter-plan]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const error = document.getElementById("supporterError");
+      error.hidden = true;
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/physical/supporter", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: button.dataset.supporterPlan }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Supporter checkout could not be started");
+        const redirect = new URL(data.redirectUrl);
+        if (redirect.protocol !== "https:" || !redirect.hostname.endsWith(".midtrans.com")) throw new Error("Payment provider returned an invalid checkout link");
+        window.location.href = redirect.href;
+      } catch (failure) {
+        error.textContent = failure?.message || "Supporter checkout could not be started";
+        error.hidden = false;
+        button.disabled = false;
+      }
+    });
+  });
+
+  document.getElementById("physicalLogoutButton").addEventListener("click", async () => {
+    if (!confirm("Log out of the local seller account?")) return;
+    try {
+      await fetch("/api/physical/auth", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logout" }),
+      });
+    } finally {
+      physicalAccount = null;
+      renderPhysicalMarket();
+    }
+  });
+
+  document.querySelectorAll("[data-physical-cat]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll("[data-physical-cat]").forEach((candidate) => candidate.classList.toggle("active", candidate === tab));
+      physicalCategory = tab.dataset.physicalCat;
+      renderPhysicalMarket();
+    });
+  });
+  marketplaceSearch.addEventListener("input", () => {
+    if (activePageName() !== "physical") return;
+    physicalSearchQuery = marketplaceSearch.value.trim();
+    renderPhysicalMarket();
+  });
+  [physicalAuthModal, physicalProfileModal, physicalListingModal, supporterModal].forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closePhysicalModal(modal);
+    });
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    [supporterModal, physicalListingModal, physicalProfileModal, physicalAuthModal].find((modal) => !modal.hidden && (closePhysicalModal(modal), true));
+  });
+
       inventoryNext = null;
     }
 
