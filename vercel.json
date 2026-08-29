@@ -5,6 +5,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/physical/:action",
+      "destination": "/api/physical"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },
