@@ -20,6 +20,7 @@ const host = args.get("--host") || process.env.HOST || "0.0.0.0";
 const port = Number(args.get("--port") || process.env.PORT || 4321);
 
 const routes = new Map([
+  ["/api/blog", path.join(root, "api/blog.js")],
   ["/api/currency", path.join(root, "api/currency.js")],
   ["/api/marketplace/stores", path.join(root, "api/marketplace/stores.js")],
   ["/api/marketplace/bids", path.join(root, "api/marketplace/bids.js")],
