@@ -245,6 +245,32 @@
     white-space: nowrap;
   }
   .steam-auth { display: contents; }
+  .site-account-btn {
+    min-width: 112px;
+    margin-left: auto;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+  }
+  .site-account-btn:hover,
+  .site-account-btn.is-connected {
+    border-color: var(--nav-hover-border);
+    color: var(--text);
+  }
+  .google-mark {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    flex: 0 0 18px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #4285f4;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .topbar .steam-connect { margin-left: 0; }
   .steam-connect {
     min-width: 122px;
     padding: 7px 12px;
@@ -2368,6 +2394,7 @@
     .steam-btn {
       margin-left: 0;
     }
+    .site-account-btn { margin-left: auto; }
     .content {
       padding: 16px 14px 28px;
     }
@@ -2486,6 +2513,10 @@
     <header class="topbar">
       <h1 id="pageTitle">Fraxb</h1>
       <input class="search" type="text" placeholder="Search skins..." aria-label="Search skins" />
+      <button type="button" class="steam-btn site-account-btn" id="siteAccountButton" aria-label="Open Google or email marketplace sign in">
+        <span class="google-mark" aria-hidden="true">G</span>
+        <span id="siteAccountLabel">Google sign in</span>
+      </button>
       <div class="steam-auth" id="steamAuth">
         <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
           <svg id="steamConnectIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -2796,6 +2827,16 @@
             View rules
           </button>
         </div>
+        <div class="settings-row" id="siteAccountRow">
+          <div>
+            <p class="settings-label" data-i18n="settings.marketAccount">Marketplace account</p>
+            <p class="settings-sub" id="siteAccountStatus" data-i18n="settings.marketAccountHelp">Use Google or email for physical store tools</p>
+          </div>
+          <button class="settings-action" id="settingsSiteAccountButton" type="button">
+            <span class="google-mark" aria-hidden="true">G</span>
+            <span id="settingsSiteAccountLabel" data-i18n="settings.signIn">Sign in</span>
+          </button>
+        </div>
         <div class="settings-row" id="accountRow" hidden>
           <div>
             <p class="settings-label">Account</p>
@@ -2909,7 +2950,7 @@
 <div class="bid-modal" id="priceModal" role="dialog" aria-modal="true" aria-labelledby="priceDialogTitle" hidden>
   <section class="bid-dialog">
     <header class="bid-dialog-header">
-      <h2 class="bid-dialog-title" id="priceDialogTitle">Set item price</h2>
+      <h2 class="bid-dialog-title" id="priceDialogTitle" data-i18n="listing.setPrice">Set item price</h2>
       <button class="icon-button bid-dialog-close" id="closePriceModal" type="button" title="Close price editor" aria-label="Close price editor">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
@@ -2927,14 +2968,14 @@
           <input type="radio" name="listingMode" value="fixed" checked>
           <span class="listing-mode-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16v10H4V7Z"/><path d="M8 12h8"/></svg>
-            Fixed price
+            <span data-i18n="listing.fixed">Fixed price</span>
           </span>
         </label>
         <label class="listing-mode-option">
           <input type="radio" name="listingMode" value="auction">
           <span class="listing-mode-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg>
-            Auction
+            <span data-i18n="listing.auction">Auction</span>
           </span>
         </label>
       </div>
@@ -2946,7 +2987,7 @@
       <p class="bid-minimum" id="listingPriceHint">Buyers see this fixed price in their selected currency.</p>
       <p class="bid-error" id="priceError" role="alert" hidden></p>
       <div class="bid-dialog-actions">
-        <button class="bid-cancel" id="cancelPrice" type="button">Cancel</button>
+        <button class="bid-cancel" id="cancelPrice" type="button" data-i18n="common.cancel">Cancel</button>
         <button class="bid-submit" id="savePrice" type="submit">Save price</button>
       </div>
     </form>
@@ -2956,7 +2997,7 @@
 <div class="bid-modal" id="bidModal" role="dialog" aria-modal="true" aria-labelledby="bidDialogTitle" hidden>
   <section class="bid-dialog">
     <header class="bid-dialog-header">
-      <h2 class="bid-dialog-title" id="bidDialogTitle">Place bid</h2>
+      <h2 class="bid-dialog-title" id="bidDialogTitle" data-i18n="listing.bid">Place bid</h2>
       <button class="icon-button bid-dialog-close" id="closeBidModal" type="button" title="Close bid" aria-label="Close bid">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
@@ -2972,7 +3013,7 @@
       <div class="bid-current-row">
         <div>
           <p class="bid-current-label">Current bid</p>
-          <p class="bid-current-value" id="bidCurrentValue">No bids</p>
+          <p class="bid-current-value" id="bidCurrentValue" data-i18n="listing.noBids">No bids</p>
         </div>
         <p class="bid-current-user" id="bidCurrentUser"></p>
       </div>
@@ -2984,8 +3025,8 @@
       <p class="bid-minimum" id="bidMinimum"></p>
       <p class="bid-error" id="bidError" role="alert" hidden></p>
       <div class="bid-dialog-actions">
-        <button class="bid-cancel" id="cancelBid" type="button">Cancel</button>
-        <button class="bid-submit" id="submitBid" type="submit">Place bid</button>
+        <button class="bid-cancel" id="cancelBid" type="button" data-i18n="common.cancel">Cancel</button>
+        <button class="bid-submit" id="submitBid" type="submit" data-i18n="listing.bid">Place bid</button>
       </div>
     </form>
   </section>
@@ -3037,31 +3078,32 @@
       "category.all": "全部", "category.rifles": "步槍", "category.pistols": "手槍", "category.knives": "刀具", "category.gloves": "手套", "category.stickers": "貼紙", "category.charms": "吊飾", "category.cases": "武器箱",
       "inventory.title": "你的庫存", "inventory.showUnavailable": "顯示不可用商品", "trades.title": "交易", "trades.copy": "已連接 Steam 帳戶的私人交易紀錄。",
       "physical.title": "在地市場", "physical.copy": "依地區尋找餐點、日用品、服務與實體商品。", "blog.title": "FN 部落格", "blog.copy": "Fraxb 的專案、個人更新、圖片、遊戲作品與證書。",
-      "settings.title": "設定", "settings.currency": "貨幣", "settings.language": "語言", "settings.languageHelp": "變更市場介面語言", "common.noResults": "找不到符合的選項",
+      "settings.title": "設定", "settings.currency": "貨幣", "settings.language": "語言", "settings.languageHelp": "變更市場介面語言", "settings.marketAccount": "市場帳戶", "settings.marketAccountHelp": "使用 Google 或電子郵件管理實體商店", "settings.signIn": "登入", "common.noResults": "找不到符合的選項",
+      "listing.setPrice": "設定商品價格", "listing.fixed": "固定價格", "listing.auction": "競標", "listing.helpFixed": "買家會看到單一固定售價", "listing.helpAuction": "買家自行決定出價金額", "listing.price": "價格（USD）", "listing.startingPrice": "起標價（USD）", "listing.hintFixed": "買家會以所選貨幣看到此固定價格。", "listing.hintAuction": "首次出價必須達到此金額，後續出價必須更高。", "listing.startAuction": "開始競標", "listing.listSale": "刊登出售", "listing.save": "儲存刊登", "listing.startingBid": "起標價", "listing.fixedPrice": "固定價格", "listing.bid": "出價", "listing.bids": "次出價", "listing.buy": "購買", "listing.connect": "連接", "listing.yourItem": "你的商品", "listing.noBids": "尚無出價", "listing.list": "刊登", "listing.listed": "已刊登", "listing.mixedPrices": "多種價格", "common.cancel": "取消",
     },
     id: {
       "page.global": "Pasar Global", "page.market": "Pasar", "page.physical": "Pasar Lokal", "page.inventory": "Inventaris", "page.trades": "Perdagangan", "page.settings": "Pengaturan",
       "home.kicker": "Pasar Fraxb", "home.title": "Selamat datang di Fraxb Marketplace", "home.copy": "Tempat ringan untuk melihat item Steam digital, produk fisik lokal, dan karya publik Fraxb.",
       "market.digital": "Pasar digital", "market.physical": "Pasar fisik", "market.global": "Pasar Global", "market.digitalShort": "Digital", "market.physicalShort": "Fisik",
-      "inventory.title": "Inventaris Anda", "trades.title": "Perdagangan", "physical.title": "Pasar Lokal", "settings.title": "Pengaturan", "settings.currency": "Mata uang", "settings.language": "Bahasa", "settings.languageHelp": "Ubah bahasa antarmuka pasar", "common.noResults": "Tidak ada pilihan yang cocok",
+      "inventory.title": "Inventaris Anda", "trades.title": "Perdagangan", "physical.title": "Pasar Lokal", "settings.title": "Pengaturan", "settings.currency": "Mata uang", "settings.language": "Bahasa", "settings.languageHelp": "Ubah bahasa antarmuka pasar", "settings.marketAccount": "Akun marketplace", "settings.marketAccountHelp": "Gunakan Google atau email untuk toko fisik", "settings.signIn": "Masuk", "common.noResults": "Tidak ada pilihan yang cocok",
     },
     ms: {
       "page.global": "Pasaran Global", "page.market": "Pasaran", "page.physical": "Pasaran Tempatan", "page.inventory": "Inventori", "page.trades": "Dagangan", "page.settings": "Tetapan",
       "home.kicker": "Pasaran Fraxb", "home.title": "Selamat datang ke Fraxb Marketplace", "home.copy": "Tempat ringan untuk melihat item Steam digital, produk fizikal tempatan dan karya awam Fraxb.",
       "market.digital": "Pasaran digital", "market.physical": "Pasaran fizikal", "market.global": "Pasaran Global", "market.digitalShort": "Digital", "market.physicalShort": "Fizikal",
-      "inventory.title": "Inventori Anda", "trades.title": "Dagangan", "physical.title": "Pasaran Tempatan", "settings.title": "Tetapan", "settings.currency": "Mata wang", "settings.language": "Bahasa", "settings.languageHelp": "Tukar bahasa antara muka pasaran", "common.noResults": "Tiada pilihan sepadan",
+      "inventory.title": "Inventori Anda", "trades.title": "Dagangan", "physical.title": "Pasaran Tempatan", "settings.title": "Tetapan", "settings.currency": "Mata wang", "settings.language": "Bahasa", "settings.languageHelp": "Tukar bahasa antara muka pasaran", "settings.marketAccount": "Akaun marketplace", "settings.marketAccountHelp": "Gunakan Google atau e-mel untuk kedai fizikal", "settings.signIn": "Log masuk", "common.noResults": "Tiada pilihan sepadan",
     },
     ja: {
       "page.global": "グローバル市場", "page.market": "マーケット", "page.physical": "ローカル市場", "page.inventory": "インベントリ", "page.trades": "取引", "page.settings": "設定",
       "home.kicker": "Fraxb マーケット", "home.title": "Fraxb Marketplace へようこそ", "home.copy": "Steam のデジタル出品、地域の実物商品、Fraxb の公開作品を軽快に閲覧できます。",
       "market.digital": "デジタル市場", "market.physical": "実物市場", "market.global": "グローバル市場", "market.digitalShort": "デジタル", "market.physicalShort": "実物",
-      "inventory.title": "あなたのインベントリ", "trades.title": "取引", "physical.title": "ローカル市場", "settings.title": "設定", "settings.currency": "通貨", "settings.language": "言語", "settings.languageHelp": "マーケットの表示言語を変更", "common.noResults": "一致する項目はありません",
+      "inventory.title": "あなたのインベントリ", "trades.title": "取引", "physical.title": "ローカル市場", "settings.title": "設定", "settings.currency": "通貨", "settings.language": "言語", "settings.languageHelp": "マーケットの表示言語を変更", "settings.marketAccount": "マーケットアカウント", "settings.marketAccountHelp": "Google またはメールで実店舗を管理", "settings.signIn": "ログイン", "common.noResults": "一致する項目はありません",
     },
     ko: {
       "page.global": "글로벌 마켓", "page.market": "마켓", "page.physical": "로컬 마켓", "page.inventory": "인벤토리", "page.trades": "거래", "page.settings": "설정",
       "home.kicker": "Fraxb 마켓", "home.title": "Fraxb Marketplace에 오신 것을 환영합니다", "home.copy": "Steam 디지털 상품, 지역 실물 상품, Fraxb의 공개 작업을 가볍게 둘러보세요.",
       "market.digital": "디지털 마켓", "market.physical": "실물 마켓", "market.global": "글로벌 마켓", "market.digitalShort": "디지털", "market.physicalShort": "실물",
-      "inventory.title": "내 인벤토리", "trades.title": "거래", "physical.title": "로컬 마켓", "settings.title": "설정", "settings.currency": "통화", "settings.language": "언어", "settings.languageHelp": "마켓 인터페이스 언어 변경", "common.noResults": "일치하는 옵션이 없습니다",
+      "inventory.title": "내 인벤토리", "trades.title": "거래", "physical.title": "로컬 마켓", "settings.title": "설정", "settings.currency": "통화", "settings.language": "언어", "settings.languageHelp": "마켓 인터페이스 언어 변경", "settings.marketAccount": "마켓 계정", "settings.marketAccountHelp": "Google 또는 이메일로 실물 상점 관리", "settings.signIn": "로그인", "common.noResults": "일치하는 옵션이 없습니다",
     },
   };
   let currentLanguage = translations[localStorage.getItem(LANGUAGE_KEY)] ? localStorage.getItem(LANGUAGE_KEY) : "en";
@@ -3289,6 +3331,8 @@
     syncPageTitle(activePageName());
     renderGrid(currentCategory);
     renderInventory();
+    if (!priceModal.hidden) updateListingModeFields();
+    if (!bidModal.hidden) updateBidDialogValues();
     window.dispatchEvent(new CustomEvent("fn-language-change", { detail: { language: currentLanguage } }));
   }
 
@@ -3643,7 +3687,7 @@
   }
 
   function formatBid(auction) {
-    return auction.currentBidCents > 0 ? formatPrice(auction.currentBidCents / 100) : "No bids";
+    return auction.currentBidCents > 0 ? formatPrice(auction.currentBidCents / 100) : t("listing.noBids", "No bids");
   }
 
   function normalizePriceCents(value) {
@@ -3839,15 +3883,17 @@
   function updateListingModeFields() {
     const auctionMode = selectedListingMode() === "auction";
     document.getElementById("listingModeSummary").textContent = auctionMode
-      ? "Buyers choose how much they want to bid"
-      : "Buyers see one fixed selling price";
-    document.getElementById("listingPriceLabel").textContent = auctionMode ? "Starting bid (USD)" : "Price (USD)";
+      ? t("listing.helpAuction", "Buyers choose how much they want to bid")
+      : t("listing.helpFixed", "Buyers see one fixed selling price");
+    document.getElementById("listingPriceLabel").textContent = auctionMode
+      ? t("listing.startingPrice", "Starting bid (USD)")
+      : t("listing.price", "Price (USD)");
     document.getElementById("listingPriceHint").textContent = auctionMode
-      ? "The first bid must meet this amount. Later bids must be higher."
-      : "Buyers see this fixed price in their selected currency.";
+      ? t("listing.hintAuction", "The first bid must meet this amount. Later bids must be higher.")
+      : t("listing.hintFixed", "Buyers see this fixed price in their selected currency.");
     savePriceButton.textContent = listAfterPriceSave
-      ? (auctionMode ? "Start auction" : "List for sale")
-      : "Save listing";
+      ? (auctionMode ? t("listing.startAuction", "Start auction") : t("listing.listSale", "List for sale"))
+      : t("listing.save", "Save listing");
   }
 
   function openPriceModal(item, { listAfterSave = false, stackItems = [item] } = {}) {
@@ -4116,8 +4162,8 @@
       const label = document.createElement("span");
       label.className = "auction-label";
       label.textContent = isAuction
-        ? (auction.bidCount ? `${auction.bidCount} bid${auction.bidCount === 1 ? "" : "s"}` : "Starting bid")
-        : "Fixed price";
+        ? (auction.bidCount ? `${auction.bidCount} ${t("listing.bids", auction.bidCount === 1 ? "bid" : "bids")}` : t("listing.startingBid", "Starting bid"))
+        : t("listing.fixedPrice", "Fixed price");
       const value = document.createElement("span");
       value.className = "auction-value";
       value.textContent = isAuction && auction.currentBidCents > 0 ? formatBid(auction) : formatPrice(it.usd);
@@ -4132,7 +4178,9 @@
         button.innerHTML = isAuction
           ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg><span>Bid</span>'
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16v10H4V7Z"/><path d="M8 12h8"/></svg><span>Buy</span>';
-        const actionLabel = steamUser ? (isAuction ? "Bid" : "Buy") : "Connect";
+        const actionLabel = steamUser
+          ? (isAuction ? t("listing.bid", "Bid") : t("listing.buy", "Buy"))
+          : t("listing.connect", "Connect");
         button.querySelector("span").textContent = actionLabel;
         button.title = steamUser
           ? `${isAuction ? "Bid on" : "Buy"} ${it.name}`
@@ -4146,7 +4194,7 @@
       } else {
         const owner = document.createElement("span");
         owner.className = "auction-owner";
-        owner.textContent = "Your item";
+        owner.textContent = t("listing.yourItem", "Your item");
         strip.appendChild(owner);
       }
       card.appendChild(strip);
@@ -4235,7 +4283,7 @@
     const allPriced = items.every((item) => normalizePriceCents(item.priceCents) !== null);
     const priceValues = new Set(items.map((item) => normalizePriceCents(item.priceCents)));
     const samePrice = priceValues.size === 1;
-    const priceText = samePrice ? formatPrice(it.usd) : "Mixed prices";
+    const priceText = samePrice ? formatPrice(it.usd) : t("listing.mixedPrices", "Mixed prices");
     const quantityText = items.length > 1 ? ` x${items.length}` : "";
     row.innerHTML = `
       <div class="inv-media">
@@ -4251,7 +4299,7 @@
       <div class="inv-actions">
         <button type="button" class="inv-price ${allPriced && samePrice ? "" : "is-unpriced"}" ${canList ? 'title="Set price and sale type for this stack" aria-label="Set price and sale type"' : 'disabled title="Only tradable CS2 items can be priced"'}>${escapeHtml(priceText)}</button>
         <button class="list-toggle ${allListed ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
-          ${allListed ? `Listed${quantityText}` : `List${quantityText}`}
+          ${allListed ? `${t("listing.listed", "Listed")}${quantityText}` : `${t("listing.list", "List")}${quantityText}`}
         </button>
       </div>
     `;
@@ -4276,7 +4324,9 @@
           }
         });
         toggle.classList.toggle("is-listed", shouldList);
-        toggle.textContent = shouldList ? `Listed${quantityText}` : `List${quantityText}`;
+        toggle.textContent = shouldList
+          ? `${t("listing.listed", "Listed")}${quantityText}`
+          : `${t("listing.list", "List")}${quantityText}`;
         renderGrid(currentCategory);
         renderSellers();
         scheduleMarketplaceListingSave();

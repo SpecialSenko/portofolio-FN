@@ -131,8 +131,8 @@ function installDialogs() {
     <div class="bid-modal" id="physicalAuthModal" role="dialog" aria-modal="true" aria-labelledby="physicalAuthTitle" hidden>
       <section class="bid-dialog physical-modal">
         <header class="bid-dialog-header">
-          <h2 class="bid-dialog-title" id="physicalAuthTitle">Seller sign in</h2>
-          <button class="icon-button bid-dialog-close" data-close-physical="physicalAuthModal" type="button" title="Close" aria-label="Close seller sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+          <h2 class="bid-dialog-title" id="physicalAuthTitle">Marketplace sign in</h2>
+          <button class="icon-button bid-dialog-close" data-close-physical="physicalAuthModal" type="button" title="Close" aria-label="Close marketplace sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
         </header>
         <div class="cat-tabs physical-auth-tabs" role="tablist" aria-label="Seller account mode">
           <button class="cat-tab active" id="physicalLoginTab" type="button" role="tab" aria-selected="true">Sign in</button>
@@ -215,7 +215,7 @@ function closeModal(modal) {
 function setAuthMode(mode) {
   authMode = mode === "register" ? "register" : "login";
   const registering = authMode === "register";
-  element("physicalAuthTitle").textContent = registering ? "Create seller account" : "Seller sign in";
+  element("physicalAuthTitle").textContent = registering ? "Create marketplace account" : "Marketplace sign in";
   element("physicalAuthSubmit").textContent = registering ? "Create account" : "Sign in";
   element("physicalPassword").autocomplete = registering ? "new-password" : "current-password";
   document.querySelectorAll(".physical-register-field").forEach((field) => {
@@ -234,10 +234,30 @@ function renderAccount() {
   const addButton = element("addPhysicalListing");
   const accountButton = element("physicalAccountButton");
   const settingsRow = element("physicalAccountRow");
+  const siteButton = element("siteAccountButton");
+  const siteLabel = element("siteAccountLabel");
+  const settingsSiteButton = element("settingsSiteAccountButton");
+  const settingsSiteLabel = element("settingsSiteAccountLabel");
+  const siteStatus = element("siteAccountStatus");
   band.hidden = !account;
   addButton.hidden = !account;
   settingsRow.hidden = !account;
   accountButton.textContent = account ? "Store settings" : "Seller sign in";
+  siteButton?.classList.toggle("is-connected", Boolean(account));
+  if (siteLabel) siteLabel.textContent = account ? account.displayName : "Google sign in";
+  if (settingsSiteLabel) settingsSiteLabel.textContent = account ? "Store settings" : "Sign in";
+  if (settingsSiteButton) settingsSiteButton.title = account ? "Open marketplace account settings" : "Sign in with Google or email";
+  if (siteButton) {
+    siteButton.title = account
+      ? `Marketplace account: ${account.displayName}`
+      : googleClientId ? "Sign in with Google or email" : "Google setup required; email sign in is available";
+    siteButton.setAttribute("aria-label", siteButton.title);
+  }
+  if (siteStatus) {
+    siteStatus.textContent = account
+      ? `Connected as ${account.displayName} with ${account.signInMethod === "google" ? "Google" : "email"}`
+      : googleClientId ? "Use Google or email for physical store tools" : "Google setup required; email sign in is available";
+  }
   if (!account) return;
   element("physicalStoreName").textContent = account.storeName;
   element("physicalStoreMeta").textContent = [account.city, account.description].filter(Boolean).join(" - ") || account.email;
@@ -568,14 +588,22 @@ async function renderGoogleButton() {
   if (!googleClientId) {
     const status = document.createElement("p");
     status.className = "physical-google-status";
-    status.textContent = "Google sign-in is not configured yet";
+    status.textContent = "Google sign-in needs a Web Client ID; email sign-in is available below";
     zone.appendChild(status);
     return;
   }
   try {
     const google = await loadGoogleLibrary();
     google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
-    google.accounts.id.renderButton(zone, { type: "standard", theme: "outline", size: "large", text: "continue_with", shape: "rectangular", width: Math.min(360, zone.clientWidth || 360) });
+    google.accounts.id.renderButton(zone, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "rectangular",
+      locale: document.documentElement.lang || "en",
+      width: Math.min(360, zone.clientWidth || 360),
+    });
   } catch (error) {
     const status = document.createElement("p");
     status.className = "physical-google-status";
@@ -616,6 +644,7 @@ function bindEvents() {
   window.addEventListener("fn-language-change", () => {
     renderAccount();
     renderListings();
+    if (!element("physicalAuthModal").hidden) void renderGoogleButton();
     if (!element("physicalCartModal").hidden) renderCart();
   });
   document.querySelector(".search")?.addEventListener("input", (event) => {
@@ -631,10 +660,13 @@ function bindEvents() {
     document.querySelectorAll("[data-physical-cat]").forEach((item) => item.classList.toggle("active", item === button));
     renderListings();
   });
-  element("physicalAccountButton").addEventListener("click", () => {
+  function openMarketplaceAccount() {
     if (account) openProfile();
     else { setAuthMode("login"); openModal(element("physicalAuthModal")); void renderGoogleButton(); }
-  });
+  }
+  element("physicalAccountButton").addEventListener("click", openMarketplaceAccount);
+  element("siteAccountButton")?.addEventListener("click", openMarketplaceAccount);
+  element("settingsSiteAccountButton")?.addEventListener("click", openMarketplaceAccount);
   element("physicalLoginTab").addEventListener("click", () => setAuthMode("login"));
   element("physicalRegisterTab").addEventListener("click", () => setAuthMode("register"));
   element("physicalCartButton").addEventListener("click", () => { renderCart(); openModal(element("physicalCartModal")); });
