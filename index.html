@@ -1460,6 +1460,69 @@
   }
   .inv-list .empty-state { grid-column: 1 / -1; }
   .inv-list + #loadMoreInventory { margin-top: 14px; }
+  .inventory-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+  }
+  .inventory-filter-summary { color: var(--muted); font-size: 9.5px; }
+  .inventory-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text);
+    font-size: 9.5px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+  }
+  .inventory-filter-toggle input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .inventory-toggle-track {
+    position: relative;
+    width: 30px;
+    height: 17px;
+    flex: 0 0 30px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--panel);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .inventory-toggle-track::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: transform .15s ease, background .15s ease;
+  }
+  .inventory-filter-toggle input:checked + .inventory-toggle-track {
+    border-color: #4dffb2;
+    background: rgba(77, 255, 178, .12);
+  }
+  .inventory-filter-toggle input:checked + .inventory-toggle-track::after {
+    transform: translateX(13px);
+    background: #4dffb2;
+  }
+  .inventory-filter-toggle input:focus-visible + .inventory-toggle-track {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
   .inventory-games {
     position: relative;
     margin-top: 14px;
@@ -2120,6 +2183,7 @@
     .inv-row { min-height: 238px; grid-template-rows: 112px minmax(72px, 1fr) auto; }
     .inv-icon { height: 84px; }
     .inv-actions { gap: 6px; padding: 7px; }
+    .inventory-filter-bar { align-items: flex-start; flex-direction: column; }
     .currency-select {
       width: 100%;
     }
@@ -2262,6 +2326,14 @@
           <div class="game-picker-popover" id="gamePickerPopover" hidden>
             <div class="game-tabs" id="gameTabs" role="listbox" aria-label="Steam game inventory"></div>
           </div>
+        </div>
+        <div class="inventory-filter-bar" id="inventoryFilterBar" hidden>
+          <span class="inventory-filter-summary" id="inventoryFilterSummary"></span>
+          <label class="inventory-filter-toggle" title="Includes non-CS2 and non-tradable items">
+            <input id="showUnavailableInventory" type="checkbox">
+            <span class="inventory-toggle-track" aria-hidden="true"></span>
+            <span>Show unavailable</span>
+          </label>
         </div>
         <div class="inv-list" id="invList"></div>
         <button class="back-btn" id="loadMoreInventory" type="button" hidden>Load more</button>
@@ -2889,6 +2961,8 @@
   let inventoryTotal = 0;
   let inventoryNext = null;
   let inventoryRequestVersion = 0;
+  let showUnavailableInventoryItems = false;
+  const showUnavailableInventoryToggle = document.getElementById("showUnavailableInventory");
   const listedAssetIds = new Set();
   const listedItems = new Map();
   let listingSaveTimer = null;
@@ -2912,6 +2986,11 @@
   const gamePickerPopover = document.getElementById("gamePickerPopover");
   let gamePickerReturnFocus = null;
   const tierLabel = { normal: "Normal", stattrak: "StatTrak\u2122", holo: "Holo", "stattrak-holo": "StatTrak\u2122 Holo" };
+
+  showUnavailableInventoryToggle.addEventListener("change", () => {
+    showUnavailableInventoryItems = showUnavailableInventoryToggle.checked;
+    renderInventory();
+  });
 
   const currencies = {
     USD: { symbol: "$", rate: 1 },
@@ -2974,6 +3053,8 @@
         if (accountChanged) {
           inventoryRequestVersion += 1;
           inventory = [];
+          showUnavailableInventoryItems = false;
+          showUnavailableInventoryToggle.checked = false;
           inventoryLoaded = false;
           inventoryPrivate = false;
           cs2InventoryPrivate = false;
@@ -3580,12 +3661,16 @@
 
   let currentCategory = "all";
 
+  function isInventoryItemAvailable(item) {
+    return item?.appid === "730" && Boolean(item.tradable);
+  }
+
   function invRowEl(it) {
     const row = document.createElement("div");
     row.className = "inv-row";
     row.dataset.tier = it.tier || "normal";
     const image = trustedSteamImageUrl(it.icon);
-    const canList = it.appid === "730" && it.tradable;
+    const canList = isInventoryItemAvailable(it);
     const hasPrice = normalizePriceCents(it.priceCents) !== null;
     row.innerHTML = `
       <div class="inv-media">
@@ -3633,7 +3718,10 @@
 
   function renderInventory() {
     const list = document.getElementById("invList");
+    const filterBar = document.getElementById("inventoryFilterBar");
+    const filterSummary = document.getElementById("inventoryFilterSummary");
     list.innerHTML = "";
+    filterBar.hidden = true;
     if (!steamUser) {
       list.innerHTML = '<p class="empty-state">Connect Steam to load your personal inventory.</p>';
       return;
@@ -3655,8 +3743,21 @@
       return;
     }
 
+    const availableItems = inventory.filter(isInventoryItemAvailable);
+    const unavailableCount = inventory.length - availableItems.length;
+    filterBar.hidden = unavailableCount === 0;
+    showUnavailableInventoryToggle.checked = showUnavailableInventoryItems;
+    filterSummary.textContent = showUnavailableInventoryItems
+      ? `${availableItems.length} available, ${unavailableCount} unavailable shown.`
+      : `${availableItems.length} available, ${unavailableCount} unavailable hidden.`;
+    const visibleItems = showUnavailableInventoryItems ? inventory : availableItems;
+    if (visibleItems.length === 0) {
+      list.innerHTML = '<p class="empty-state">No tradable marketplace items were found in the loaded inventory.</p>';
+      return;
+    }
+
     const fragment = document.createDocumentFragment();
-    inventory.forEach((it) => fragment.appendChild(invRowEl(it)));
+    visibleItems.forEach((it) => fragment.appendChild(invRowEl(it)));
     list.appendChild(fragment);
   }
 
@@ -4120,6 +4221,8 @@
     inventoryError = "";
     inventoryTotal = 0;
     inventoryNext = null;
+    showUnavailableInventoryItems = false;
+    showUnavailableInventoryToggle.checked = false;
     listedAssetIds.clear();
     listedItems.clear();
     resetListingSyncState();
