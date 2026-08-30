@@ -109,7 +109,7 @@ test("marketplace stores persist and listings are verified against the signed St
     const saved = await invoke({
       method: "PUT",
       cookie: sessionCookie(),
-      body: { listings: [{ assetid: "9001", priceCents: 12345 }] },
+      body: { listings: [{ assetid: "9001", priceCents: 12345, saleMode: "fixed" }] },
     });
     assert.equal(saved.status, 200);
     assert.equal(saved.body.store.steamid, ownerSteamId);
@@ -117,6 +117,7 @@ test("marketplace stores persist and listings are verified against the signed St
     assert.equal(saved.body.store.items[0].name, "AK-47 | Persistent Test");
     assert.equal(saved.body.store.items[0].priceCents, 12345);
     assert.equal(saved.body.store.items[0].usd, 123.45);
+    assert.equal(saved.body.store.items[0].saleMode, "fixed");
     assert.equal(fetchCalls, 1);
 
     const publicStores = await invoke();

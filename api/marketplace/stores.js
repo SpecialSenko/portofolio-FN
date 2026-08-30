@@ -53,6 +53,7 @@ function parseListings(body) {
     const listings = body.listings.map((listing) => {
       const assetid = String(listing?.assetid || "");
       const priceCents = listing?.priceCents === null ? null : Number(listing?.priceCents);
+      const saleMode = listing?.saleMode === "auction" ? "auction" : "fixed";
       if (!/^\d{1,32}$/.test(assetid)) {
         const error = new Error("Every listing must contain a valid Steam asset ID");
         error.code = "INVALID_LISTINGS";
@@ -63,7 +64,7 @@ function parseListings(body) {
         error.code = "INVALID_LISTINGS";
         throw error;
       }
-      return { assetid, priceCents };
+      return { assetid, priceCents, saleMode };
     });
     if (new Set(listings.map((listing) => listing.assetid)).size !== listings.length) {
       const error = new Error("Each Steam asset can only appear once");
@@ -84,7 +85,7 @@ function parseListings(body) {
     error.code = "INVALID_LISTINGS";
     throw error;
   }
-  return assetids.map((assetid) => ({ assetid, priceCents: null }));
+  return assetids.map((assetid) => ({ assetid, priceCents: null, saleMode: "fixed" }));
 }
 
 function marketplaceItem(item) {
@@ -170,9 +171,11 @@ export default async function handler(req, res) {
     const requestedListings = parseListings(body);
     const assetids = requestedListings.map((listing) => listing.assetid);
     const prices = new Map(requestedListings.map((listing) => [listing.assetid, listing.priceCents]));
+    const saleModes = new Map(requestedListings.map((listing) => [listing.assetid, listing.saleMode]));
     const items = (await verifyListings(session.steamid, assetids)).map((item) => ({
       ...item,
       priceCents: prices.get(item.assetid) ?? null,
+      saleMode: saleModes.get(item.assetid) || "fixed",
     }));
     const store = await saveMarketplaceListings(session, items);
     sendJson(res, 200, { store }, { headers: { Vary: "Cookie" } });

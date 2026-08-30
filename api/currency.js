@@ -1,5 +1,9 @@
 const ECB_DAILY_RATES_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "IDR", "JPY", "AUD"];
+const OPEN_USD_RATES_URL = "https://open.er-api.com/v6/latest/USD";
+const SUPPORTED_CURRENCIES = [
+  "USD", "EUR", "GBP", "IDR", "JPY", "AUD", "MYR", "TWD",
+  "CNY", "SGD", "THB", "KRW", "CAD", "NZD", "PHP", "HKD",
+];
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 let rateCache = null;
 
@@ -28,22 +32,69 @@ export function parseEcbRates(xml) {
   return { base: "USD", date, rates };
 }
 
+export function parseOpenRates(payload) {
+  if (payload?.result !== "success" || payload?.base_code !== "USD" || !payload?.rates) {
+    throw new Error("Open currency rate feed is incomplete");
+  }
+  const rates = {};
+  for (const currency of SUPPORTED_CURRENCIES) {
+    const rate = Number(payload.rates[currency]);
+    if (Number.isFinite(rate) && rate > 0) rates[currency] = rate;
+  }
+  if (rates.USD !== 1 || !Number.isFinite(rates.TWD) || !Number.isFinite(rates.MYR)) {
+    throw new Error("Open currency rate feed is incomplete");
+  }
+  const updatedAt = Number(payload.time_last_update_unix);
+  const date = Number.isFinite(updatedAt)
+    ? new Date(updatedAt * 1000).toISOString().slice(0, 10)
+    : "";
+  return { base: "USD", date, rates };
+}
+
+async function fetchEcbRates(signal) {
+  const response = await fetch(ECB_DAILY_RATES_URL, {
+    headers: {
+      Accept: "application/xml, text/xml",
+      "Accept-Encoding": "identity",
+      "User-Agent": "fraxb-market/1.0",
+    },
+    signal,
+  });
+  if (!response.ok) throw new Error(`ECB rate feed returned HTTP ${response.status}`);
+  return parseEcbRates(await response.text());
+}
+
+async function fetchOpenRates(signal) {
+  const response = await fetch(OPEN_USD_RATES_URL, {
+    headers: { Accept: "application/json", "User-Agent": "fraxb-market/1.0" },
+    signal,
+  });
+  if (!response.ok) throw new Error(`Open rate feed returned HTTP ${response.status}`);
+  return parseOpenRates(await response.json());
+}
+
 async function loadRates() {
   if (rateCache && Date.now() - rateCache.createdAt < CACHE_TTL_MS) return rateCache.data;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6_000);
   try {
-    const response = await fetch(ECB_DAILY_RATES_URL, {
-      headers: {
-        Accept: "application/xml, text/xml",
-        "Accept-Encoding": "identity",
-        "User-Agent": "fraxb-market/1.0",
-      },
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`ECB rate feed returned HTTP ${response.status}`);
-    const data = parseEcbRates(await response.text());
+    const [ecbResult, openResult] = await Promise.allSettled([
+      fetchEcbRates(controller.signal),
+      fetchOpenRates(controller.signal),
+    ]);
+    const ecb = ecbResult.status === "fulfilled" ? ecbResult.value : null;
+    const open = openResult.status === "fulfilled" ? openResult.value : null;
+    if (!ecb && !open) {
+      if (controller.signal.aborted) throw new DOMException("Currency rate request timed out", "AbortError");
+      throw new Error("Currency rate feeds are unavailable");
+    }
+    const data = {
+      base: "USD",
+      date: ecb?.date || open?.date || "",
+      rates: { ...(open?.rates || {}), ...(ecb?.rates || {}) },
+      sources: [ecb ? "ECB" : null, open ? "ExchangeRate-API" : null].filter(Boolean),
+    };
     rateCache = { createdAt: Date.now(), data };
     return data;
   } finally {

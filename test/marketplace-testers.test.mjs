@@ -13,11 +13,13 @@ test("tester roles are assigned by the server-controlled Steam ID list", async (
     disabled: process.env.MARKETPLACE_STORAGE_DISABLED,
     kvUrl: process.env.KV_REST_API_URL,
     kvToken: process.env.KV_REST_API_TOKEN,
+    ownerSteamId: process.env.FN_OWNER_STEAM_ID,
   };
   process.env.MARKETPLACE_DATA_FILE = path.join(temporaryDirectory, "marketplace.json");
   delete process.env.MARKETPLACE_STORAGE_DISABLED;
   delete process.env.KV_REST_API_URL;
   delete process.env.KV_REST_API_TOKEN;
+  process.env.FN_OWNER_STEAM_ID = "76561199088840145";
 
   try {
     const testers = [
@@ -31,11 +33,14 @@ test("tester roles are assigned by the server-controlled Steam ID list", async (
     for (const [steamid, , role] of testers) {
       assert.equal(stores.find((store) => store.steamid === steamid)?.testerRole ?? null, role);
     }
+    assert.equal(stores.find((store) => store.steamid === "76561199088840145")?.isOwner, true);
+    assert.equal(stores.find((store) => store.steamid === "76561199181595673")?.isOwner, false);
   } finally {
     if (original.dataFile === undefined) delete process.env.MARKETPLACE_DATA_FILE; else process.env.MARKETPLACE_DATA_FILE = original.dataFile;
     if (original.disabled === undefined) delete process.env.MARKETPLACE_STORAGE_DISABLED; else process.env.MARKETPLACE_STORAGE_DISABLED = original.disabled;
     if (original.kvUrl === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = original.kvUrl;
     if (original.kvToken === undefined) delete process.env.KV_REST_API_TOKEN; else process.env.KV_REST_API_TOKEN = original.kvToken;
+    if (original.ownerSteamId === undefined) delete process.env.FN_OWNER_STEAM_ID; else process.env.FN_OWNER_STEAM_ID = original.ownerSteamId;
     await fs.rm(temporaryDirectory, { recursive: true, force: true });
   }
 });

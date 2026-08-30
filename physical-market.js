@@ -23,7 +23,10 @@ let category = "all";
 let searchQuery = "";
 let authMode = "login";
 let cart = readCart();
-let currencyRates = { USD: 1, EUR: .92, GBP: .79, IDR: 15800, JPY: 157, AUD: 1.52 };
+let currencyRates = {
+  USD: 1, EUR: .92, GBP: .79, IDR: 15800, JPY: 157, AUD: 1.52, MYR: 4.2, TWD: 30.5,
+  CNY: 7.2, SGD: 1.3, THB: 32.5, KRW: 1380, CAD: 1.36, NZD: 1.65, PHP: 57, HKD: 7.8,
+};
 let returnFocus = null;
 
 function element(id) {
@@ -57,7 +60,7 @@ function safeHttpsUrl(value) {
 }
 
 function formatIdr(value) {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat(document.documentElement.lang || "id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 }
 
 function selectedCurrency() {
@@ -69,7 +72,7 @@ function convertedPrice(priceIdr) {
   const currency = selectedCurrency();
   if (currency === "IDR" || !currencyRates.IDR || !currencyRates[currency]) return "";
   const amount = (priceIdr / currencyRates.IDR) * currencyRates[currency];
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat(document.documentElement.lang || undefined, {
     style: "currency",
     currency,
     maximumFractionDigits: amount >= 1000 ? 0 : 2,
@@ -598,7 +601,7 @@ async function handleGoogleCredential(response) {
 }
 
 function bindEvents() {
-  document.querySelector('[data-nav][data-page="physical"]')?.addEventListener("click", () => {
+  window.addEventListener("fn-physical-market-open", () => {
     searchQuery = "";
     if (!listings.length) void loadListings();
   });
@@ -610,8 +613,13 @@ function bindEvents() {
   window.addEventListener("storage", (event) => {
     if (event.key === CART_KEY) { cart = readCart(); renderCartCount(); }
   });
+  window.addEventListener("fn-language-change", () => {
+    renderAccount();
+    renderListings();
+    if (!element("physicalCartModal").hidden) renderCart();
+  });
   document.querySelector(".search")?.addEventListener("input", (event) => {
-    if (!document.querySelector('[data-nav][data-page="physical"]')?.classList.contains("active")) return;
+    if (document.querySelector('.page[data-page="physical"]')?.hidden) return;
     searchQuery = event.target.value.trim();
     renderListings();
   });

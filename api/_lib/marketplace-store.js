@@ -74,6 +74,11 @@ function testerRole(steamid) {
   return TESTER_ROLES.get(steamid) || null;
 }
 
+function isMarketplaceOwner(steamid) {
+  const ownerSteamId = String(process.env.FN_OWNER_STEAM_ID || process.env.STEAM_TRADE_OWNER_ID || "").trim();
+  return /^\d{17}$/.test(ownerSteamId) && ownerSteamId === steamid;
+}
+
 function normalizeAuction(value) {
   const currentBidCents = Math.max(0, Number.parseInt(value?.currentBidCents || "0", 10) || 0);
   const bidderSteamId = String(value?.bidder?.steamid || "");
@@ -103,6 +108,8 @@ function normalizeListing(item) {
   const category = ["rifles", "pistols", "knives", "gloves", "stickers", "charms", "cases"].includes(item?.cat)
     ? item.cat
     : null;
+  const auction = normalizeAuction(item?.auction);
+  const saleMode = item?.saleMode === "auction" || auction.bidCount > 0 ? "auction" : "fixed";
   return {
     id: `730:2:${assetid}`,
     assetid,
@@ -119,7 +126,8 @@ function normalizeListing(item) {
     priceCents,
     usd: priceCents === null ? null : priceCents / 100,
     forSale: true,
-    auction: normalizeAuction(item?.auction),
+    saleMode,
+    auction: saleMode === "auction" ? auction : normalizeAuction(null),
   };
 }
 
@@ -139,6 +147,7 @@ function normalizeStore(value) {
     name: cleanText(value?.name, "Steam User", 80),
     avatar: safeSteamImage(value?.avatar),
     isAlt: isMarkedAltAccount(steamid),
+    isOwner: isMarketplaceOwner(steamid),
     testerRole: testerRole(steamid),
     rating: Number.isFinite(rating) && rating >= 0 && rating <= 5 ? rating : null,
     ratingCount: Math.max(0, Number.parseInt(value?.ratingCount || "0", 10) || 0),
@@ -291,10 +300,13 @@ export async function upsertMarketplaceProfile(profile) {
 export async function saveMarketplaceListings(profile, items) {
   const now = Date.now();
   const existing = await getStore(profile.steamid);
-  const existingAuctions = new Map((existing?.items || []).map((item) => [item.assetid, item.auction]));
+  const existingItems = new Map((existing?.items || []).map((item) => [item.assetid, item]));
   const listingsWithAuctions = items.map((item) => ({
     ...item,
-    auction: existingAuctions.get(String(item.assetid || "")) || item.auction,
+    saleMode: item.saleMode === "auction" ? "auction" : "fixed",
+    auction: item.saleMode === "auction" && existingItems.get(String(item.assetid || ""))?.saleMode === "auction"
+      ? existingItems.get(String(item.assetid || "")).auction
+      : normalizeAuction(null),
   }));
   return putStore({
     ...(existing || {}),
@@ -322,7 +334,11 @@ for _, item in ipairs(store.items or {}) do
       current = tonumber(item.auction.currentBidCents) or 0
       count = tonumber(item.auction.bidCount) or 0
     end
-    if requested <= current then return 'ERR_BID_TOO_LOW:' .. tostring(current) end
+    local isAuction = item.saleMode == 'auction' or (item.saleMode == nil and count > 0)
+    if not isAuction then return 'ERR_LISTING_NOT_AUCTION' end
+    local minimumFloor = current
+    if current == 0 then minimumFloor = math.max((tonumber(item.priceCents) or 1) - 1, 0) end
+    if requested <= minimumFloor then return 'ERR_BID_TOO_LOW:' .. tostring(minimumFloor) end
     item.auction = {
       currentBidCents = requested,
       bidCount = count + 1,
@@ -346,6 +362,9 @@ function bidError(result) {
   }
   if (result === "ERR_SELF_BID") {
     return new MarketplaceBidError("SELF_BID", "You cannot bid on your own item");
+  }
+  if (result === "ERR_LISTING_NOT_AUCTION") {
+    return new MarketplaceBidError("LISTING_NOT_AUCTION", "This item is listed at a fixed price and does not accept bids");
   }
   if (typeof result === "string" && result.startsWith("ERR_BID_TOO_LOW:")) {
     const current = Number.parseInt(result.split(":")[1] || "0", 10) || 0;
@@ -390,9 +409,13 @@ export async function placeMarketplaceBid({ sellerSteamId, assetid, bidder, amou
     if (!store) throw new MarketplaceBidError("STORE_NOT_FOUND", "This seller store is no longer available");
     const item = store.items.find((listing) => listing.assetid === assetid);
     if (!item) throw new MarketplaceBidError("LISTING_NOT_FOUND", "This item is no longer listed");
+    if (item.saleMode !== "auction") {
+      throw new MarketplaceBidError("LISTING_NOT_AUCTION", "This item is listed at a fixed price and does not accept bids");
+    }
     const currentBidCents = item.auction.currentBidCents;
-    if (amountCents <= currentBidCents) {
-      throw new MarketplaceBidError("BID_TOO_LOW", "Your bid must be higher than the current bid", currentBidCents);
+    const minimumFloor = currentBidCents || Math.max((item.priceCents || 1) - 1, 0);
+    if (amountCents <= minimumFloor) {
+      throw new MarketplaceBidError("BID_TOO_LOW", "Your bid must meet the starting price or beat the current bid", minimumFloor);
     }
     item.auction = normalizeAuction({
       currentBidCents: amountCents,

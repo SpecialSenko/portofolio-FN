@@ -96,7 +96,7 @@ export default async function handler(req, res) {
     }
     if (error instanceof MarketplaceBidError) {
       const status = error.code === "SELF_BID" ? 403
-        : error.code === "BID_TOO_LOW" ? 409
+        : ["BID_TOO_LOW", "LISTING_NOT_AUCTION"].includes(error.code) ? 409
           : 404;
       sendJson(res, status, {
         error: error.message,

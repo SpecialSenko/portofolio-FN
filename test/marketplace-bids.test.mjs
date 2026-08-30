@@ -65,11 +65,20 @@ test("open marketplace auctions accept only higher session-bound bids", async ()
     marketable: true,
     tier: "normal",
     cat: "rifles",
+    priceCents: 500,
+    saleMode: "auction",
+  };
+  const fixedListing = {
+    ...listing,
+    assetid: "7002",
+    name: "AK-47 | Fixed Price",
+    priceCents: 750,
+    saleMode: "fixed",
   };
 
   try {
     await upsertMarketplaceProfile({ steamid: sellerSteamId, name: "Auction Seller", avatar: "" });
-    await saveMarketplaceListings({ steamid: sellerSteamId, name: "Auction Seller", avatar: "" }, [listing]);
+    await saveMarketplaceListings({ steamid: sellerSteamId, name: "Auction Seller", avatar: "" }, [listing, fixedListing]);
 
     const anonymous = await invoke({ body: { sellerSteamId, assetid: "7001", amountCents: 500 } });
     assert.equal(anonymous.status, 401);
@@ -87,6 +96,13 @@ test("open marketplace auctions accept only higher session-bound bids", async ()
     });
     assert.equal(selfBid.status, 403);
     assert.equal(selfBid.body.code, "SELF_BID");
+
+    const fixedPriceBid = await invoke({
+      cookie: sessionCookie(bidderSteamId, "Bidder"),
+      body: { sellerSteamId, assetid: "7002", amountCents: 800 },
+    });
+    assert.equal(fixedPriceBid.status, 409);
+    assert.equal(fixedPriceBid.body.code, "LISTING_NOT_AUCTION");
 
     const firstBid = await invoke({
       cookie: sessionCookie(bidderSteamId, "Bidder"),

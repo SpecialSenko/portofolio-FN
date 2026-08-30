@@ -68,6 +68,11 @@
     gap: 8px;
     padding: 6px 0 0;
   }
+  .sidebar-bottom .nav-item {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
   .twitch-btn {
     position: relative;
     display: grid;
@@ -770,6 +775,89 @@
     min-width: 0;
     padding: 20px 26px 40px;
   }
+  .home-page {
+    min-height: calc(100vh - 126px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(28px, 7vh, 72px) min(7vw, 82px);
+    border-bottom: 1px solid var(--border);
+  }
+  .home-page[hidden] { display: none; }
+  .home-kicker {
+    margin: 0 0 12px;
+    color: #7bffc3;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .home-title {
+    max-width: 760px;
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+  .home-copy {
+    max-width: 650px;
+    margin: 14px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .home-action {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .home-action:first-child { border-color: rgba(77, 255, 178, .48); }
+  .home-action svg { width: 15px; height: 15px; }
+  .market-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .market-heading .page-title { margin: 0; }
+  .market-mode-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(84px, 1fr));
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel);
+  }
+  .market-mode-button {
+    min-height: 29px;
+    padding: 5px 9px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 9.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .market-mode-button.active {
+    background: var(--nav-active-bg);
+    color: var(--text);
+  }
   .ad-rail {
     grid-column: 2;
     grid-row: 2;
@@ -985,6 +1073,27 @@
     transition: border-color .15s ease, transform .15s ease;
   }
   .seller-card:hover { border-color: var(--nav-hover-border); transform: translateY(-1px); }
+  .seller-card.is-owner {
+    border-color: rgba(246, 200, 95, .72);
+    box-shadow: 0 0 0 1px rgba(246, 200, 95, .16), 0 0 22px rgba(246, 200, 95, .2);
+  }
+  .seller-owner-crown {
+    position: absolute;
+    z-index: 2;
+    top: -17px;
+    left: 50%;
+    width: 30px;
+    height: 24px;
+    color: #f6c85f;
+    filter: drop-shadow(0 3px 5px rgba(246, 200, 95, .38));
+    transform: translateX(-50%);
+    animation: owner-crown-float 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes owner-crown-float {
+    0%, 100% { transform: translate(-50%, 0) rotate(-2deg); }
+    50% { transform: translate(-50%, -4px) rotate(2deg); }
+  }
   .seller-alt-badge {
     position: absolute;
     top: 8px;
@@ -1355,7 +1464,8 @@
   @media (prefers-reduced-motion: reduce) {
     .twitch-popover,
     .twitch-equalizer span,
-    .twitch-preview::after { animation: none; transition: none; }
+    .twitch-preview::after,
+    .seller-owner-crown { animation: none; transition: none; }
   }
   .currency-select {
     padding: 8px 10px;
@@ -1721,6 +1831,20 @@
     background: rgba(16, 18, 22, .88);
     color: var(--muted);
   }
+  .inv-quantity {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    min-width: 26px;
+    padding: 3px 6px;
+    border: 1px solid rgba(77, 255, 178, .45);
+    border-radius: 4px;
+    background: rgba(6, 17, 12, .9);
+    color: #7bffc3;
+    font-size: 9px;
+    font-weight: 800;
+    text-align: center;
+  }
   .inv-actions {
     min-height: 44px;
     display: grid;
@@ -1748,6 +1872,75 @@
     white-space: nowrap;
     cursor: pointer;
   }
+  .currency-select.is-hidden-select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .search-picker {
+    position: relative;
+    width: min(280px, 45vw);
+  }
+  .search-picker-input {
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 32px 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    outline: 0;
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 650;
+  }
+  .search-picker-input:focus { border-color: var(--nav-hover-border); }
+  .search-picker::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid var(--muted);
+    border-bottom: 1px solid var(--muted);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+  .search-picker-menu {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 5px);
+    right: 0;
+    width: 100%;
+    max-height: 242px;
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .36);
+  }
+  .search-picker-menu[hidden] { display: none; }
+  .search-picker-option {
+    width: 100%;
+    min-height: 32px;
+    padding: 7px 8px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text);
+    font-size: 10.5px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .search-picker-option:hover,
+  .search-picker-option.is-active { background: var(--nav-active-bg); }
+  .search-picker-empty { margin: 0; padding: 10px 8px; color: var(--muted); font-size: 10px; }
   .inv-price:hover,
   .inv-price:focus-visible { border-color: var(--nav-hover-border); color: var(--accent); }
   .inv-price.is-unpriced { color: #f6c85f; }
@@ -1790,7 +1983,7 @@
     cursor: pointer;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .variant-card.has-auction {
+  .variant-card.has-listing {
     height: 190px;
     cursor: default;
   }
@@ -1801,7 +1994,7 @@
     height: calc(100% - 30px);
     object-fit: contain;
   }
-  .variant-card.has-auction .item-art {
+  .variant-card.has-listing .item-art {
     inset: 6px 16px 76px;
     height: calc(100% - 82px);
   }
@@ -1880,7 +2073,7 @@
     transition: transform .2s ease, opacity .2s ease;
   }
   .variant-card:hover .info { transform: translateY(0); opacity: 1; }
-  .variant-card.has-auction .info {
+  .variant-card.has-listing .info {
     bottom: 42px;
     padding: 8px 10px;
     transform: translateY(0);
@@ -2001,6 +2194,41 @@
   }
   .bid-item-name { margin: 0; font-size: 12px; font-weight: 800; overflow-wrap: anywhere; }
   .bid-item-seller { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+  .listing-mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 13px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+  }
+  .listing-mode-option { position: relative; min-width: 0; cursor: pointer; }
+  .listing-mode-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .listing-mode-label {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .listing-mode-label svg { width: 14px; height: 14px; }
+  .listing-mode-option input:checked + .listing-mode-label {
+    border-color: var(--nav-hover-border);
+    background: var(--nav-active-bg);
+    color: var(--text);
+  }
+  .listing-mode-option input:focus-visible + .listing-mode-label {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
   .bid-current-row {
     display: flex;
     align-items: flex-end;
@@ -2187,6 +2415,7 @@
     .currency-select {
       width: 100%;
     }
+    .search-picker { width: 100%; }
     .ad-panel-head {
       align-items: flex-start;
       flex-direction: column;
@@ -2208,6 +2437,10 @@
     .blog-field-full { grid-column: auto; }
     .blog-grid { grid-template-columns: 1fr; }
     .settings-action { width: 100%; }
+    .home-page { min-height: calc(100vh - 210px); padding: 34px 4px; }
+    .home-title { font-size: 34px; }
+    .market-heading { align-items: flex-start; flex-direction: column; }
+    .market-mode-switch { width: 100%; }
   }
 </style>
 <link rel="stylesheet" href="/physical-market.css">
@@ -2223,12 +2456,6 @@
     <button class="sidebar-logo" id="sidebarLogo" title="Back to my store">FN</button>
     <button class="nav-item" data-nav data-page="global" title="Global Market" aria-label="Global Market">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>
-    </button>
-    <button class="nav-item active" data-nav data-page="market" title="Marketplace" aria-label="Marketplace">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 9h16l-1.5 9.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>
-    </button>
-    <button class="nav-item" data-nav data-page="physical" title="Local Market" aria-label="Local Market">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6M4 10c1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0 1.3 1.5 2.7 1.5 4 0"/></svg>
     </button>
     <button class="nav-item" data-nav data-page="inventory" title="Inventory" aria-label="Inventory" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
@@ -2246,6 +2473,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Z"/><path d="M15 3v4h4M9 11h6M9 15h6M9 19h4"/></svg>
     </button>
     <div class="sidebar-bottom">
+      <button class="nav-item" id="homeButton" type="button" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m4 11 8-7 8 7v9h-5v-6H9v6H4v-9Z"/></svg>
+      </button>
       <button class="steam-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
         <svg id="themeIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg>
       </button>
@@ -2254,7 +2484,7 @@
 
   <div class="main">
     <header class="topbar">
-      <h1 id="pageTitle">Marketplace</h1>
+      <h1 id="pageTitle">Fraxb</h1>
       <input class="search" type="text" placeholder="Search skins..." aria-label="Search skins" />
       <div class="steam-auth" id="steamAuth">
         <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
@@ -2274,16 +2504,38 @@
         <a class="link" id="inventoryAction" href="/api/auth/steam/login">Connect Steam</a>
       </div>
 
+      <section class="page home-page" data-page="home">
+        <p class="home-kicker" data-i18n="home.kicker">Fraxb marketplace</p>
+        <h2 class="home-title" data-i18n="home.title">Welcome to Fraxb Marketplace</h2>
+        <p class="home-copy" data-i18n="home.copy">A lightweight place to browse digital Steam listings, discover local physical products, and follow Fraxb's public work. Connect only when you need your private inventory or store tools.</p>
+        <div class="home-actions">
+          <button class="home-action" type="button" data-home-market="global">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>
+            <span data-i18n="market.digital">Digital market</span>
+          </button>
+          <button class="home-action" type="button" data-home-market="physical">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>
+            <span data-i18n="market.physical">Physical market</span>
+          </button>
+        </div>
+      </section>
+
       <section class="page" data-page="global" hidden>
-        <h2 class="page-title">Global Market</h2>
+        <div class="market-heading">
+          <h2 class="page-title" data-i18n="market.global">Global Market</h2>
+          <div class="market-mode-switch" role="group" aria-label="Marketplace type">
+            <button class="market-mode-button active" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
+            <button class="market-mode-button" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
+          </div>
+        </div>
 
         <div class="protect-banner">
           <span class="protect-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
           </span>
           <div>
-            <p class="protect-title">Trade Protection</p>
-            <p class="protect-copy">Listings and bids are recorded here. Confirm every Steam trade before completing payment; this site does not currently hold funds.</p>
+            <p class="protect-title" data-i18n="market.protection">Trade Protection</p>
+            <p class="protect-copy" data-i18n="market.protectionCopy">Listings and bids are recorded here. Confirm every Steam trade before completing payment; this site does not currently hold funds.</p>
           </div>
         </div>
 
@@ -2291,28 +2543,35 @@
         <div class="seller-grid" id="sellerGrid"></div>
       </section>
 
-      <section class="page" data-page="market">
+      <section class="page" data-page="market" hidden>
+        <div class="market-heading">
+          <span></span>
+          <div class="market-mode-switch" role="group" aria-label="Marketplace type">
+            <button class="market-mode-button active" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
+            <button class="market-mode-button" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
+          </div>
+        </div>
         <div class="viewing-banner" id="viewingBanner" hidden>
           <span id="viewingText"></span>
           <button class="back-btn" id="backToMyStore">Back to my store</button>
         </div>
 
         <div class="cat-tabs" aria-label="Item categories">
-          <button class="cat-tab active" data-cat="all">All</button>
-          <button class="cat-tab" data-cat="rifles">Rifles</button>
-          <button class="cat-tab" data-cat="pistols">Pistols</button>
-          <button class="cat-tab" data-cat="knives">Knives</button>
-          <button class="cat-tab" data-cat="gloves">Gloves</button>
-          <button class="cat-tab" data-cat="stickers">Stickers</button>
-          <button class="cat-tab" data-cat="charms">Charms</button>
-          <button class="cat-tab" data-cat="cases">Cases</button>
+          <button class="cat-tab active" data-cat="all" data-i18n="category.all">All</button>
+          <button class="cat-tab" data-cat="rifles" data-i18n="category.rifles">Rifles</button>
+          <button class="cat-tab" data-cat="pistols" data-i18n="category.pistols">Pistols</button>
+          <button class="cat-tab" data-cat="knives" data-i18n="category.knives">Knives</button>
+          <button class="cat-tab" data-cat="gloves" data-i18n="category.gloves">Gloves</button>
+          <button class="cat-tab" data-cat="stickers" data-i18n="category.stickers">Stickers</button>
+          <button class="cat-tab" data-cat="charms" data-i18n="category.charms">Charms</button>
+          <button class="cat-tab" data-cat="cases" data-i18n="category.cases">Cases</button>
         </div>
 
         <div class="grid" id="grid"></div>
       </section>
 
       <section class="page" data-page="inventory" hidden>
-        <h2 class="page-title">Your Inventory</h2>
+        <h2 class="page-title" data-i18n="inventory.title">Your Inventory</h2>
         <p class="page-copy" id="inventoryCopy">Items from your connected Steam account.</p>
         <div class="inventory-games" id="inventoryGames" hidden>
           <button class="game-picker-trigger" id="gamePickerButton" type="button" aria-haspopup="listbox" aria-controls="gameTabs" aria-expanded="false">
@@ -2332,7 +2591,7 @@
           <label class="inventory-filter-toggle" title="Includes non-CS2 and non-tradable items">
             <input id="showUnavailableInventory" type="checkbox">
             <span class="inventory-toggle-track" aria-hidden="true"></span>
-            <span>Show unavailable</span>
+            <span data-i18n="inventory.showUnavailable">Show unavailable</span>
           </label>
         </div>
         <div class="inv-list" id="invList"></div>
@@ -2340,8 +2599,8 @@
       </section>
 
       <section class="page" data-page="trades" hidden>
-        <h2 class="page-title">Trades</h2>
-        <p class="page-copy">Private trade history for the connected Steam account.</p>
+        <h2 class="page-title" data-i18n="trades.title">Trades</h2>
+        <p class="page-copy" data-i18n="trades.copy">Private trade history for the connected Steam account.</p>
         <div class="trade-access">
           <span class="trade-access-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -2358,8 +2617,8 @@
       <section class="page physical-page" data-page="physical" hidden>
         <div class="physical-head">
           <div>
-            <h2 class="page-title">Local Market</h2>
-            <p class="page-copy">Food, daily needs, services, and physical products available by area.</p>
+            <h2 class="page-title" data-i18n="physical.title">Local Market</h2>
+            <p class="page-copy" data-i18n="physical.copy">Food, daily needs, services, and physical products available by area.</p>
           </div>
           <div class="physical-actions">
             <button class="back-btn physical-cart-trigger" id="physicalCartButton" type="button" aria-label="Open physical cart">
@@ -2369,6 +2628,10 @@
             <button class="back-btn" id="physicalAccountButton" type="button">Seller sign in</button>
             <button class="physical-primary" id="addPhysicalListing" type="button" hidden>Add listing</button>
           </div>
+        </div>
+        <div class="market-mode-switch" role="group" aria-label="Marketplace type">
+          <button class="market-mode-button" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
+          <button class="market-mode-button active" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
         </div>
         <div class="physical-account-band" id="physicalAccountBand" hidden>
           <span class="physical-account-mark" aria-hidden="true">
@@ -2398,8 +2661,8 @@
         <header class="blog-head">
           <span class="blog-monogram" aria-hidden="true">FN</span>
           <div class="blog-heading">
-            <h2 class="blog-title">FN Blog</h2>
-            <p class="blog-subtitle">Fraxb projects, personal updates, pictures, game work, and certificates.</p>
+            <h2 class="blog-title" data-i18n="blog.title">FN Blog</h2>
+            <p class="blog-subtitle" data-i18n="blog.copy">Fraxb projects, personal updates, pictures, game work, and certificates.</p>
           </div>
           <button class="blog-new-post" id="blogComposeToggle" type="button" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -2469,7 +2732,7 @@
       </section>
 
       <section class="page" data-page="settings" hidden>
-        <h2 class="page-title">Settings</h2>
+        <h2 class="page-title" data-i18n="settings.title">Settings</h2>
         <div class="settings-row">
           <div>
             <p class="settings-label">Giveaway</p>
@@ -2479,16 +2742,48 @@
         </div>
         <div class="settings-row">
           <div>
-            <p class="settings-label">Currency</p>
+            <p class="settings-label" data-i18n="settings.currency">Currency</p>
             <p class="settings-sub" id="currencyStatus">Loading latest reference rates...</p>
           </div>
-          <select class="currency-select" id="currencySelect">
+          <div class="search-picker" id="currencyPicker">
+            <input class="search-picker-input" id="currencySearch" type="search" role="combobox" aria-label="Search currency" aria-controls="currencyMenu" aria-expanded="false" autocomplete="off">
+            <div class="search-picker-menu" id="currencyMenu" role="listbox" hidden></div>
+          </div>
+          <select class="currency-select is-hidden-select" id="currencySelect" aria-hidden="true" tabindex="-1">
             <option value="USD">USD - US Dollar</option>
             <option value="EUR">EUR - Euro</option>
             <option value="GBP">GBP - British Pound</option>
             <option value="IDR">IDR - Indonesian Rupiah</option>
             <option value="JPY">JPY - Japanese Yen</option>
             <option value="AUD">AUD - Australian Dollar</option>
+            <option value="MYR">MYR - Malaysian Ringgit</option>
+            <option value="TWD">TWD - New Taiwan Dollar</option>
+            <option value="CNY">CNY - Chinese Yuan</option>
+            <option value="SGD">SGD - Singapore Dollar</option>
+            <option value="THB">THB - Thai Baht</option>
+            <option value="KRW">KRW - South Korean Won</option>
+            <option value="CAD">CAD - Canadian Dollar</option>
+            <option value="NZD">NZD - New Zealand Dollar</option>
+            <option value="PHP">PHP - Philippine Peso</option>
+            <option value="HKD">HKD - Hong Kong Dollar</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div>
+            <p class="settings-label" data-i18n="settings.language">Language</p>
+            <p class="settings-sub" data-i18n="settings.languageHelp">Change the marketplace interface language</p>
+          </div>
+          <div class="search-picker" id="languagePicker">
+            <input class="search-picker-input" id="languageSearch" type="search" role="combobox" aria-label="Search language" aria-controls="languageMenu" aria-expanded="false" autocomplete="off">
+            <div class="search-picker-menu" id="languageMenu" role="listbox" hidden></div>
+          </div>
+          <select class="currency-select is-hidden-select" id="languageSelect" aria-hidden="true" tabindex="-1">
+            <option value="en">English</option>
+            <option value="zh-TW">Traditional Chinese - Taiwan</option>
+            <option value="id">Bahasa Indonesia</option>
+            <option value="ms">Bahasa Melayu</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
           </select>
         </div>
         <div class="settings-row">
@@ -2624,15 +2919,31 @@
         <img class="bid-item-image" id="priceItemImage" alt="" hidden>
         <div>
           <p class="bid-item-name" id="priceItemName"></p>
-          <p class="bid-item-seller">Your fixed Buy Now price</p>
+          <p class="bid-item-seller" id="listingModeSummary">Choose how buyers can purchase this item</p>
         </div>
       </div>
-      <label class="bid-field-label" for="priceAmount">Price (USD)</label>
+      <div class="listing-mode" role="radiogroup" aria-label="Listing type">
+        <label class="listing-mode-option">
+          <input type="radio" name="listingMode" value="fixed" checked>
+          <span class="listing-mode-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16v10H4V7Z"/><path d="M8 12h8"/></svg>
+            Fixed price
+          </span>
+        </label>
+        <label class="listing-mode-option">
+          <input type="radio" name="listingMode" value="auction">
+          <span class="listing-mode-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg>
+            Auction
+          </span>
+        </label>
+      </div>
+      <label class="bid-field-label" id="listingPriceLabel" for="priceAmount">Price (USD)</label>
       <div class="bid-input-wrap">
         <span class="bid-input-prefix">$</span>
         <input class="bid-input" id="priceAmount" name="priceAmount" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" required>
       </div>
-      <p class="bid-minimum">Displayed currencies are converted automatically from this USD price.</p>
+      <p class="bid-minimum" id="listingPriceHint">Buyers see this fixed price in their selected currency.</p>
       <p class="bid-error" id="priceError" role="alert" hidden></p>
       <div class="bid-dialog-actions">
         <button class="bid-cancel" id="cancelPrice" type="button">Cancel</button>
@@ -2715,14 +3026,57 @@
   const pages = Array.from(document.querySelectorAll(".page"));
   const pageTitle = document.getElementById("pageTitle");
   const adRail = document.getElementById("adRail");
-  const pageTitles = {
-    global: "Global Market",
-    market: "Marketplace",
-    physical: "Local Market",
-    inventory: "Inventory",
-    trades: "Trades",
-    blog: "FN Blog",
-    settings: "Settings",
+  const LANGUAGE_KEY = "fraxb_language";
+  const translations = {
+    en: {},
+    "zh-TW": {
+      "page.global": "全球市場", "page.market": "市場", "page.physical": "在地市場", "page.inventory": "庫存", "page.trades": "交易", "page.settings": "設定",
+      "home.kicker": "Fraxb 市場", "home.title": "歡迎來到 Fraxb 市場", "home.copy": "輕量瀏覽 Steam 數位商品、探索在地實體商品，並追蹤 Fraxb 的公開作品。只有在使用私人庫存或商店工具時才需要連接帳戶。",
+      "market.digital": "數位市場", "market.physical": "實體市場", "market.global": "全球市場", "market.digitalShort": "數位", "market.physicalShort": "實體",
+      "market.protection": "交易保護", "market.protectionCopy": "刊登與出價會記錄在此。付款前請確認每筆 Steam 交易；本站目前不保管資金。",
+      "category.all": "全部", "category.rifles": "步槍", "category.pistols": "手槍", "category.knives": "刀具", "category.gloves": "手套", "category.stickers": "貼紙", "category.charms": "吊飾", "category.cases": "武器箱",
+      "inventory.title": "你的庫存", "inventory.showUnavailable": "顯示不可用商品", "trades.title": "交易", "trades.copy": "已連接 Steam 帳戶的私人交易紀錄。",
+      "physical.title": "在地市場", "physical.copy": "依地區尋找餐點、日用品、服務與實體商品。", "blog.title": "FN 部落格", "blog.copy": "Fraxb 的專案、個人更新、圖片、遊戲作品與證書。",
+      "settings.title": "設定", "settings.currency": "貨幣", "settings.language": "語言", "settings.languageHelp": "變更市場介面語言", "common.noResults": "找不到符合的選項",
+    },
+    id: {
+      "page.global": "Pasar Global", "page.market": "Pasar", "page.physical": "Pasar Lokal", "page.inventory": "Inventaris", "page.trades": "Perdagangan", "page.settings": "Pengaturan",
+      "home.kicker": "Pasar Fraxb", "home.title": "Selamat datang di Fraxb Marketplace", "home.copy": "Tempat ringan untuk melihat item Steam digital, produk fisik lokal, dan karya publik Fraxb.",
+      "market.digital": "Pasar digital", "market.physical": "Pasar fisik", "market.global": "Pasar Global", "market.digitalShort": "Digital", "market.physicalShort": "Fisik",
+      "inventory.title": "Inventaris Anda", "trades.title": "Perdagangan", "physical.title": "Pasar Lokal", "settings.title": "Pengaturan", "settings.currency": "Mata uang", "settings.language": "Bahasa", "settings.languageHelp": "Ubah bahasa antarmuka pasar", "common.noResults": "Tidak ada pilihan yang cocok",
+    },
+    ms: {
+      "page.global": "Pasaran Global", "page.market": "Pasaran", "page.physical": "Pasaran Tempatan", "page.inventory": "Inventori", "page.trades": "Dagangan", "page.settings": "Tetapan",
+      "home.kicker": "Pasaran Fraxb", "home.title": "Selamat datang ke Fraxb Marketplace", "home.copy": "Tempat ringan untuk melihat item Steam digital, produk fizikal tempatan dan karya awam Fraxb.",
+      "market.digital": "Pasaran digital", "market.physical": "Pasaran fizikal", "market.global": "Pasaran Global", "market.digitalShort": "Digital", "market.physicalShort": "Fizikal",
+      "inventory.title": "Inventori Anda", "trades.title": "Dagangan", "physical.title": "Pasaran Tempatan", "settings.title": "Tetapan", "settings.currency": "Mata wang", "settings.language": "Bahasa", "settings.languageHelp": "Tukar bahasa antara muka pasaran", "common.noResults": "Tiada pilihan sepadan",
+    },
+    ja: {
+      "page.global": "グローバル市場", "page.market": "マーケット", "page.physical": "ローカル市場", "page.inventory": "インベントリ", "page.trades": "取引", "page.settings": "設定",
+      "home.kicker": "Fraxb マーケット", "home.title": "Fraxb Marketplace へようこそ", "home.copy": "Steam のデジタル出品、地域の実物商品、Fraxb の公開作品を軽快に閲覧できます。",
+      "market.digital": "デジタル市場", "market.physical": "実物市場", "market.global": "グローバル市場", "market.digitalShort": "デジタル", "market.physicalShort": "実物",
+      "inventory.title": "あなたのインベントリ", "trades.title": "取引", "physical.title": "ローカル市場", "settings.title": "設定", "settings.currency": "通貨", "settings.language": "言語", "settings.languageHelp": "マーケットの表示言語を変更", "common.noResults": "一致する項目はありません",
+    },
+    ko: {
+      "page.global": "글로벌 마켓", "page.market": "마켓", "page.physical": "로컬 마켓", "page.inventory": "인벤토리", "page.trades": "거래", "page.settings": "설정",
+      "home.kicker": "Fraxb 마켓", "home.title": "Fraxb Marketplace에 오신 것을 환영합니다", "home.copy": "Steam 디지털 상품, 지역 실물 상품, Fraxb의 공개 작업을 가볍게 둘러보세요.",
+      "market.digital": "디지털 마켓", "market.physical": "실물 마켓", "market.global": "글로벌 마켓", "market.digitalShort": "디지털", "market.physicalShort": "실물",
+      "inventory.title": "내 인벤토리", "trades.title": "거래", "physical.title": "로컬 마켓", "settings.title": "설정", "settings.currency": "통화", "settings.language": "언어", "settings.languageHelp": "마켓 인터페이스 언어 변경", "common.noResults": "일치하는 옵션이 없습니다",
+    },
+  };
+  let currentLanguage = translations[localStorage.getItem(LANGUAGE_KEY)] ? localStorage.getItem(LANGUAGE_KEY) : "en";
+  let languagePickerControl = null;
+
+  function t(key, fallback = "") {
+    return translations[currentLanguage]?.[key] || translations.en[key] || fallback || key;
+  }
+
+  window.fnTranslate = t;
+
+  const pageTitleKeys = {
+    home: ["page.home", "Fraxb"], global: ["page.global", "Global Market"], market: ["page.market", "Marketplace"],
+    physical: ["page.physical", "Local Market"], inventory: ["page.inventory", "Inventory"], trades: ["page.trades", "Trades"],
+    blog: ["page.blog", "FN Blog"], settings: ["page.settings", "Settings"],
   };
 
   let currentViewSeller = null;
@@ -2733,7 +3087,7 @@
   let marketplaceRequestVersion = 0;
 
   function activePageName() {
-    return document.querySelector("[data-nav].active")?.dataset.page || "market";
+    return pages.find((page) => !page.hidden)?.dataset.page || "home";
   }
 
   function syncPageTitle(name) {
@@ -2741,7 +3095,8 @@
       pageTitle.textContent = `${currentViewSeller.name}'s Store`;
       return;
     }
-    pageTitle.textContent = pageTitles[name] || "Marketplace";
+    const [key, fallback] = pageTitleKeys[name] || ["page.market", "Marketplace"];
+    pageTitle.textContent = t(key, fallback);
   }
 
   function showPage(name) {
@@ -2751,16 +3106,17 @@
     const showAdRail = name === "global";
     adRail.hidden = !showAdRail;
     adRail.closest(".main").classList.toggle("has-ad-rail", showAdRail);
-    document.getElementById("inventoryBanner").hidden = name === "physical" || name === "blog";
+    document.getElementById("inventoryBanner").hidden = ["home", "physical", "blog"].includes(name);
     const search = document.querySelector(".search");
     if (search) {
-      search.hidden = name === "blog";
+      search.hidden = name === "home" || name === "blog";
       search.placeholder = name === "physical" ? "Search local products..." : "Search skins...";
       search.setAttribute("aria-label", name === "physical" ? "Search local products" : "Search skins");
       if (name === "physical") search.value = "";
     }
     syncPageTitle(name);
     updateSidebarLogo(name);
+    if (name === "physical") window.dispatchEvent(new CustomEvent("fn-physical-market-open"));
   }
 
   function updateSidebarLogo(page) {
@@ -2814,6 +3170,127 @@
       if (item.dataset.page === "blog") void loadBlogPosts();
     });
   });
+
+  function activateMarketPage(name) {
+    const page = name === "physical" ? "physical" : "global";
+    navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
+    showPage(page);
+  }
+
+  document.querySelectorAll("[data-market-mode]").forEach((button) => {
+    button.addEventListener("click", () => activateMarketPage(button.dataset.marketMode));
+  });
+  document.querySelectorAll("[data-home-market]").forEach((button) => {
+    button.addEventListener("click", () => activateMarketPage(button.dataset.homeMarket));
+  });
+  document.getElementById("homeButton").addEventListener("click", () => {
+    hideAdPopover();
+    hideTwitchPopover({ immediate: true });
+    navItems.forEach((item) => item.classList.remove("active"));
+    showPage("home");
+  });
+
+  function setupSearchPicker({ selectId, inputId, menuId }) {
+    const select = document.getElementById(selectId);
+    const input = document.getElementById(inputId);
+    const menu = document.getElementById(menuId);
+    const options = Array.from(select.options).map((option) => ({ value: option.value, label: option.textContent.trim() }));
+    let activeIndex = 0;
+
+    function selectedOption() {
+      return options.find((option) => option.value === select.value) || options[0];
+    }
+
+    function close({ restoreLabel = true } = {}) {
+      menu.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      if (restoreLabel) input.value = selectedOption().label;
+    }
+
+    function choose(option) {
+      if (!option) return;
+      select.value = option.value;
+      input.value = option.label;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+      close({ restoreLabel: false });
+      input.focus();
+    }
+
+    function render(query = "") {
+      const normalized = query.trim().toLocaleLowerCase(currentLanguage);
+      const filtered = options.filter((option) => option.label.toLocaleLowerCase(currentLanguage).includes(normalized));
+      activeIndex = Math.min(activeIndex, Math.max(0, filtered.length - 1));
+      menu.replaceChildren();
+      if (filtered.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "search-picker-empty";
+        empty.textContent = t("common.noResults", "No matching options");
+        menu.appendChild(empty);
+      } else {
+        filtered.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.className = "search-picker-option";
+          button.classList.toggle("is-active", index === activeIndex);
+          button.type = "button";
+          button.role = "option";
+          button.setAttribute("aria-selected", String(option.value === select.value));
+          button.textContent = option.label;
+          button.addEventListener("pointerdown", (event) => event.preventDefault());
+          button.addEventListener("click", () => choose(option));
+          menu.appendChild(button);
+        });
+      }
+      menu.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+    }
+
+    input.value = selectedOption().label;
+    input.addEventListener("focus", () => {
+      input.select();
+      activeIndex = 0;
+      render("");
+    });
+    input.addEventListener("input", () => {
+      activeIndex = 0;
+      render(input.value);
+    });
+    input.addEventListener("keydown", (event) => {
+      const candidates = Array.from(menu.querySelectorAll(".search-picker-option"));
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        input.blur();
+        return;
+      }
+      if (!["ArrowDown", "ArrowUp", "Enter"].includes(event.key)) return;
+      event.preventDefault();
+      if (menu.hidden) render("");
+      if (event.key === "Enter") {
+        candidates[activeIndex]?.click();
+        return;
+      }
+      activeIndex = event.key === "ArrowDown"
+        ? Math.min(activeIndex + 1, Math.max(0, candidates.length - 1))
+        : Math.max(activeIndex - 1, 0);
+      candidates.forEach((button, index) => button.classList.toggle("is-active", index === activeIndex));
+      candidates[activeIndex]?.scrollIntoView({ block: "nearest" });
+    });
+    input.addEventListener("blur", () => close());
+    return { sync: () => { input.value = selectedOption().label; } };
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = currentLanguage;
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      if (!element.dataset.i18nFallback) element.dataset.i18nFallback = element.textContent.trim();
+      element.textContent = t(element.dataset.i18n, element.dataset.i18nFallback);
+    });
+    languagePickerControl?.sync();
+    syncPageTitle(activePageName());
+    renderGrid(currentCategory);
+    renderInventory();
+    window.dispatchEvent(new CustomEvent("fn-language-change", { detail: { language: currentLanguage } }));
+  }
 
   const adPopupButton = document.getElementById("adPopupButton");
   const adPopover = document.getElementById("adPopover");
@@ -2993,14 +3470,13 @@
   });
 
   const currencies = {
-    USD: { symbol: "$", rate: 1 },
-    EUR: { symbol: "\u20ac", rate: 0.92 },
-    GBP: { symbol: "\u00a3", rate: 0.79 },
-    IDR: { symbol: "Rp", rate: 15800 },
-    JPY: { symbol: "\u00a5", rate: 157 },
-    AUD: { symbol: "A$", rate: 1.52 },
+    USD: { rate: 1 }, EUR: { rate: 0.92 }, GBP: { rate: 0.79 }, IDR: { rate: 15800 },
+    JPY: { rate: 157 }, AUD: { rate: 1.52 }, MYR: { rate: 4.2 }, TWD: { rate: 30.5 },
+    CNY: { rate: 7.2 }, SGD: { rate: 1.3 }, THB: { rate: 32.5 }, KRW: { rate: 1380 },
+    CAD: { rate: 1.36 }, NZD: { rate: 1.65 }, PHP: { rate: 57 }, HKD: { rate: 7.8 },
   };
-  let currentCurrency = "USD";
+  const CURRENCY_KEY = "fraxb_currency";
+  let currentCurrency = currencies[localStorage.getItem(CURRENCY_KEY)] ? localStorage.getItem(CURRENCY_KEY) : "USD";
 
   const connectBtn = document.getElementById("steamConnectBtn");
   const connectLabel = document.getElementById("steamConnectLabel");
@@ -3017,9 +3493,7 @@
     });
     if (!loggedIn && privatePageWasActive) {
       navItems.forEach((item) => item.classList.remove("active"));
-      const marketNav = document.querySelector('[data-nav][data-page="market"]');
-      marketNav?.classList.add("active");
-      showPage("market");
+      activateMarketPage("global");
     }
     if (!connectBtn) return;
 
@@ -3127,12 +3601,12 @@
     if (!Number.isFinite(usd)) return "Unpriced";
     const c = currencies[currentCurrency];
     const amount = usd * c.rate;
-    const decimals = amount >= 1000 ? 0 : 2;
-    const formatted = amount.toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    return `${c.symbol}${formatted}`;
+    return new Intl.NumberFormat(currentLanguage, {
+      style: "currency",
+      currency: currentCurrency,
+      minimumFractionDigits: amount >= 1000 ? 0 : 2,
+      maximumFractionDigits: amount >= 1000 ? 0 : 2,
+    }).format(amount);
   }
 
   function escapeHtml(value) {
@@ -3204,6 +3678,7 @@
         priceCents,
         usd: priceCents === null ? null : priceCents / 100,
         forSale: true,
+        saleMode: item.saleMode === "auction" ? "auction" : "fixed",
         auction: normalizeAuction(item.auction),
       };
     }).filter(Boolean);
@@ -3213,6 +3688,7 @@
       name: String(store.name || "Steam User"),
       avatar: trustedSteamImageUrl(store.avatar),
       isAlt: Boolean(store.isAlt),
+      isOwner: Boolean(store.isOwner),
       testerRole: ["first", "second", "special"].includes(store.testerRole) ? store.testerRole : null,
       rating: Number.isFinite(rating) ? rating.toFixed(1) : null,
       ratingCount: Number.parseInt(store.ratingCount || "0", 10) || 0,
@@ -3244,6 +3720,7 @@
       const persistedListing = listedItems.get(item.id);
       item.forSale = listedAssetIds.has(item.id);
       item.auction = persistedListing?.auction || item.auction || normalizeAuction(null);
+      item.saleMode = persistedListing?.saleMode === "auction" ? "auction" : "fixed";
       item.priceCents = normalizePriceCents(persistedListing?.priceCents ?? item.priceCents);
       item.usd = item.priceCents === null ? null : item.priceCents / 100;
       if (item.forSale) listedItems.set(item.id, item);
@@ -3304,6 +3781,7 @@
       .map((item) => ({
         assetid: item.assetid,
         priceCents: normalizePriceCents(item.priceCents),
+        saleMode: item.saleMode === "auction" ? "auction" : "fixed",
       }));
     listingSyncSaving = true;
     listingSyncError = "";
@@ -3348,16 +3826,38 @@
   const priceAmountInput = document.getElementById("priceAmount");
   const priceError = document.getElementById("priceError");
   const savePriceButton = document.getElementById("savePrice");
+  const listingModeInputs = Array.from(document.querySelectorAll('input[name="listingMode"]'));
   let activePriceItem = null;
+  let activePriceStack = [];
   let listAfterPriceSave = false;
   let priceReturnFocus = null;
 
-  function openPriceModal(item, { listAfterSave = false } = {}) {
+  function selectedListingMode() {
+    return listingModeInputs.find((input) => input.checked)?.value === "auction" ? "auction" : "fixed";
+  }
+
+  function updateListingModeFields() {
+    const auctionMode = selectedListingMode() === "auction";
+    document.getElementById("listingModeSummary").textContent = auctionMode
+      ? "Buyers choose how much they want to bid"
+      : "Buyers see one fixed selling price";
+    document.getElementById("listingPriceLabel").textContent = auctionMode ? "Starting bid (USD)" : "Price (USD)";
+    document.getElementById("listingPriceHint").textContent = auctionMode
+      ? "The first bid must meet this amount. Later bids must be higher."
+      : "Buyers see this fixed price in their selected currency.";
+    savePriceButton.textContent = listAfterPriceSave
+      ? (auctionMode ? "Start auction" : "List for sale")
+      : "Save listing";
+  }
+
+  function openPriceModal(item, { listAfterSave = false, stackItems = [item] } = {}) {
     if (!steamUser || item?.appid !== "730" || !item.tradable) return;
     hideAdPopover();
     hideTwitchPopover({ immediate: true });
     priceReturnFocus = document.activeElement;
     activePriceItem = item;
+    activePriceStack = stackItems.filter((candidate) => candidate?.appid === "730" && candidate.tradable);
+    if (activePriceStack.length === 0) activePriceStack = [item];
     listAfterPriceSave = listAfterSave;
     priceError.hidden = true;
     priceError.textContent = "";
@@ -3368,11 +3868,16 @@
     image.hidden = !imageUrl;
     if (imageUrl) image.src = imageUrl;
     else image.removeAttribute("src");
-    document.getElementById("priceItemName").textContent = item.name;
+    document.getElementById("priceItemName").textContent = activePriceStack.length > 1
+      ? `${item.name} x${activePriceStack.length}`
+      : item.name;
 
     const currentPriceCents = normalizePriceCents(item.priceCents);
     priceAmountInput.value = currentPriceCents === null ? "" : (currentPriceCents / 100).toFixed(2);
-    savePriceButton.textContent = listAfterSave ? "Save and list" : "Save price";
+    listingModeInputs.forEach((input) => {
+      input.checked = input.value === (item.saleMode === "auction" ? "auction" : "fixed");
+    });
+    updateListingModeFields();
     priceModal.hidden = false;
     document.body.style.overflow = "hidden";
     requestAnimationFrame(() => priceAmountInput.focus());
@@ -3383,6 +3888,7 @@
     priceModal.hidden = true;
     document.body.style.overflow = "";
     activePriceItem = null;
+    activePriceStack = [];
     listAfterPriceSave = false;
     priceError.hidden = true;
     if (priceReturnFocus instanceof HTMLElement && priceReturnFocus.isConnected) priceReturnFocus.focus();
@@ -3399,15 +3905,21 @@
       return;
     }
 
-    const item = activePriceItem;
-    item.priceCents = priceCents;
-    item.usd = priceCents / 100;
-    if (listAfterPriceSave) item.forSale = true;
-    if (item.forSale) {
-      listedAssetIds.add(item.id);
-      listedItems.set(item.id, item);
-    }
-    const shouldPersist = item.forSale;
+    const saleMode = selectedListingMode();
+    let shouldPersist = false;
+    activePriceStack.forEach((item) => {
+      const previousMode = item.saleMode === "auction" ? "auction" : "fixed";
+      item.priceCents = priceCents;
+      item.usd = priceCents / 100;
+      item.saleMode = saleMode;
+      if (previousMode !== saleMode) item.auction = normalizeAuction(null);
+      if (listAfterPriceSave) item.forSale = true;
+      if (item.forSale) {
+        listedAssetIds.add(item.id);
+        listedItems.set(item.id, item);
+        shouldPersist = true;
+      }
+    });
     closePriceModal();
     renderInventory();
     renderGrid(currentCategory);
@@ -3416,6 +3928,7 @@
   }
 
   priceForm.addEventListener("submit", saveItemPrice);
+  listingModeInputs.forEach((input) => input.addEventListener("change", updateListingModeFields));
   document.getElementById("closePriceModal").addEventListener("click", closePriceModal);
   document.getElementById("cancelPrice").addEventListener("click", closePriceModal);
   priceModal.addEventListener("click", (event) => {
@@ -3450,7 +3963,7 @@
     document.getElementById("bidCurrentUser").textContent = auction.bidder
       ? `Highest bidder: ${auction.bidder.name}`
       : "Open auction";
-    const minimumCents = auction.currentBidCents + 1;
+    const minimumCents = Math.max(auction.currentBidCents + 1, normalizePriceCents(activeBidItem.priceCents) || 1);
     const minimumUsd = (minimumCents / 100).toFixed(2);
     bidAmountInput.min = minimumUsd;
     bidAmountInput.value = minimumUsd;
@@ -3458,6 +3971,7 @@
   }
 
   function openBidModal(item, seller) {
+    if (item?.saleMode !== "auction") return;
     if (!steamUser) {
       window.location.href = "/api/auth/steam/login";
       return;
@@ -3504,8 +4018,9 @@
     if (!activeBidItem || !activeBidSeller || bidSubmitting) return;
     const amountCents = Math.round(Number(bidAmountInput.value) * 100);
     const currentBidCents = normalizeAuction(activeBidItem.auction).currentBidCents;
-    if (!Number.isSafeInteger(amountCents) || amountCents <= currentBidCents) {
-      bidError.textContent = "Enter an amount higher than the current bid.";
+    const minimumCents = Math.max(currentBidCents + 1, normalizePriceCents(activeBidItem.priceCents) || 1);
+    if (!Number.isSafeInteger(amountCents) || amountCents < minimumCents) {
+      bidError.textContent = "Enter an amount that meets the minimum bid.";
       bidError.hidden = false;
       return;
     }
@@ -3565,14 +4080,24 @@
     if (event.key === "Escape" && !bidModal.hidden) closeBidModal();
   });
 
+  function openFixedListing(item, seller) {
+    if (!steamUser) {
+      window.location.href = "/api/auth/steam/login";
+      return;
+    }
+    if (!seller || seller.steamid === steamUser.steamid) return;
+    window.open(`https://steamcommunity.com/profiles/${encodeURIComponent(seller.steamid)}/`, "_blank", "noopener,noreferrer");
+  }
+
   function cardEl(it) {
     const card = document.createElement("div");
     card.className = "variant-card";
     card.dataset.tier = it.tier;
     const image = trustedSteamImageUrl(it.icon);
-    const isAuction = Boolean(it.forSale && it.appid === "730");
+    const hasListing = Boolean(it.forSale && it.appid === "730");
+    const isAuction = hasListing && it.saleMode === "auction";
     const auction = normalizeAuction(it.auction);
-    if (isAuction) card.classList.add("has-auction");
+    if (hasListing) card.classList.add("has-listing");
     card.innerHTML = `
       <span class="stat-badge" aria-hidden="true"><span class="holo-shine"></span><span class="stat-badge-text">ST</span></span>
       <span class="holo-fill" aria-hidden="true"></span>
@@ -3583,17 +4108,19 @@
         <div class="info-row"><span class="info-tier">${escapeHtml(tierLabel[it.tier] || "Standard")}</span><span class="info-price">${formatPrice(it.usd)}</span></div>
       </div>
     `;
-    if (isAuction) {
+    if (hasListing) {
       const strip = document.createElement("div");
       strip.className = "auction-strip";
       const current = document.createElement("div");
       current.className = "auction-current";
       const label = document.createElement("span");
       label.className = "auction-label";
-      label.textContent = auction.bidCount ? `${auction.bidCount} bid${auction.bidCount === 1 ? "" : "s"}` : "Open bidding";
+      label.textContent = isAuction
+        ? (auction.bidCount ? `${auction.bidCount} bid${auction.bidCount === 1 ? "" : "s"}` : "Starting bid")
+        : "Fixed price";
       const value = document.createElement("span");
       value.className = "auction-value";
-      value.textContent = formatBid(auction);
+      value.textContent = isAuction && auction.currentBidCents > 0 ? formatBid(auction) : formatPrice(it.usd);
       current.append(label, value);
       strip.appendChild(current);
 
@@ -3602,11 +4129,19 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "bid-button";
-        button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg><span>Bid</span>';
-        button.querySelector("span").textContent = steamUser ? "Bid" : "Connect";
-        button.title = steamUser ? `Bid on ${it.name}` : "Connect Steam to bid";
-        button.setAttribute("aria-label", steamUser ? `Bid on ${it.name}` : "Connect Steam to bid");
-        button.addEventListener("click", () => openBidModal(it, seller));
+        button.innerHTML = isAuction
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 4 6 6-3 3-6-6 3-3ZM4 14l6 6M7 17l7-7M3 21h8"/></svg><span>Bid</span>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16v10H4V7Z"/><path d="M8 12h8"/></svg><span>Buy</span>';
+        const actionLabel = steamUser ? (isAuction ? "Bid" : "Buy") : "Connect";
+        button.querySelector("span").textContent = actionLabel;
+        button.title = steamUser
+          ? `${isAuction ? "Bid on" : "Buy"} ${it.name}`
+          : `Connect Steam to ${isAuction ? "bid" : "buy"}`;
+        button.setAttribute("aria-label", button.title);
+        button.addEventListener("click", () => {
+          if (isAuction) openBidModal(it, seller);
+          else openFixedListing(it, seller);
+        });
         strip.appendChild(button);
       } else {
         const owner = document.createElement("span");
@@ -3665,16 +4200,47 @@
     return item?.appid === "730" && Boolean(item.tradable);
   }
 
-  function invRowEl(it) {
+  function inventoryStackKey(item) {
+    return [
+      item?.appid,
+      item?.name,
+      item?.type,
+      item?.tier,
+      item?.cat,
+      item?.icon,
+      item?.tradable ? "tradable" : "locked",
+      item?.marketable ? "marketable" : "private",
+    ].join("\u001f");
+  }
+
+  function stackInventoryItems(items) {
+    const stacks = new Map();
+    items.forEach((item) => {
+      const key = inventoryStackKey(item);
+      if (!stacks.has(key)) stacks.set(key, []);
+      stacks.get(key).push(item);
+    });
+    return Array.from(stacks.values());
+  }
+
+  function invRowEl(stack) {
+    const items = Array.isArray(stack) ? stack : [stack];
+    const it = items[0];
     const row = document.createElement("div");
     row.className = "inv-row";
     row.dataset.tier = it.tier || "normal";
     const image = trustedSteamImageUrl(it.icon);
-    const canList = isInventoryItemAvailable(it);
-    const hasPrice = normalizePriceCents(it.priceCents) !== null;
+    const canList = items.every(isInventoryItemAvailable);
+    const allListed = items.every((item) => item.forSale);
+    const allPriced = items.every((item) => normalizePriceCents(item.priceCents) !== null);
+    const priceValues = new Set(items.map((item) => normalizePriceCents(item.priceCents)));
+    const samePrice = priceValues.size === 1;
+    const priceText = samePrice ? formatPrice(it.usd) : "Mixed prices";
+    const quantityText = items.length > 1 ? ` x${items.length}` : "";
     row.innerHTML = `
       <div class="inv-media">
         ${image ? `<img class="inv-icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : '<div class="inv-icon"></div>'}
+        ${items.length > 1 ? `<span class="inv-quantity" title="${items.length} matching Steam assets">x${items.length}</span>` : ""}
         <span class="inv-game">${escapeHtml(it.gameShort)}</span>
       </div>
       <div class="inv-main">
@@ -3683,31 +4249,34 @@
         <p class="inv-meta">${escapeHtml(it.type || "CS2 item")}</p>
       </div>
       <div class="inv-actions">
-        <button type="button" class="inv-price ${hasPrice ? "" : "is-unpriced"}" ${canList ? 'title="Set item price" aria-label="Set item price"' : 'disabled title="Only tradable CS2 items can be priced"'}>${formatPrice(it.usd)}</button>
-        <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
-          ${it.forSale ? "Listed" : "List"}
+        <button type="button" class="inv-price ${allPriced && samePrice ? "" : "is-unpriced"}" ${canList ? 'title="Set price and sale type for this stack" aria-label="Set price and sale type"' : 'disabled title="Only tradable CS2 items can be priced"'}>${escapeHtml(priceText)}</button>
+        <button class="list-toggle ${allListed ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
+          ${allListed ? `Listed${quantityText}` : `List${quantityText}`}
         </button>
       </div>
     `;
     if (canList) {
       const priceButton = row.querySelector(".inv-price");
       const toggle = row.querySelector(".list-toggle");
-      priceButton.addEventListener("click", () => openPriceModal(it));
+      priceButton.addEventListener("click", () => openPriceModal(it, { stackItems: items }));
       toggle.addEventListener("click", () => {
-        if (!it.forSale && normalizePriceCents(it.priceCents) === null) {
-          openPriceModal(it, { listAfterSave: true });
+        if (!allListed && !allPriced) {
+          openPriceModal(it, { listAfterSave: true, stackItems: items });
           return;
         }
-        it.forSale = !it.forSale;
-        if (it.forSale) {
-          listedAssetIds.add(it.id);
-          listedItems.set(it.id, it);
-        } else {
-          listedAssetIds.delete(it.id);
-          listedItems.delete(it.id);
-        }
-        toggle.classList.toggle("is-listed", it.forSale);
-        toggle.textContent = it.forSale ? "Listed" : "List";
+        const shouldList = !items.every((item) => item.forSale);
+        items.forEach((item) => {
+          item.forSale = shouldList;
+          if (shouldList) {
+            listedAssetIds.add(item.id);
+            listedItems.set(item.id, item);
+          } else {
+            listedAssetIds.delete(item.id);
+            listedItems.delete(item.id);
+          }
+        });
+        toggle.classList.toggle("is-listed", shouldList);
+        toggle.textContent = shouldList ? `Listed${quantityText}` : `List${quantityText}`;
         renderGrid(currentCategory);
         renderSellers();
         scheduleMarketplaceListingSave();
@@ -3757,7 +4326,7 @@
     }
 
     const fragment = document.createDocumentFragment();
-    visibleItems.forEach((it) => fragment.appendChild(invRowEl(it)));
+    stackInventoryItems(visibleItems).forEach((stack) => fragment.appendChild(invRowEl(stack)));
     list.appendChild(fragment);
   }
 
@@ -3780,8 +4349,21 @@
   function sellerCardEl(s) {
     const card = document.createElement("button");
     card.className = "seller-card";
+    card.classList.toggle("is-owner", Boolean(s.isOwner));
     card.type = "button";
     card.title = `Open ${s.name}'s store`;
+
+    if (s.isOwner) {
+      const crown = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      crown.classList.add("seller-owner-crown");
+      crown.setAttribute("viewBox", "0 0 24 24");
+      crown.setAttribute("fill", "currentColor");
+      crown.setAttribute("aria-label", "Fraxb owner");
+      const crownPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      crownPath.setAttribute("d", "M3 7 7.5 11 12 4l4.5 7L21 7l-2 11H5L3 7Zm3.5 9h11l.5-3-1.8 1.6L12 8l-4.2 6.6L6 13l.5 3Z");
+      crown.appendChild(crownPath);
+      card.appendChild(crown);
+    }
 
     if (s.isAlt) {
       const altBadge = document.createElement("span");
@@ -4183,6 +4765,7 @@
           priceCents: persistedPriceCents,
           usd: persistedPriceCents === null ? null : persistedPriceCents / 100,
           forSale: listedAssetIds.has(itemId),
+          saleMode: persistedListing?.saleMode === "auction" ? "auction" : "fixed",
           auction: persistedListing?.auction || normalizeAuction(null),
         };
         inventory.push(normalizedItem);
@@ -4268,11 +4851,11 @@
     sellerName.textContent = seller.name;
     viewingText.replaceChildren("Viewing ", sellerName, "'s store");
 
-    const marketNav = document.querySelector('[data-nav][data-page="market"]');
-    marketNav.click();
+    navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
+    showPage("market");
 
     currentCategory = "all";
-    document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".cat-tab[data-cat]").forEach((t) => t.classList.remove("active"));
     document.querySelector('.cat-tab[data-cat="all"]').classList.add("active");
     renderGrid(currentCategory);
     syncPageTitle("market");
@@ -4281,13 +4864,11 @@
   function backToMyStore() {
     currentViewSeller = null;
     viewingBanner.hidden = true;
-    const marketNav = document.querySelector('[data-nav][data-page="market"]');
-    if (marketNav && !marketNav.classList.contains("active")) {
-      marketNav.click();
-    }
+    navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
+    showPage("market");
     renderGrid(currentCategory);
-    syncPageTitle(activePageName());
-    updateSidebarLogo(activePageName());
+    syncPageTitle("market");
+    updateSidebarLogo("market");
   }
 
   document.getElementById("backToMyStore").addEventListener("click", backToMyStore);
@@ -4447,17 +5028,20 @@
     }
   }
 
-  document.querySelectorAll(".cat-tab").forEach((tab) => {
+  document.querySelectorAll(".cat-tab[data-cat]").forEach((tab) => {
     tab.addEventListener("click", () => {
-      document.querySelectorAll(".cat-tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".cat-tab[data-cat]").forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
       currentCategory = tab.dataset.cat;
       renderGrid(currentCategory);
     });
   });
 
-  document.getElementById("currencySelect").addEventListener("change", (e) => {
+  const currencySelect = document.getElementById("currencySelect");
+  currencySelect.value = currentCurrency;
+  currencySelect.addEventListener("change", (e) => {
     currentCurrency = e.target.value;
+    localStorage.setItem(CURRENCY_KEY, currentCurrency);
     renderGrid(currentCategory);
     renderTrades();
     renderInventory();
@@ -4473,7 +5057,8 @@
       for (const [code, rate] of Object.entries(data.rates || {})) {
         if (currencies[code] && Number.isFinite(rate) && rate > 0) currencies[code].rate = rate;
       }
-      status.textContent = data.date ? `ECB reference rates from ${data.date}` : "Latest ECB reference rates";
+      const sourceLabel = Array.isArray(data.sources) && data.sources.length ? data.sources.join(" + ") : "reference";
+      status.textContent = data.date ? `${sourceLabel} rates from ${data.date}` : `Latest ${sourceLabel} rates`;
       renderGrid(currentCategory);
       renderTrades();
       renderInventory();
@@ -4896,11 +5481,21 @@
   renderInventory();
   renderSellers();
   renderTrades();
+  const languageSelect = document.getElementById("languageSelect");
+  languageSelect.value = currentLanguage;
+  setupSearchPicker({ selectId: "currencySelect", inputId: "currencySearch", menuId: "currencyMenu" });
+  languagePickerControl = setupSearchPicker({ selectId: "languageSelect", inputId: "languageSearch", menuId: "languageMenu" });
+  languageSelect.addEventListener("change", (event) => {
+    currentLanguage = translations[event.target.value] ? event.target.value : "en";
+    localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+    applyLanguage();
+  });
+  applyLanguage();
   refreshSteamAuth();
   void loadCurrencyRates();
 
-  const initialNav = document.querySelector("[data-nav].active") || navItems[0];
-  showPage(initialNav.dataset.page);
+  navItems.forEach((item) => item.classList.remove("active"));
+  showPage("home");
 
   // Theme handling: time-based default, toggle, and persistence
   const themeToggle = document.getElementById('themeToggle');
