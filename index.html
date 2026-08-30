@@ -1244,11 +1244,13 @@
   }
 
   .inv-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
     margin-top: 14px;
   }
+  .inv-list .empty-state { grid-column: 1 / -1; }
+  .inv-list + #loadMoreInventory { margin-top: 14px; }
   .inventory-games {
     position: relative;
     margin-top: 14px;
@@ -1373,67 +1375,119 @@
     font-size: 9.5px;
   }
   .inv-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: var(--panel-2);
+    min-width: 0;
+    min-height: 258px;
+    display: grid;
+    grid-template-rows: 128px minmax(72px, 1fr) auto;
+    overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 7px;
+    background: var(--panel-2);
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .inv-row:hover {
+    border-color: var(--nav-hover-border);
+    transform: translateY(-1px);
+  }
+  .inv-media {
+    position: relative;
+    min-width: 0;
+    display: grid;
+    place-items: center;
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(155deg, #1c1f24, #101216);
   }
   .inv-icon {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border-radius: 6px;
-    background: linear-gradient(155deg, #1c1f24, #101216);
-    border: 1px solid var(--border);
+    width: min(116px, 82%);
+    height: 96px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
     object-fit: contain;
+    filter: drop-shadow(0 7px 12px rgba(0, 0, 0, .28));
   }
-  .inv-main { flex: 1; min-width: 0; }
+  .inv-main {
+    min-width: 0;
+    padding: 10px 11px 8px;
+  }
   .inv-item {
     margin: 0;
-    font-size: 12.5px;
-    font-weight: 600;
-    white-space: nowrap;
+    min-height: 32px;
     overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .inv-meta { margin: 2px 0 0; font-size: 11.5px; color: var(--muted); }
-  .inv-game {
-    font-size: 10px;
+    color: var(--text);
+    font-size: 11.5px;
     font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: var(--border);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .inv-tier { margin: 4px 0 0; color: var(--muted); font-size: 9px; font-weight: 700; }
+  .inv-row[data-tier*="stattrak"] .inv-tier { color: var(--gold-b); }
+  .inv-row[data-tier*="holo"] .inv-tier { color: var(--holo-a); }
+  .inv-meta {
+    margin: 3px 0 0;
+    overflow: hidden;
     color: var(--muted);
-    flex-shrink: 0;
+    font-size: 9.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .inv-game {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(16, 18, 22, .88);
+    color: var(--muted);
+  }
+  .inv-actions {
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
   }
   .inv-price {
-    font-size: 12px;
-    font-weight: 600;
-    width: 70px;
-    padding: 4px 2px;
-    border: 0;
+    min-width: 0;
+    width: 100%;
+    min-height: 28px;
+    padding: 5px 7px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 5px;
     background: transparent;
     color: var(--text);
-    text-align: right;
-    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     cursor: pointer;
   }
   .inv-price:hover,
-  .inv-price:focus-visible { color: var(--accent); }
+  .inv-price:focus-visible { border-color: var(--nav-hover-border); color: var(--accent); }
   .inv-price.is-unpriced { color: #f6c85f; }
   .inv-price:disabled { color: var(--muted); cursor: default; opacity: 1; }
   .list-toggle {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    font-size: 11px;
+    min-width: 52px;
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 9.5px;
     font-weight: 700;
-    letter-spacing: .02em;
-    border-radius: 6px;
+    letter-spacing: 0;
+    border-radius: 5px;
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text);
@@ -1834,8 +1888,7 @@
     .seller-grid {
       grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
     }
-    .trade-row,
-    .inv-row {
+    .trade-row {
       flex-wrap: wrap;
     }
     .trade-access {
@@ -1847,18 +1900,17 @@
       margin-left: 41px;
       text-align: center;
     }
-    .trade-main,
-    .inv-main {
+    .trade-main {
       flex-basis: calc(100% - 46px);
     }
     .trade-date {
       width: auto;
       margin-left: auto;
     }
-    .inv-price {
-      width: auto;
-      margin-left: auto;
-    }
+    .inv-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .inv-row { min-height: 238px; grid-template-rows: 112px minmax(72px, 1fr) auto; }
+    .inv-icon { height: 84px; }
+    .inv-actions { gap: 6px; padding: 7px; }
     .currency-select {
       width: 100%;
     }
@@ -3267,20 +3319,26 @@
   function invRowEl(it) {
     const row = document.createElement("div");
     row.className = "inv-row";
+    row.dataset.tier = it.tier || "normal";
     const image = trustedSteamImageUrl(it.icon);
     const canList = it.appid === "730" && it.tradable;
     const hasPrice = normalizePriceCents(it.priceCents) !== null;
     row.innerHTML = `
-      ${image ? `<img class="inv-icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : '<div class="inv-icon"></div>'}
+      <div class="inv-media">
+        ${image ? `<img class="inv-icon" src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">` : '<div class="inv-icon"></div>'}
+        <span class="inv-game">${escapeHtml(it.gameShort)}</span>
+      </div>
       <div class="inv-main">
-        <p class="inv-item">${escapeHtml(it.name)} <span style="color:var(--muted); font-weight:500;">&mdash; ${escapeHtml(tierLabel[it.tier] || "Standard")}</span></p>
+        <p class="inv-item">${escapeHtml(it.name)}</p>
+        <p class="inv-tier">${escapeHtml(tierLabel[it.tier] || "Standard")}</p>
         <p class="inv-meta">${escapeHtml(it.type || "CS2 item")}</p>
       </div>
-      <span class="inv-game">${escapeHtml(it.gameShort)}</span>
-      <button type="button" class="inv-price ${hasPrice ? "" : "is-unpriced"}" ${canList ? 'title="Set item price" aria-label="Set item price"' : 'disabled title="Only tradable CS2 items can be priced"'}>${formatPrice(it.usd)}</button>
-      <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
-        ${it.forSale ? "Listed" : "List"}
-      </button>
+      <div class="inv-actions">
+        <button type="button" class="inv-price ${hasPrice ? "" : "is-unpriced"}" ${canList ? 'title="Set item price" aria-label="Set item price"' : 'disabled title="Only tradable CS2 items can be priced"'}>${formatPrice(it.usd)}</button>
+        <button class="list-toggle ${it.forSale ? "is-listed" : ""}" ${canList ? "" : "disabled title=\"This Steam item is not tradable\""}>
+          ${it.forSale ? "Listed" : "List"}
+        </button>
+      </div>
     `;
     if (canList) {
       const priceButton = row.querySelector(".inv-price");
