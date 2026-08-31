@@ -46,13 +46,15 @@ test("Google marketplace sign-in is exposed site-wide and reports configuration 
       fs.readFile(new URL("../index.html", import.meta.url), "utf8"),
       fs.readFile(new URL("../physical-market.js", import.meta.url), "utf8"),
     ]);
-    assert.match(html, /id="settingsGoogleButton"/);
-    assert.match(html, /id="settingsSiteAccountButton"/);
+    assert.match(html, /id="accountModal"/);
+    assert.match(html, /id="accountGoogleButton"/);
+    assert.match(html, /id="unifiedAccountAction"/);
     assert.match(html, /id="physicalCartButton"/);
-    assert.match(html, /id="combinedGoogleMark"/);
     assert.match(client, /google\.accounts\.id\.renderButton/);
     assert.match(client, /googleButtonZones/);
-    assert.match(client, /combinedGoogleMark\.hidden = account\?\.signInMethod !== "google"/);
+    assert.match(client, /fn-marketplace-account-change/);
+    assert.doesNotMatch(html, /id="physicalLogoutButton"/);
+    assert.doesNotMatch(html, /id="logoutBtn"/);
     assert.doesNotMatch(client, /id="physicalAuthForm"/);
     assert.doesNotMatch(client, /id="physicalPassword"/);
     assert.match(html, /url\("\/marketplace-hero\.webp"\)/);

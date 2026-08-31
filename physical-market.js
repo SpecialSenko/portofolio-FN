@@ -21,6 +21,7 @@ let listings = [];
 let listingsLoading = false;
 let category = "all";
 let searchQuery = "";
+let storeScope = null;
 let cart = readCart();
 let currencyRates = {
   USD: 1, EUR: .92, GBP: .79, IDR: 15800, JPY: 157, AUD: 1.52, MYR: 4.2, TWD: 30.5,
@@ -196,31 +197,25 @@ function renderAccount() {
   const band = element("physicalAccountBand");
   const addButton = element("addPhysicalListing");
   const accountButton = element("physicalAccountButton");
-  const settingsRow = element("physicalAccountRow");
-  const settingsSiteButton = element("settingsSiteAccountButton");
-  const settingsSiteLabel = element("settingsSiteAccountLabel");
-  const settingsGoogleButton = element("settingsGoogleButton");
-  const combinedGoogleMark = element("combinedGoogleMark");
-  const siteStatus = element("siteAccountStatus");
-  band.hidden = !account;
-  addButton.hidden = !account;
-  settingsRow.hidden = !account;
-  accountButton.hidden = !account;
+  const accountGoogleButton = element("accountGoogleButton");
+  band.hidden = !account || Boolean(storeScope);
+  addButton.hidden = !account || Boolean(storeScope);
+  accountButton.hidden = !account || Boolean(storeScope);
   accountButton.textContent = "Store settings";
-  if (settingsSiteButton) settingsSiteButton.hidden = !account;
-  if (settingsGoogleButton) settingsGoogleButton.hidden = Boolean(account);
-  if (combinedGoogleMark) combinedGoogleMark.hidden = account?.signInMethod !== "google";
-  if (settingsSiteLabel) settingsSiteLabel.textContent = "Store settings";
-  if (settingsSiteButton) settingsSiteButton.title = "Open marketplace account settings";
-  if (siteStatus) {
-    siteStatus.textContent = account
-      ? `Connected as ${account.displayName}`
-      : googleClientId ? "Sign in with Google for physical store tools" : "Google sign-in setup is required";
-  }
+  if (accountGoogleButton) accountGoogleButton.hidden = Boolean(account);
+  window.dispatchEvent(new CustomEvent("fn-marketplace-account-change", {
+    detail: {
+      loggedIn: Boolean(account),
+      account: account ? {
+        displayName: account.displayName,
+        storeName: account.storeName,
+        signInMethod: account.signInMethod,
+      } : null,
+    },
+  }));
   if (!account) return;
   element("physicalStoreName").textContent = account.storeName;
   element("physicalStoreMeta").textContent = [account.city, account.description].filter(Boolean).join(" - ") || account.email;
-  element("settingsPhysicalStore").textContent = account.storeName;
   const badges = element("physicalAccountBadges");
   badges.replaceChildren();
   if (account.isVerified) badges.appendChild(badge("Verified business", "is-verified"));
@@ -301,6 +296,15 @@ function renderListings() {
     return;
   }
   const filtered = listings.filter((listing) => {
+    if (storeScope) {
+      const sellerIdMatches = storeScope.sellerId && listing.seller.id === storeScope.sellerId;
+      const scopedNames = [storeScope.name, storeScope.storeName, storeScope.displayName]
+        .map((value) => window.FraxbSearch?.normalize(value) || String(value || "").trim().toLowerCase())
+        .filter(Boolean);
+      const listingNames = [listing.seller.storeName, listing.seller.displayName]
+        .map((value) => window.FraxbSearch?.normalize(value) || String(value || "").trim().toLowerCase());
+      if (!sellerIdMatches && !listingNames.some((value) => scopedNames.includes(value))) return false;
+    }
     if (category !== "all" && listing.category !== category) return false;
     return searchMatches(
       searchQuery,
@@ -312,11 +316,13 @@ function renderListings() {
       listing.seller.displayName,
     );
   });
-  status.textContent = `${filtered.length} local listing${filtered.length === 1 ? "" : "s"}.`;
+  status.textContent = storeScope
+    ? `${filtered.length} listing${filtered.length === 1 ? "" : "s"} in ${storeScope.name}'s physical store.`
+    : `${filtered.length} local listing${filtered.length === 1 ? "" : "s"}.`;
   if (filtered.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.textContent = "No local items match this view.";
+    empty.textContent = storeScope ? `No physical items from ${storeScope.name} match this view.` : "No local items match this view.";
     grid.appendChild(empty);
     return;
   }
@@ -550,7 +556,7 @@ function loadGoogleLibrary() {
 }
 
 function googleButtonZones() {
-  return [element("settingsGoogleButton")].filter(Boolean);
+  return [element("accountGoogleButton")].filter(Boolean);
 }
 
 function showGoogleStatus(message, isError = false) {
@@ -613,6 +619,17 @@ function bindEvents() {
     searchQuery = String(event.detail?.query || "");
     renderListings();
   });
+  window.addEventListener("fn-physical-store-scope", (event) => {
+    storeScope = event.detail && typeof event.detail === "object" ? event.detail : null;
+    renderAccount();
+    renderListings();
+  });
+  window.addEventListener("fn-marketplace-logout-all", () => {
+    account = null;
+    renderAccount();
+    renderListings();
+    void renderGoogleButtons();
+  });
   document.querySelectorAll("[data-close-physical]").forEach((button) => button.addEventListener("click", () => closeModal(element(button.dataset.closePhysical))));
   document.querySelectorAll(".bid-modal").forEach((modal) => modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(modal); }));
   window.addEventListener("keydown", (event) => {
@@ -639,7 +656,7 @@ function bindEvents() {
     if (account) openProfile();
   }
   element("physicalAccountButton").addEventListener("click", openMarketplaceAccount);
-  element("settingsSiteAccountButton")?.addEventListener("click", openMarketplaceAccount);
+  window.addEventListener("fn-open-physical-profile", openMarketplaceAccount);
   element("physicalCartButton").addEventListener("click", () => { renderCart(); openModal(element("physicalCartModal")); });
   element("addPhysicalListing").addEventListener("click", () => { element("physicalListingError").hidden = true; openModal(element("physicalListingModal")); });
   element("openSupporterPlans").addEventListener("click", () => {
@@ -717,14 +734,6 @@ function bindEvents() {
     }
   }));
 
-  element("physicalLogoutButton").addEventListener("click", async () => {
-    if (!confirm("Log out of the local seller account?")) return;
-    try { await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify({ action: "logout" }) }); } catch {}
-    account = null;
-    renderAccount();
-    renderListings();
-    void renderGoogleButtons();
-  });
 }
 
 installDialogs();

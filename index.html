@@ -311,13 +311,19 @@
   .combined-google-mark[hidden] { display: none; }
   .topbar .steam-connect { margin-left: 0; }
   .steam-connect {
-    min-width: 122px;
+    min-width: 112px;
+    max-width: min(230px, 28vw);
     padding: 7px 12px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--panel-2);
     color: var(--text);
     transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .steam-connect #steamConnectLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .steam-connect:hover {
     border-color: #2a475e;
@@ -2141,6 +2147,90 @@
   .search-picker-option:hover,
   .search-picker-option.is-active { background: var(--nav-active-bg); }
   .search-picker-empty { margin: 0; padding: 10px 8px; color: var(--muted); font-size: 10px; }
+  .language-picker-button {
+    width: min(280px, 45vw);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .language-picker-button svg { width: 15px; height: 15px; color: var(--muted); }
+  .language-dialog { width: min(560px, 100%); }
+  .language-dialog-body { padding: 14px 16px 16px; }
+  .language-dialog-search {
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    outline: 0;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+  }
+  .language-dialog-search:focus { border-color: var(--nav-hover-border); }
+  .language-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    max-height: min(390px, 55vh);
+    margin-top: 12px;
+    overflow-y: auto;
+  }
+  .language-choice {
+    min-height: 44px;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .language-choice:hover { border-color: var(--nav-hover-border); }
+  .language-choice.is-active { border-color: var(--accent); background: var(--nav-active-bg); }
+  .language-choice-empty { grid-column: 1 / -1; margin: 6px 0; color: var(--muted); font-size: 11px; }
+  .account-dialog { width: min(520px, 100%); }
+  .account-dialog-body { display: grid; gap: 10px; padding: 14px 16px 16px; }
+  .account-provider-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 62px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-2);
+  }
+  .account-provider-icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--panel);
+  }
+  .account-provider-icon svg { width: 18px; height: 18px; }
+  .account-provider-name { margin: 0; font-size: 11px; font-weight: 800; }
+  .account-provider-status { margin: 2px 0 0; color: var(--muted); font-size: 10px; line-height: 1.35; }
+  .account-provider-action { margin-left: 0; border: 1px solid var(--border); }
+  .account-dialog-note { margin: 2px 0 0; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
   .inv-price:hover,
   .inv-price:focus-visible { border-color: var(--nav-hover-border); color: var(--accent); }
   .inv-price.is-unpriced { color: #f6c85f; }
@@ -2507,6 +2597,24 @@
     100% { background-position: 0% 50%; }
   }
 
+  @media (max-width: 1100px) {
+    .main.has-ad-rail { grid-template-columns: minmax(0, 1fr) 128px; }
+    .topbar { gap: 8px; padding: 12px 16px; }
+    .topbar h1 { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+    .search { min-width: 120px; max-width: 280px; }
+    .topbar-cart { padding-inline: 8px; }
+    .ad-rail { padding: 14px 10px 20px 0; }
+    .ad-rail-inner { padding: 8px; }
+    .global-result-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  }
+
+  @media (max-width: 880px) and (min-width: 761px) {
+    .main.has-ad-rail { grid-template-columns: minmax(0, 1fr); }
+    .ad-rail { grid-column: 1; grid-row: 3; padding: 0 16px 24px; }
+    .ad-rail-inner { position: static; min-height: 124px; }
+    .ad-rail-slot { min-height: 78px; }
+  }
+
   @media (max-width: 760px) {
     .layout {
       display: block;
@@ -2626,6 +2734,11 @@
       width: 100%;
     }
     .search-picker { width: 100%; }
+    .language-picker-button { width: 100%; }
+    .language-choice-grid { grid-template-columns: 1fr; }
+    .account-provider-row { grid-template-columns: 32px minmax(0, 1fr); }
+    .account-provider-row .google-button-host,
+    .account-provider-row .account-provider-action { grid-column: 1 / -1; width: 100%; }
     .ad-panel-head {
       align-items: flex-start;
       flex-direction: column;
@@ -2706,13 +2819,12 @@
         Cart <span class="physical-cart-count" id="physicalCartCount" hidden>0</span>
       </button>
       <div class="steam-auth" id="steamAuth">
-        <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
-          <span class="combined-google-mark" id="combinedGoogleMark" title="Google account connected" aria-label="Google account connected" hidden>G</span>
+        <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Open account">
           <svg id="steamConnectIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2a10 10 0 0 0-9.96 9.12l5.36 2.22a2.82 2.82 0 0 1 1.6-.49h.12l2.38-3.45v-.05a3.8 3.8 0 1 1 3.8 3.8h-.09l-3.39 2.42v.13A2.85 2.85 0 0 1 6.2 16.4l-3.83-1.58A10 10 0 1 0 12 2Zm-4.13 15.2a2.02 2.02 0 0 0 2.67-2.67 2.02 2.02 0 0 0-2.39-.95l1.2.5a1.49 1.49 0 1 1-1.14 2.75l-1.18-.49c.2.37.48.66.84.86Zm7.43-5.32a2.53 2.53 0 1 0 0-5.06 2.53 2.53 0 0 0 0 5.06Zm0-.63a1.9 1.9 0 1 1 0-3.8 1.9 1.9 0 0 1 0 3.8Z"/>
+            <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-8 9a8 8 0 0 1 16 0H4Z"/>
           </svg>
           <img class="steam-connect-avatar" id="steamConnectAvatar" alt="" hidden>
-          <span id="steamConnectLabel">Connect Steam</span>
+          <span id="steamConnectLabel">Sign in</span>
         </button>
       </div>
     </header>
@@ -2861,6 +2973,10 @@
           <button class="market-mode-button" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
           <button class="market-mode-button active" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
         </div>
+        <div class="viewing-banner" id="physicalViewingBanner" hidden>
+          <span id="physicalViewingText"></span>
+          <button class="back-btn" id="viewAllPhysicalStores" type="button">All physical stores</button>
+        </div>
         <div class="physical-account-band" id="physicalAccountBand" hidden>
           <span class="physical-account-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>
@@ -3001,10 +3117,10 @@
             <p class="settings-label" data-i18n="settings.language">Language</p>
             <p class="settings-sub" data-i18n="settings.languageHelp">Change the marketplace interface language</p>
           </div>
-          <div class="search-picker" id="languagePicker">
-            <input class="search-picker-input" id="languageSearch" type="search" role="combobox" aria-label="Search language" aria-controls="languageMenu" aria-expanded="false" autocomplete="off">
-            <div class="search-picker-menu" id="languageMenu" role="listbox" hidden></div>
-          </div>
+          <button class="language-picker-button" id="openLanguagePicker" type="button" aria-haspopup="dialog" aria-controls="languageModal">
+            <span id="selectedLanguageLabel">English</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+          </button>
           <select class="currency-select is-hidden-select" id="languageSelect" aria-hidden="true" tabindex="-1">
             <option value="en">English</option>
             <option value="zh-TW">Traditional Chinese - Taiwan</option>
@@ -3014,30 +3130,12 @@
             <option value="ko">Korean</option>
           </select>
         </div>
-        <div class="settings-row" id="siteAccountRow">
-          <div>
-            <p class="settings-label" data-i18n="settings.marketAccount">Marketplace account</p>
-            <p class="settings-sub" id="siteAccountStatus">Sign in with Google for physical store tools</p>
-          </div>
-          <div class="google-button-host" id="settingsGoogleButton" aria-label="Sign in with Google"></div>
-          <button class="settings-action" id="settingsSiteAccountButton" type="button" hidden>
-            <span class="google-mark" aria-hidden="true">G</span>
-            <span id="settingsSiteAccountLabel">Store settings</span>
-          </button>
-        </div>
-        <div class="settings-row" id="accountRow" hidden>
+        <div class="settings-row" id="unifiedAccountRow">
           <div>
             <p class="settings-label">Account</p>
-            <p class="settings-sub">Connected to Steam as <span id="settingsSteamName">Steam User</span></p>
+            <p class="settings-sub" id="unifiedAccountStatus">Not signed in</p>
           </div>
-          <button class="steam-btn" id="logoutBtn" type="button">Log out</button>
-        </div>
-        <div class="settings-row" id="physicalAccountRow" hidden>
-          <div>
-            <p class="settings-label">Local seller account</p>
-            <p class="settings-sub">Signed in to <span id="settingsPhysicalStore">your local store</span></p>
-          </div>
-          <button class="steam-btn" id="physicalLogoutButton" type="button">Log out</button>
+          <button class="settings-action" id="unifiedAccountAction" type="button">Sign in</button>
         </div>
       </section>
 
@@ -3116,6 +3214,54 @@
     </article>
   </div>
 </aside>
+
+<div class="bid-modal" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountDialogTitle" hidden>
+  <section class="bid-dialog account-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="accountDialogTitle">Account</h2>
+      <button class="icon-button bid-dialog-close" id="closeAccountModal" type="button" title="Close account" aria-label="Close account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="account-dialog-body">
+      <div class="account-provider-row">
+        <span class="account-provider-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-9.96 9.12l5.36 2.22a2.82 2.82 0 0 1 1.6-.49h.12l2.38-3.45v-.05a3.8 3.8 0 1 1 3.8 3.8h-.09l-3.39 2.42v.13A2.85 2.85 0 0 1 6.2 16.4l-3.83-1.58A10 10 0 1 0 12 2Z"/></svg>
+        </span>
+        <div>
+          <p class="account-provider-name">Steam</p>
+          <p class="account-provider-status" id="accountSteamStatus">Not connected</p>
+        </div>
+        <button class="steam-btn account-provider-action" id="accountSteamConnect" type="button">Connect Steam</button>
+      </div>
+      <div class="account-provider-row">
+        <span class="account-provider-icon google-mark" aria-hidden="true">G</span>
+        <div>
+          <p class="account-provider-name">Google</p>
+          <p class="account-provider-status" id="accountGoogleStatus">Not connected</p>
+        </div>
+        <div class="google-button-host" id="accountGoogleButton" aria-label="Sign in with Google"></div>
+        <button class="settings-action account-provider-action" id="accountGoogleSettings" type="button" hidden>Store settings</button>
+      </div>
+      <p class="account-dialog-note">Steam verifies inventory ownership. Google verifies the email used for local seller tools. Fraxb never asks for either account password.</p>
+    </div>
+  </section>
+</div>
+
+<div class="bid-modal" id="languageModal" role="dialog" aria-modal="true" aria-labelledby="languageDialogTitle" hidden>
+  <section class="bid-dialog language-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="languageDialogTitle">Choose language</h2>
+      <button class="icon-button bid-dialog-close" id="closeLanguageModal" type="button" title="Close language picker" aria-label="Close language picker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="language-dialog-body">
+      <input class="language-dialog-search" id="languageSearch" type="search" placeholder="Search languages..." aria-label="Search languages" autocomplete="off">
+      <div class="language-choice-grid" id="languageChoices" role="listbox" aria-label="Available languages"></div>
+    </div>
+  </section>
+</div>
 
 <div class="bid-modal rules-modal" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesDialogTitle" hidden>
   <section class="bid-dialog rules-dialog">
@@ -3322,6 +3468,7 @@
   let marketplaceRequestVersion = 0;
   let physicalDiscoveryListings = [];
   const marketSearchValues = { global: "", market: "", physical: "" };
+  let marketStoreScope = null;
 
   function marketSearchMatches(query, ...values) {
     return window.FraxbSearch?.matches(query, ...values) ?? values.join(" ").toLowerCase().includes(String(query || "").trim().toLowerCase());
@@ -3329,6 +3476,63 @@
 
   function activePageName() {
     return pages.find((page) => !page.hidden)?.dataset.page || "home";
+  }
+
+  function normalizedStoreName(value) {
+    return window.FraxbSearch?.normalize(value) || String(value || "").trim().toLowerCase();
+  }
+
+  function matchingDigitalSeller(scope) {
+    const names = [scope?.name, scope?.storeName, scope?.displayName]
+      .map(normalizedStoreName)
+      .filter(Boolean);
+    if (names.length === 0) return null;
+    return marketplaceSellerList().find((seller) => names.includes(normalizedStoreName(seller.name))) || null;
+  }
+
+  function digitalSellerScope(seller) {
+    return {
+      name: seller.name,
+      displayName: seller.name,
+      storeName: seller.name,
+      physicalSellerId: "",
+      digitalSeller: seller,
+    };
+  }
+
+  function physicalSellerScope(listing) {
+    const seller = listing?.seller || {};
+    const scope = {
+      name: seller.storeName || seller.displayName || "Seller",
+      displayName: seller.displayName || seller.storeName || "Seller",
+      storeName: seller.storeName || seller.displayName || "Seller",
+      physicalSellerId: seller.id || "",
+      digitalSeller: null,
+    };
+    scope.digitalSeller = matchingDigitalSeller(scope);
+    return scope;
+  }
+
+  function syncPhysicalScope() {
+    const banner = document.getElementById("physicalViewingBanner");
+    const text = document.getElementById("physicalViewingText");
+    if (banner) banner.hidden = !marketStoreScope;
+    if (text) text.textContent = marketStoreScope ? `Viewing ${marketStoreScope.name}'s physical store` : "";
+    window.dispatchEvent(new CustomEvent("fn-physical-store-scope", {
+      detail: marketStoreScope ? {
+        name: marketStoreScope.name,
+        displayName: marketStoreScope.displayName,
+        storeName: marketStoreScope.storeName,
+        sellerId: marketStoreScope.physicalSellerId,
+      } : null,
+    }));
+  }
+
+  function syncMarketModeButtons(page) {
+    document.querySelectorAll("[data-market-mode]").forEach((button) => {
+      const physical = page === "physical";
+      button.classList.toggle("active", physical ? button.dataset.marketMode === "physical" : button.dataset.marketMode === "global");
+    });
   }
 
   function syncPageTitle(name) {
@@ -3345,7 +3549,7 @@
     pages.forEach((p) => {
       p.hidden = p.dataset.page !== name;
     });
-    const showAdRail = name === "global";
+    const showAdRail = ["global", "market", "physical"].includes(name);
     adRail.hidden = !showAdRail;
     adRail.closest(".main").classList.toggle("has-ad-rail", showAdRail);
     document.getElementById("inventoryBanner").hidden = ["home", "physical", "blog"].includes(name);
@@ -3362,8 +3566,12 @@
       marketSearchInput.value = marketSearchValues[name] || "";
     }
     syncPageTitle(name);
+    syncMarketModeButtons(name);
     updateSidebarLogo(name);
-    if (name === "physical") window.dispatchEvent(new CustomEvent("fn-physical-market-open"));
+    if (name === "physical") {
+      window.dispatchEvent(new CustomEvent("fn-physical-market-open"));
+      syncPhysicalScope();
+    }
     window.dispatchEvent(new CustomEvent("fn-page-change", { detail: { page: name } }));
   }
 
@@ -3381,8 +3589,10 @@
       return;
     }
 
-    if (page === "market" && currentViewSeller) {
-      const avatar = trustedSteamImageUrl(currentViewSeller.avatar);
+    if ((page === "market" && currentViewSeller) || (page === "physical" && marketStoreScope)) {
+      const scopedSeller = page === "market" ? currentViewSeller : marketStoreScope.digitalSeller;
+      const scopedName = page === "market" ? currentViewSeller.name : marketStoreScope.name;
+      const avatar = trustedSteamImageUrl(scopedSeller?.avatar);
       sidebarLogo.classList.add("is-seller-logo");
       sidebarLogo.style.color = "";
       sidebarLogo.replaceChildren();
@@ -3393,10 +3603,10 @@
         image.decoding = "async";
         sidebarLogo.appendChild(image);
       } else {
-        sidebarLogo.textContent = initials(currentViewSeller.name);
+        sidebarLogo.textContent = initials(scopedName);
       }
-      sidebarLogo.title = `${currentViewSeller.name}'s store - click to return to your store`;
-      sidebarLogo.setAttribute("aria-label", `Viewing ${currentViewSeller.name}'s store. Return to your store`);
+      sidebarLogo.title = `${scopedName}'s store - click to return to your store`;
+      sidebarLogo.setAttribute("aria-label", `Viewing ${scopedName}'s store. Return to your store`);
       return;
     }
 
@@ -3412,6 +3622,12 @@
       hideTwitchPopover({ immediate: true });
       navItems.forEach((i) => i.classList.remove("active"));
       item.classList.add("active");
+      if (item.dataset.page === "global") {
+        currentViewSeller = null;
+        marketStoreScope = null;
+        viewingBanner.hidden = true;
+        syncPhysicalScope();
+      }
       showPage(item.dataset.page);
       if (item.dataset.page === "inventory" && steamUser) void loadSteamGameCatalog();
       if (item.dataset.page === "trades" && steamUser) void loadSteamTrades();
@@ -3419,10 +3635,41 @@
     });
   });
 
-  function activateMarketPage(name) {
-    const page = name === "physical" ? "physical" : "global";
+  function activateMarketPage(name, { scope = null } = {}) {
+    const activePage = activePageName();
     navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
-    showPage(page);
+    if (name === "physical") {
+      if (scope) marketStoreScope = scope;
+      else if (activePage === "market" && currentViewSeller) marketStoreScope = digitalSellerScope(currentViewSeller);
+      else if (activePage !== "physical") marketStoreScope = null;
+      marketSearchValues.physical = "";
+      showPage("physical");
+      return;
+    }
+
+    if (activePage === "physical" && marketStoreScope) {
+      const scopedSeller = marketStoreScope.digitalSeller || matchingDigitalSeller(marketStoreScope) || {
+        name: marketStoreScope.name,
+        avatar: "",
+        items: [],
+        listed: 0,
+        isCurrentUser: false,
+      };
+      marketStoreScope.digitalSeller = scopedSeller;
+      currentViewSeller = scopedSeller;
+      marketSearchValues.market = "";
+      viewingBanner.hidden = false;
+      viewingText.textContent = `Viewing ${scopedSeller.name}'s store`;
+      showPage("market");
+      renderGrid(currentCategory);
+      return;
+    }
+
+    if (activePage === "market") return;
+    currentViewSeller = null;
+    marketStoreScope = null;
+    viewingBanner.hidden = true;
+    showPage("global");
   }
 
   document.querySelectorAll("[data-market-mode]").forEach((button) => {
@@ -3430,6 +3677,11 @@
   });
   document.querySelectorAll("[data-home-market]").forEach((button) => {
     button.addEventListener("click", () => activateMarketPage(button.dataset.homeMarket));
+  });
+  document.getElementById("viewAllPhysicalStores").addEventListener("click", () => {
+    marketStoreScope = null;
+    marketSearchValues.physical = "";
+    showPage("physical");
   });
   document.getElementById("homeButton").addEventListener("click", () => {
     hideAdPopover();
@@ -3541,6 +3793,79 @@
     });
     input.addEventListener("blur", () => close());
     return { sync: () => { input.value = selectedOption().label; } };
+  }
+
+  function setupLanguageDialog() {
+    const modal = document.getElementById("languageModal");
+    const openButton = document.getElementById("openLanguagePicker");
+    const closeButton = document.getElementById("closeLanguageModal");
+    const input = document.getElementById("languageSearch");
+    const choices = document.getElementById("languageChoices");
+    const selectedLabel = document.getElementById("selectedLanguageLabel");
+    const select = document.getElementById("languageSelect");
+    const options = Array.from(select.options).map((option) => ({ value: option.value, label: option.textContent.trim() }));
+    let returnFocus = null;
+
+    function selectedOption() {
+      return options.find((option) => option.value === select.value) || options[0];
+    }
+
+    function sync() {
+      selectedLabel.textContent = selectedOption().label;
+    }
+
+    function render(query = "") {
+      const normalized = normalizedStoreName(query);
+      const filtered = options.filter((option) => !normalized || marketSearchMatches(normalized, option.label, option.value));
+      choices.replaceChildren();
+      if (filtered.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "language-choice-empty";
+        empty.textContent = t("common.noResults", "No matching languages");
+        choices.appendChild(empty);
+        return;
+      }
+      filtered.forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "language-choice";
+        button.classList.toggle("is-active", option.value === select.value);
+        button.role = "option";
+        button.setAttribute("aria-selected", String(option.value === select.value));
+        button.textContent = option.label;
+        button.addEventListener("click", () => {
+          select.value = option.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          close();
+        });
+        choices.appendChild(button);
+      });
+    }
+
+    function open() {
+      returnFocus = document.activeElement;
+      input.value = "";
+      render();
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => input.focus());
+    }
+
+    function close() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      document.body.style.overflow = "";
+      if (returnFocus instanceof HTMLElement) returnFocus.focus();
+      returnFocus = null;
+    }
+
+    openButton.addEventListener("click", open);
+    closeButton.addEventListener("click", close);
+    input.addEventListener("input", () => render(input.value));
+    modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
+    window.addEventListener("keydown", (event) => { if (event.key === "Escape" && !modal.hidden) close(); });
+    sync();
+    return { sync };
   }
 
   function applyLanguage() {
@@ -3747,7 +4072,63 @@
 
   const connectBtn = document.getElementById("steamConnectBtn");
   const connectLabel = document.getElementById("steamConnectLabel");
+  const accountModal = document.getElementById("accountModal");
+  const accountSteamConnect = document.getElementById("accountSteamConnect");
+  const unifiedAccountAction = document.getElementById("unifiedAccountAction");
   let steamLoggedIn = false;
+  let googleAccountState = null;
+  let accountReturnFocus = null;
+
+  function updateUnifiedAccount() {
+    const connected = steamLoggedIn || Boolean(googleAccountState);
+    const accountName = steamUser?.name || googleAccountState?.displayName || "Account";
+    const steamStatus = document.getElementById("accountSteamStatus");
+    const googleStatus = document.getElementById("accountGoogleStatus");
+    const googleSettings = document.getElementById("accountGoogleSettings");
+    const settingsStatus = document.getElementById("unifiedAccountStatus");
+    const connectedServices = [];
+
+    if (steamLoggedIn) connectedServices.push(`Steam as ${steamUser?.name || "Steam User"}`);
+    if (googleAccountState) connectedServices.push(`Google as ${googleAccountState.displayName || "Google user"}`);
+    if (steamStatus) steamStatus.textContent = steamLoggedIn ? `Connected as ${steamUser?.name || "Steam User"}` : "Not connected";
+    if (googleStatus) googleStatus.textContent = googleAccountState ? `Connected as ${googleAccountState.displayName || "Google user"}` : "Not connected";
+    if (settingsStatus) settingsStatus.textContent = connectedServices.length ? connectedServices.join(" and ") : "Not signed in";
+    if (unifiedAccountAction) unifiedAccountAction.textContent = connected ? "Log out all" : "Sign in";
+    if (accountSteamConnect) {
+      accountSteamConnect.textContent = steamLoggedIn ? "Connected" : "Connect Steam";
+      accountSteamConnect.disabled = steamLoggedIn;
+    }
+    if (googleSettings) googleSettings.hidden = !googleAccountState;
+
+    const connectIcon = document.getElementById("steamConnectIcon");
+    const connectAvatar = document.getElementById("steamConnectAvatar");
+    const avatarUrl = steamLoggedIn ? trustedSteamImageUrl(steamUser?.avatar) : "";
+    connectBtn?.classList.toggle("is-connected", connected);
+    connectBtn?.setAttribute("aria-label", connected ? `Account connected as ${accountName}. Open account` : "Open account sign in");
+    if (connectBtn) connectBtn.title = connected ? `Account connected as ${accountName}` : "Sign in to Fraxb";
+    if (connectIcon) connectIcon.hidden = Boolean(avatarUrl);
+    if (connectAvatar) {
+      connectAvatar.hidden = !avatarUrl;
+      if (avatarUrl) connectAvatar.src = avatarUrl;
+      else connectAvatar.removeAttribute("src");
+    }
+    if (connectLabel) connectLabel.textContent = connected ? accountName : "Sign in";
+  }
+
+  function openAccountModal() {
+    accountReturnFocus = document.activeElement;
+    accountModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    document.getElementById("closeAccountModal").focus();
+  }
+
+  function closeAccountModal() {
+    if (accountModal.hidden) return;
+    accountModal.hidden = true;
+    document.body.style.overflow = "";
+    if (accountReturnFocus instanceof HTMLElement) accountReturnFocus.focus();
+    accountReturnFocus = null;
+  }
 
   function setSteamButton(loggedIn, name = "Steam User", avatar = "") {
     steamLoggedIn = loggedIn;
@@ -3762,22 +4143,9 @@
       navItems.forEach((item) => item.classList.remove("active"));
       activateMarketPage("global");
     }
-    if (!connectBtn) return;
-
-    const connectIcon = document.getElementById("steamConnectIcon");
-    const connectAvatar = document.getElementById("steamConnectAvatar");
-    const avatarUrl = loggedIn ? trustedSteamImageUrl(avatar) : "";
-    connectBtn.hidden = false;
-    connectBtn.classList.toggle("is-connected", loggedIn);
-    connectBtn.setAttribute("aria-label", loggedIn ? `Steam connected as ${name}. Open Settings` : "Connect Steam");
-    connectBtn.title = loggedIn ? `Steam connected as ${name}` : "Connect Steam";
-    if (connectIcon) connectIcon.hidden = Boolean(avatarUrl);
-    if (connectAvatar) {
-      connectAvatar.hidden = !avatarUrl;
-      if (avatarUrl) connectAvatar.src = avatarUrl;
-      else connectAvatar.removeAttribute("src");
-    }
-    if (connectLabel) connectLabel.textContent = loggedIn ? name : "Connect Steam";
+    if (loggedIn && steamUser) steamUser = { ...steamUser, name, avatar };
+    if (connectBtn) connectBtn.hidden = false;
+    updateUnifiedAccount();
   }
 
   async function refreshSteamAuth() {
@@ -3818,10 +4186,6 @@
           avatar: data.avatar || "",
         };
         setSteamButton(true, data.name || "Steam User", data.avatar || "");
-        const accountRow = document.getElementById('accountRow');
-        const settingsName = document.getElementById('settingsSteamName');
-        if (settingsName) settingsName.textContent = data.name || 'Steam User';
-        if (accountRow) accountRow.hidden = false;
         await loadMarketplaceStores({ hydrateOwnStore: true });
         renderGameSelector();
         renderTrades();
@@ -3840,27 +4204,41 @@
     }
   }
 
-  connectBtn?.addEventListener("click", () => {
-    if (steamLoggedIn) {
-      const settingsNav = document.querySelector('[data-nav][data-page="settings"]');
-      if (settingsNav) settingsNav.click();
-      return;
-    }
-
-    window.location.href = "/api/auth/steam/login";
+  connectBtn?.addEventListener("click", openAccountModal);
+  document.getElementById("closeAccountModal").addEventListener("click", closeAccountModal);
+  accountModal.addEventListener("click", (event) => { if (event.target === accountModal) closeAccountModal(); });
+  accountSteamConnect.addEventListener("click", () => { window.location.href = "/api/auth/steam/login"; });
+  document.getElementById("accountGoogleSettings").addEventListener("click", () => {
+    closeAccountModal();
+    window.dispatchEvent(new CustomEvent("fn-open-physical-profile"));
+  });
+  window.addEventListener("fn-marketplace-account-change", (event) => {
+    googleAccountState = event.detail?.loggedIn ? event.detail.account : null;
+    updateUnifiedAccount();
   });
 
-  // logout button in settings
-  const logoutBtn = document.getElementById('logoutBtn');
-  logoutBtn?.addEventListener('click', async () => {
-    if (!confirm('Log out of Steam?')) return;
-    try {
-      await fetch('/api/auth/me', { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
-    } catch (e) {
-      console.warn('Logout request failed', e);
-    }
+  async function logoutAllAccounts() {
+    if (!confirm("Log out of Steam and Google on Fraxb?")) return;
+    unifiedAccountAction.disabled = true;
+    await Promise.allSettled([
+      fetch("/api/auth/me", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json" } }),
+      fetch("/api/physical/auth", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ action: "logout" }) }),
+    ]);
+    googleAccountState = null;
     setSteamButton(false);
     clearSteamAccountState();
+    window.dispatchEvent(new CustomEvent("fn-marketplace-logout-all"));
+    unifiedAccountAction.disabled = false;
+    closeAccountModal();
+    updateUnifiedAccount();
+  }
+
+  unifiedAccountAction.addEventListener("click", () => {
+    if (steamLoggedIn || googleAccountState) void logoutAllAccounts();
+    else openAccountModal();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !accountModal.hidden) closeAccountModal();
   });
 
 
@@ -4800,10 +5178,7 @@
         viewSeller(entry.seller, entry.item.name);
         return;
       }
-      const sellerQuery = entry.listing.seller.storeName;
-      marketSearchValues.physical = sellerQuery;
-      activateMarketPage("physical");
-      window.dispatchEvent(new CustomEvent("fn-physical-search", { detail: { query: sellerQuery } }));
+      activateMarketPage("physical", { scope: physicalSellerScope(entry.listing) });
     });
     return card;
   }
@@ -5232,12 +5607,12 @@
     gameCatalogError = "";
     resetTradeState();
     currentViewSeller = null;
+    marketStoreScope = null;
     if (!priceModal.hidden) closePriceModal();
     if (!bidModal.hidden) closeBidModal();
 
-    const accountRow = document.getElementById("accountRow");
-    if (accountRow) accountRow.hidden = true;
     viewingBanner.hidden = true;
+    syncPhysicalScope();
     updateSidebarLogo(activePageName());
     updateInventoryStatus();
     renderGameSelector();
@@ -5246,6 +5621,7 @@
     renderTrades();
     renderGrid(currentCategory);
     syncPageTitle(activePageName());
+    updateUnifiedAccount();
   }
 
   document.getElementById("loadMoreInventory").addEventListener("click", () => {
@@ -5262,6 +5638,7 @@
       return;
     }
     currentViewSeller = seller;
+    marketStoreScope = digitalSellerScope(seller);
     marketSearchValues.market = itemQuery;
     viewingBanner.hidden = false;
     const sellerName = document.createElement("strong");
@@ -5280,8 +5657,10 @@
 
   function backToMyStore() {
     currentViewSeller = null;
+    marketStoreScope = null;
     marketSearchValues.market = "";
     viewingBanner.hidden = true;
+    syncPhysicalScope();
     navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
     showPage("market");
     renderGrid(currentCategory);
@@ -5904,7 +6283,7 @@
   const languageSelect = document.getElementById("languageSelect");
   languageSelect.value = currentLanguage;
   setupSearchPicker({ selectId: "currencySelect", inputId: "currencySearch", menuId: "currencyMenu" });
-  languagePickerControl = setupSearchPicker({ selectId: "languageSelect", inputId: "languageSearch", menuId: "languageMenu" });
+  languagePickerControl = setupLanguageDialog();
   languageSelect.addEventListener("change", (event) => {
     currentLanguage = translations[event.target.value] ? event.target.value : "en";
     localStorage.setItem(LANGUAGE_KEY, currentLanguage);

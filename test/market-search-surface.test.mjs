@@ -28,10 +28,14 @@ test("global, digital, and physical searches stay separate and route to stores",
   assert.match(html, /Search physical products/);
   assert.match(html, /id="globalResultGrid"/);
   assert.match(html, /viewSeller\(entry\.seller, entry\.item\.name\)/);
-  assert.match(html, /marketSearchValues\.physical = sellerQuery/);
+  assert.match(html, /activateMarketPage\("physical", \{ scope: physicalSellerScope\(entry\.listing\) \}\)/);
+  assert.match(html, /activePage === "physical" && marketStoreScope/);
+  assert.match(html, /showPage\("market"\)/);
   assert.match(html, /\.physical-page > \.market-mode-switch[\s\S]*?margin: 12px 0 12px auto/);
   assert.ok(html.indexOf('id="physicalCartButton"') < html.indexOf('id="steamAuth"'));
   assert.match(physicalClient, /fn-physical-search/);
+  assert.match(physicalClient, /fn-physical-store-scope/);
+  assert.match(physicalClient, /sellerIdMatches/);
   assert.match(physicalClient, /FraxbSearch\?\.matches/);
 });
 

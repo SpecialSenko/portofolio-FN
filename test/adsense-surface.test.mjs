@@ -11,6 +11,7 @@ test("AdSense remains configuration-gated inside the advertisement rail", async 
 
   assert.match(html, /id="googleAdSlot"[^>]*hidden/);
   assert.match(html, /src="\/adsense\.js"/);
+  assert.match(html, /const showAdRail = \["global", "market", "physical"\]\.includes\(name\)/);
   assert.match(client, /VITE_ADSENSE_CLIENT/);
   assert.match(client, /VITE_ADSENSE_SLOT/);
   assert.match(client, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/);
