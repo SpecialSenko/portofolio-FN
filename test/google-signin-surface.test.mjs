@@ -47,9 +47,16 @@ test("Google marketplace sign-in is exposed site-wide and reports configuration 
       fs.readFile(new URL("../physical-market.js", import.meta.url), "utf8"),
     ]);
     assert.match(html, /id="siteAccountButton"/);
+    assert.match(html, /id="topGoogleButton"/);
+    assert.match(html, /id="settingsGoogleButton"/);
     assert.match(html, /id="settingsSiteAccountButton"/);
     assert.match(client, /google\.accounts\.id\.renderButton/);
-    assert.match(client, /id="physicalGoogleZone"/);
+    assert.match(client, /googleButtonZones/);
+    assert.doesNotMatch(client, /id="physicalAuthForm"/);
+    assert.doesNotMatch(client, /id="physicalPassword"/);
+    assert.match(html, /url\("\/marketplace-hero\.webp"\)/);
+    assert.match(html, /class="home-action" id="openRules"/);
+    assert.match(html, /\.physical-page > \.market-mode-switch[\s\S]*?width: 168px/);
   } finally {
     if (originalClientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
     else process.env.GOOGLE_CLIENT_ID = originalClientId;

@@ -21,7 +21,6 @@ let listings = [];
 let listingsLoading = false;
 let category = "all";
 let searchQuery = "";
-let authMode = "login";
 let cart = readCart();
 let currencyRates = {
   USD: 1, EUR: .92, GBP: .79, IDR: 15800, JPY: 157, AUD: 1.52, MYR: 4.2, TWD: 30.5,
@@ -128,29 +127,6 @@ function normalizeListing(value) {
 function installDialogs() {
   const host = document.createElement("div");
   host.innerHTML = `
-    <div class="bid-modal" id="physicalAuthModal" role="dialog" aria-modal="true" aria-labelledby="physicalAuthTitle" hidden>
-      <section class="bid-dialog physical-modal">
-        <header class="bid-dialog-header">
-          <h2 class="bid-dialog-title" id="physicalAuthTitle">Marketplace sign in</h2>
-          <button class="icon-button bid-dialog-close" data-close-physical="physicalAuthModal" type="button" title="Close" aria-label="Close marketplace sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
-        </header>
-        <div class="cat-tabs physical-auth-tabs" role="tablist" aria-label="Seller account mode">
-          <button class="cat-tab active" id="physicalLoginTab" type="button" role="tab" aria-selected="true">Sign in</button>
-          <button class="cat-tab" id="physicalRegisterTab" type="button" role="tab" aria-selected="false">Create account</button>
-        </div>
-        <div class="physical-google-zone" id="physicalGoogleZone"><p class="physical-google-status">Google sign-in unavailable</p></div>
-        <div class="physical-auth-divider">or use email</div>
-        <form class="bid-dialog-body physical-form-grid" id="physicalAuthForm">
-          <label class="physical-field is-wide"><span>Email</span><input class="physical-input" id="physicalEmail" type="email" autocomplete="email" maxlength="254" required></label>
-          <label class="physical-field is-wide"><span>Password</span><input class="physical-input" id="physicalPassword" type="password" autocomplete="current-password" minlength="10" maxlength="128" required></label>
-          <label class="physical-field physical-register-field"><span>Your name</span><input class="physical-input" id="physicalDisplayName" maxlength="80"></label>
-          <label class="physical-field physical-register-field"><span>Store name</span><input class="physical-input" id="physicalRegisterStoreName" maxlength="100"></label>
-          <label class="physical-field physical-register-field is-wide"><span>City</span><input class="physical-input" id="physicalRegisterCity" maxlength="80"></label>
-          <p class="bid-error is-wide" id="physicalAuthError" role="alert" hidden></p>
-          <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalAuthModal" type="button">Cancel</button><button class="bid-submit" id="physicalAuthSubmit" type="submit">Sign in</button></div>
-        </form>
-      </section>
-    </div>
     <div class="bid-modal" id="physicalProfileModal" role="dialog" aria-modal="true" aria-labelledby="physicalProfileTitle" hidden>
       <section class="bid-dialog physical-modal">
         <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalProfileTitle">Store settings</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalProfileModal" type="button" title="Close" aria-label="Close store settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
@@ -212,23 +188,6 @@ function closeModal(modal) {
   returnFocus = null;
 }
 
-function setAuthMode(mode) {
-  authMode = mode === "register" ? "register" : "login";
-  const registering = authMode === "register";
-  element("physicalAuthTitle").textContent = registering ? "Create marketplace account" : "Marketplace sign in";
-  element("physicalAuthSubmit").textContent = registering ? "Create account" : "Sign in";
-  element("physicalPassword").autocomplete = registering ? "new-password" : "current-password";
-  document.querySelectorAll(".physical-register-field").forEach((field) => {
-    field.hidden = !registering;
-    field.querySelector("input").required = registering;
-  });
-  element("physicalLoginTab").classList.toggle("active", !registering);
-  element("physicalRegisterTab").classList.toggle("active", registering);
-  element("physicalLoginTab").setAttribute("aria-selected", String(!registering));
-  element("physicalRegisterTab").setAttribute("aria-selected", String(registering));
-  element("physicalAuthError").hidden = true;
-}
-
 function renderAccount() {
   const band = element("physicalAccountBand");
   const addButton = element("addPhysicalListing");
@@ -236,27 +195,31 @@ function renderAccount() {
   const settingsRow = element("physicalAccountRow");
   const siteButton = element("siteAccountButton");
   const siteLabel = element("siteAccountLabel");
+  const topGoogleButton = element("topGoogleButton");
   const settingsSiteButton = element("settingsSiteAccountButton");
   const settingsSiteLabel = element("settingsSiteAccountLabel");
+  const settingsGoogleButton = element("settingsGoogleButton");
   const siteStatus = element("siteAccountStatus");
   band.hidden = !account;
   addButton.hidden = !account;
   settingsRow.hidden = !account;
-  accountButton.textContent = account ? "Store settings" : "Seller sign in";
-  siteButton?.classList.toggle("is-connected", Boolean(account));
-  if (siteLabel) siteLabel.textContent = account ? account.displayName : "Google sign in";
-  if (settingsSiteLabel) settingsSiteLabel.textContent = account ? "Store settings" : "Sign in";
-  if (settingsSiteButton) settingsSiteButton.title = account ? "Open marketplace account settings" : "Sign in with Google or email";
+  accountButton.hidden = !account;
+  accountButton.textContent = "Store settings";
+  if (siteButton) siteButton.hidden = !account;
+  if (topGoogleButton) topGoogleButton.hidden = Boolean(account);
+  if (settingsSiteButton) settingsSiteButton.hidden = !account;
+  if (settingsGoogleButton) settingsGoogleButton.hidden = Boolean(account);
+  if (siteLabel) siteLabel.textContent = account?.displayName || "Google account";
+  if (settingsSiteLabel) settingsSiteLabel.textContent = "Store settings";
+  if (settingsSiteButton) settingsSiteButton.title = "Open marketplace account settings";
   if (siteButton) {
-    siteButton.title = account
-      ? `Marketplace account: ${account.displayName}`
-      : googleClientId ? "Sign in with Google or email" : "Google setup required; email sign in is available";
+    siteButton.title = account ? `Marketplace account: ${account.displayName}` : "Google marketplace account";
     siteButton.setAttribute("aria-label", siteButton.title);
   }
   if (siteStatus) {
     siteStatus.textContent = account
-      ? `Connected as ${account.displayName} with ${account.signInMethod === "google" ? "Google" : "email"}`
-      : googleClientId ? "Use Google or email for physical store tools" : "Google setup required; email sign in is available";
+      ? `Connected as ${account.displayName} with Google`
+      : googleClientId ? "Sign in with Google for physical store tools" : "Google sign-in setup is required";
   }
   if (!account) return;
   element("physicalStoreName").textContent = account.storeName;
@@ -389,6 +352,7 @@ async function loadAuth() {
   }
   renderAccount();
   renderListings();
+  void renderGoogleButtons();
 }
 
 async function loadRates() {
@@ -582,49 +546,57 @@ function loadGoogleLibrary() {
   return googleLibraryPromise;
 }
 
-async function renderGoogleButton() {
-  const zone = element("physicalGoogleZone");
-  zone.replaceChildren();
-  if (!googleClientId) {
-    const status = document.createElement("p");
-    status.className = "physical-google-status";
-    status.textContent = "Google sign-in needs a Web Client ID; email sign-in is available below";
+function googleButtonZones() {
+  return [element("topGoogleButton"), element("settingsGoogleButton")].filter(Boolean);
+}
+
+function showGoogleStatus(message, isError = false) {
+  googleButtonZones().forEach((zone) => {
+    zone.replaceChildren();
+    const status = document.createElement("span");
+    status.className = "google-setup-status";
+    status.textContent = message;
+    if (isError) status.setAttribute("role", "alert");
     zone.appendChild(status);
+  });
+}
+
+async function renderGoogleButtons() {
+  const zones = googleButtonZones();
+  zones.forEach((zone) => zone.replaceChildren());
+  if (account) return;
+  if (!googleClientId) {
+    showGoogleStatus("Google setup required");
     return;
   }
   try {
     const google = await loadGoogleLibrary();
     google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
-    google.accounts.id.renderButton(zone, {
-      type: "standard",
-      theme: "outline",
-      size: "large",
-      text: "continue_with",
-      shape: "rectangular",
-      locale: document.documentElement.lang || "en",
-      width: Math.min(360, zone.clientWidth || 360),
+    zones.forEach((zone) => {
+      google.accounts.id.renderButton(zone, {
+        type: "standard",
+        theme: "outline",
+        size: "medium",
+        text: "signin_with",
+        shape: "rectangular",
+        locale: document.documentElement.lang || "en",
+        width: Math.max(168, Math.min(300, zone.clientWidth || 200)),
+      });
     });
   } catch (error) {
-    const status = document.createElement("p");
-    status.className = "physical-google-status";
-    status.textContent = error.message;
-    zone.appendChild(status);
+    showGoogleStatus(error.message || "Google sign-in could not be loaded", true);
   }
 }
 
 async function handleGoogleCredential(response) {
-  const error = element("physicalAuthError");
-  error.hidden = true;
   try {
     const data = await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify({ action: "google", credential: response?.credential }) });
     account = data.account;
     paymentsConfigured = Boolean(data.paymentsConfigured);
-    closeModal(element("physicalAuthModal"));
     renderAccount();
     renderListings();
   } catch (failure) {
-    error.textContent = failure.message || "Google sign-in failed";
-    error.hidden = false;
+    showGoogleStatus(failure.message || "Google sign-in failed", true);
   }
 }
 
@@ -644,7 +616,7 @@ function bindEvents() {
   window.addEventListener("fn-language-change", () => {
     renderAccount();
     renderListings();
-    if (!element("physicalAuthModal").hidden) void renderGoogleButton();
+    void renderGoogleButtons();
     if (!element("physicalCartModal").hidden) renderCart();
   });
   document.querySelector(".search")?.addEventListener("input", (event) => {
@@ -662,13 +634,10 @@ function bindEvents() {
   });
   function openMarketplaceAccount() {
     if (account) openProfile();
-    else { setAuthMode("login"); openModal(element("physicalAuthModal")); void renderGoogleButton(); }
   }
   element("physicalAccountButton").addEventListener("click", openMarketplaceAccount);
   element("siteAccountButton")?.addEventListener("click", openMarketplaceAccount);
   element("settingsSiteAccountButton")?.addEventListener("click", openMarketplaceAccount);
-  element("physicalLoginTab").addEventListener("click", () => setAuthMode("login"));
-  element("physicalRegisterTab").addEventListener("click", () => setAuthMode("register"));
   element("physicalCartButton").addEventListener("click", () => { renderCart(); openModal(element("physicalCartModal")); });
   element("addPhysicalListing").addEventListener("click", () => { element("physicalListingError").hidden = true; openModal(element("physicalListingModal")); });
   element("openSupporterPlans").addEventListener("click", () => {
@@ -677,36 +646,6 @@ function bindEvents() {
     error.textContent = paymentsConfigured ? "" : "Supporter payments are not configured yet.";
     document.querySelectorAll("[data-supporter-plan]").forEach((button) => { button.disabled = !paymentsConfigured; });
     openModal(element("supporterModal"));
-  });
-
-  element("physicalAuthForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const error = element("physicalAuthError");
-    const submit = element("physicalAuthSubmit");
-    error.hidden = true;
-    submit.disabled = true;
-    try {
-      const payload = {
-        action: authMode,
-        email: element("physicalEmail").value,
-        password: element("physicalPassword").value,
-        displayName: element("physicalDisplayName").value,
-        storeName: element("physicalRegisterStoreName").value,
-        city: element("physicalRegisterCity").value,
-      };
-      const data = await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify(payload) });
-      account = data.account;
-      paymentsConfigured = Boolean(data.paymentsConfigured);
-      event.currentTarget.reset();
-      closeModal(element("physicalAuthModal"));
-      renderAccount();
-      renderListings();
-    } catch (failure) {
-      error.textContent = failure.message || "Seller sign-in failed";
-      error.hidden = false;
-    } finally {
-      submit.disabled = false;
-    }
   });
 
   element("physicalProfileForm").addEventListener("submit", async (event) => {
@@ -781,11 +720,11 @@ function bindEvents() {
     account = null;
     renderAccount();
     renderListings();
+    void renderGoogleButtons();
   });
 }
 
 installDialogs();
-setAuthMode("login");
 bindEvents();
 renderCartCount();
 renderAccount();

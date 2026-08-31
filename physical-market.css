@@ -191,26 +191,6 @@
 .physical-checks { gap: 8px 14px; }
 .physical-check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10.5px; }
 .physical-check input { accent-color: var(--text); }
-.physical-auth-tabs { margin: 0 16px 14px; }
-
-.physical-google-zone {
-  min-height: 44px;
-  display: grid;
-  place-items: center;
-  margin: 0 14px 14px;
-}
-.physical-google-status { margin: 0; color: var(--muted); font-size: 10px; }
-.physical-auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 14px 14px;
-  color: var(--muted);
-  font-size: 9px;
-  text-transform: uppercase;
-}
-.physical-auth-divider::before,
-.physical-auth-divider::after { height: 1px; flex: 1; background: var(--border); content: ""; }
 
 .supporter-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .supporter-plan {
