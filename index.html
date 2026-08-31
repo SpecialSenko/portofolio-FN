@@ -263,20 +263,6 @@
     white-space: nowrap;
   }
   .steam-auth { display: contents; }
-  .site-account-btn {
-    min-width: 112px;
-    margin-left: auto;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-  }
-  .top-google-account {
-    min-width: 172px;
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
   .google-button-host {
     min-height: 32px;
     display: flex;
@@ -296,11 +282,6 @@
     font-weight: 700;
     white-space: nowrap;
   }
-  .site-account-btn:hover,
-  .site-account-btn.is-connected {
-    border-color: var(--nav-hover-border);
-    color: var(--text);
-  }
   .google-mark {
     width: 18px;
     height: 18px;
@@ -314,6 +295,20 @@
     font-size: 11px;
     font-weight: 800;
   }
+  .combined-google-mark {
+    width: 16px;
+    height: 16px;
+    display: grid;
+    flex: 0 0 16px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #4285f4;
+    font-family: Arial, sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+  }
+  .combined-google-mark[hidden] { display: none; }
   .topbar .steam-connect { margin-left: 0; }
   .steam-connect {
     min-width: 122px;
@@ -951,7 +946,7 @@
   }
   .physical-page > .market-mode-switch {
     width: 168px;
-    margin: 12px 0;
+    margin: 12px 0 12px auto;
   }
   .ad-rail {
     grid-column: 2;
@@ -1171,6 +1166,97 @@
   .seller-card.is-owner {
     border-color: rgba(246, 200, 95, .72);
     box-shadow: 0 0 0 1px rgba(246, 200, 95, .16), 0 0 22px rgba(246, 200, 95, .2);
+  }
+  .global-discovery {
+    margin: 18px 0 22px;
+  }
+  .global-discovery-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+  }
+  .global-discovery-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .global-discovery-count {
+    color: var(--muted);
+    font-size: 9px;
+  }
+  .global-result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 8px;
+  }
+  .global-listing-card {
+    min-width: 0;
+    min-height: 88px;
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 9px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .global-listing-card:hover,
+  .global-listing-card:focus-visible {
+    border-color: var(--nav-hover-border);
+    background: var(--nav-active-bg);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .global-listing-media {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    align-self: center;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--muted);
+  }
+  .global-listing-media img { width: 100%; height: 100%; object-fit: contain; }
+  .global-listing-media svg { width: 21px; height: 21px; }
+  .global-listing-body { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .global-listing-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
+  .global-listing-tag {
+    padding: 2px 4px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--muted);
+    font-size: 7px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .global-listing-tag.is-auction { border-color: rgba(77, 255, 178, .35); color: #69e8b1; }
+  .global-listing-name {
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .global-listing-store,
+  .global-listing-price { margin: 3px 0 0; color: var(--muted); font-size: 8px; }
+  .global-listing-price { color: var(--text); font-weight: 800; }
+  .global-discovery-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 20px 0;
+    color: var(--muted);
+    font-size: 11px;
   }
   .seller-owner-crown {
     position: absolute;
@@ -2492,8 +2578,6 @@
     .steam-btn {
       margin-left: 0;
     }
-    .top-google-account { min-width: 0; margin-left: auto; }
-    .site-account-btn { margin-left: auto; }
     .content {
       padding: 16px 14px 28px;
     }
@@ -2616,16 +2700,14 @@
   <div class="main">
     <header class="topbar">
       <h1 id="pageTitle">Fraxb</h1>
-      <input class="search" type="text" placeholder="Search skins..." aria-label="Search skins" />
-      <div class="top-google-account" id="topGoogleAccount">
-        <div class="google-button-host google-button-host-top" id="topGoogleButton" aria-label="Sign in with Google"></div>
-        <button type="button" class="steam-btn site-account-btn is-connected" id="siteAccountButton" aria-label="Open marketplace account settings" hidden>
-          <span class="google-mark" aria-hidden="true">G</span>
-          <span id="siteAccountLabel">Google account</span>
-        </button>
-      </div>
+      <input class="search" type="search" maxlength="120" autocomplete="off" placeholder="Search marketplace..." aria-label="Search marketplace" />
+      <button class="back-btn physical-cart-trigger topbar-cart" id="physicalCartButton" type="button" aria-label="Open physical cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20.5 8H6.1"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>
+        Cart <span class="physical-cart-count" id="physicalCartCount" hidden>0</span>
+      </button>
       <div class="steam-auth" id="steamAuth">
         <button type="button" class="steam-btn steam-connect" id="steamConnectBtn" aria-label="Connect Steam">
+          <span class="combined-google-mark" id="combinedGoogleMark" title="Google account connected" aria-label="Google account connected" hidden>G</span>
           <svg id="steamConnectIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2a10 10 0 0 0-9.96 9.12l5.36 2.22a2.82 2.82 0 0 1 1.6-.49h.12l2.38-3.45v-.05a3.8 3.8 0 1 1 3.8 3.8h-.09l-3.39 2.42v.13A2.85 2.85 0 0 1 6.2 16.4l-3.83-1.58A10 10 0 1 0 12 2Zm-4.13 15.2a2.02 2.02 0 0 0 2.67-2.67 2.02 2.02 0 0 0-2.39-.95l1.2.5a1.49 1.49 0 1 1-1.14 2.75l-1.18-.49c.2.37.48.66.84.86Zm7.43-5.32a2.53 2.53 0 1 0 0-5.06 2.53 2.53 0 0 0 0 5.06Zm0-.63a1.9 1.9 0 1 1 0-3.8 1.9 1.9 0 0 1 0 3.8Z"/>
           </svg>
@@ -2680,6 +2762,14 @@
             <p class="protect-copy" data-i18n="market.protectionCopy">Listings and bids are recorded here. Confirm every Steam trade before completing payment; this site does not currently hold funds.</p>
           </div>
         </div>
+
+        <section class="global-discovery" id="globalDiscovery" aria-live="polite">
+          <div class="global-discovery-head">
+            <h3 class="global-discovery-title" id="globalDiscoveryTitle">Featured listings</h3>
+            <span class="global-discovery-count" id="globalDiscoveryCount"></span>
+          </div>
+          <div class="global-result-grid" id="globalResultGrid"></div>
+        </section>
 
         <p class="page-copy" id="sellerCopy">Connect Steam to show your account on the market.</p>
         <div class="seller-grid" id="sellerGrid"></div>
@@ -2763,10 +2853,6 @@
             <p class="page-copy" data-i18n="physical.copy">Food, daily needs, services, and physical products available by area.</p>
           </div>
           <div class="physical-actions">
-            <button class="back-btn physical-cart-trigger" id="physicalCartButton" type="button" aria-label="Open physical cart">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20.5 8H6.1"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>
-              Cart <span class="physical-cart-count" id="physicalCartCount" hidden>0</span>
-            </button>
             <button class="back-btn" id="physicalAccountButton" type="button" hidden>Store settings</button>
             <button class="physical-primary" id="addPhysicalListing" type="button" hidden>Add listing</button>
           </div>
@@ -3151,6 +3237,7 @@
   </div>
 </div>
 
+<script src="/search-utils.js"></script>
 <script>
   // UI deterrent only. Server authorization must never depend on browser shortcut blocking.
   document.addEventListener("contextmenu", (event) => {
@@ -3172,6 +3259,7 @@
   const pages = Array.from(document.querySelectorAll(".page"));
   const pageTitle = document.getElementById("pageTitle");
   const adRail = document.getElementById("adRail");
+  const marketSearchInput = document.querySelector(".search");
   const LANGUAGE_KEY = "fraxb_language";
   const translations = {
     en: {},
@@ -3232,6 +3320,12 @@
   let marketplaceLoaded = false;
   let marketplaceError = "";
   let marketplaceRequestVersion = 0;
+  let physicalDiscoveryListings = [];
+  const marketSearchValues = { global: "", market: "", physical: "" };
+
+  function marketSearchMatches(query, ...values) {
+    return window.FraxbSearch?.matches(query, ...values) ?? values.join(" ").toLowerCase().includes(String(query || "").trim().toLowerCase());
+  }
 
   function activePageName() {
     return pages.find((page) => !page.hidden)?.dataset.page || "home";
@@ -3255,12 +3349,17 @@
     adRail.hidden = !showAdRail;
     adRail.closest(".main").classList.toggle("has-ad-rail", showAdRail);
     document.getElementById("inventoryBanner").hidden = ["home", "physical", "blog"].includes(name);
-    const search = document.querySelector(".search");
-    if (search) {
-      search.hidden = name === "home" || name === "blog";
-      search.placeholder = name === "physical" ? "Search local products..." : "Search skins...";
-      search.setAttribute("aria-label", name === "physical" ? "Search local products" : "Search skins");
-      if (name === "physical") search.value = "";
+    if (marketSearchInput) {
+      const searchable = ["global", "market", "physical"].includes(name);
+      const placeholders = {
+        global: "Search digital and physical listings...",
+        market: "Search this digital store...",
+        physical: "Search physical products...",
+      };
+      marketSearchInput.hidden = !searchable;
+      marketSearchInput.placeholder = placeholders[name] || "Search marketplace...";
+      marketSearchInput.setAttribute("aria-label", placeholders[name] || "Search marketplace");
+      marketSearchInput.value = marketSearchValues[name] || "";
     }
     syncPageTitle(name);
     updateSidebarLogo(name);
@@ -3337,6 +3436,22 @@
     hideTwitchPopover({ immediate: true });
     navItems.forEach((item) => item.classList.remove("active"));
     showPage("home");
+  });
+
+  marketSearchInput?.addEventListener("input", (event) => {
+    const page = activePageName();
+    if (!["global", "market", "physical"].includes(page)) return;
+    marketSearchValues[page] = event.target.value;
+    if (page === "global") renderGlobalDiscovery();
+    if (page === "market") renderGrid(currentCategory);
+    if (page === "physical") {
+      window.dispatchEvent(new CustomEvent("fn-physical-search", { detail: { query: event.target.value } }));
+    }
+  });
+
+  window.addEventListener("fn-physical-listings-change", (event) => {
+    physicalDiscoveryListings = Array.isArray(event.detail?.listings) ? event.detail.listings : [];
+    if (activePageName() === "global") renderGlobalDiscovery();
   });
 
   function setupSearchPicker({ selectId, inputId, menuId }) {
@@ -3437,6 +3552,7 @@
     languagePickerControl?.sync();
     syncPageTitle(activePageName());
     renderGrid(currentCategory);
+    renderGlobalDiscovery();
     renderInventory();
     if (!priceModal.hidden) updateListingModeFields();
     if (!bidModal.hidden) updateBidDialogValues();
@@ -3770,6 +3886,16 @@
     try {
       const url = new URL(value);
       return url.protocol === "https:" && url.hostname.endsWith(".steamstatic.com") ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function safeHttpsImageUrl(value) {
+    if (!value) return "";
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" ? url.href : "";
     } catch {
       return "";
     }
@@ -4311,6 +4437,7 @@
 
   function renderGrid(category) {
     grid.innerHTML = "";
+    const digitalQuery = marketSearchValues.market;
 
     if (currentViewSeller) {
       if (currentViewSeller.isCurrentUser) {
@@ -4325,11 +4452,14 @@
           </div>`;
         return;
       }
-      const sellerItems = category === "all"
+      const categoryItems = category === "all"
         ? currentViewSeller.items
         : currentViewSeller.items.filter((it) => it.cat === category);
+      const sellerItems = categoryItems.filter((item) =>
+        marketSearchMatches(digitalQuery, item.name, item.type, item.cat, item.game, currentViewSeller.name)
+      );
       if (sellerItems.length === 0) {
-        grid.innerHTML = `<p class="empty-state">${escapeHtml(currentViewSeller.name)} has nothing listed in this category.</p>`;
+        grid.innerHTML = `<p class="empty-state">${digitalQuery.trim() ? "No digital items match this store search." : `${escapeHtml(currentViewSeller.name)} has nothing listed in this category.`}</p>`;
         return;
       }
       const sellerFragment = document.createDocumentFragment();
@@ -4339,9 +4469,12 @@
     }
 
     const forSale = Array.from(listedItems.values());
-    const filtered = category === "all" ? forSale : forSale.filter((it) => it.cat === category);
+    const categoryItems = category === "all" ? forSale : forSale.filter((it) => it.cat === category);
+    const filtered = categoryItems.filter((item) =>
+      marketSearchMatches(digitalQuery, item.name, item.type, item.cat, item.game)
+    );
     if (filtered.length === 0) {
-      grid.innerHTML = `<p class="empty-state">Nothing listed in this category yet. Go to Inventory and toggle "List" on an item to sell it here.</p>`;
+      grid.innerHTML = `<p class="empty-state">${digitalQuery.trim() ? "No digital items match this store search." : "Nothing listed in this category yet. Go to Inventory and toggle \"List\" on an item to sell it here."}</p>`;
       return;
     }
     const fragment = document.createDocumentFragment();
@@ -4531,7 +4664,7 @@
     }
 
     if (s.testerRole) {
-      const testerLabels = { first: "First Tester", second: "Second Tester", special: "Special Tester" };
+      const testerLabels = { first: "1st Tester", second: "2nd Tester", special: "Special Tester" };
       const testerBadge = document.createElement("span");
       testerBadge.className = `seller-tester-badge is-${s.testerRole}`;
       testerBadge.textContent = testerLabels[s.testerRole];
@@ -4571,11 +4704,17 @@
     return card;
   }
 
-  function renderSellers() {
-    const sellerGrid = document.getElementById("sellerGrid");
-    const sellerCopy = document.getElementById("sellerCopy");
-    sellerGrid.replaceChildren();
+  function interleaveListings(left, right) {
+    const output = [];
+    const length = Math.max(left.length, right.length);
+    for (let index = 0; index < length; index += 1) {
+      if (left[index]) output.push(left[index]);
+      if (right[index]) output.push(right[index]);
+    }
+    return output;
+  }
 
+  function marketplaceSellerList() {
     const currentSeller = currentSteamSeller();
     const sellers = marketplaceSellers.map((seller) => {
       if (!currentSeller || seller.steamid !== currentSeller.steamid) {
@@ -4591,6 +4730,126 @@
     if (currentSeller && !sellers.some((seller) => seller.steamid === currentSeller.steamid)) {
       sellers.unshift(currentSeller);
     }
+    return sellers;
+  }
+
+  function globalListingCard(entry) {
+    const card = document.createElement("button");
+    card.className = "global-listing-card";
+    card.type = "button";
+
+    const media = document.createElement("span");
+    media.className = "global-listing-media";
+    const imageUrl = entry.kind === "digital"
+      ? trustedSteamImageUrl(entry.item.icon)
+      : safeHttpsImageUrl(entry.listing.imageUrl);
+    if (imageUrl) {
+      const image = document.createElement("img");
+      image.src = imageUrl;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      media.appendChild(image);
+    } else {
+      media.innerHTML = entry.kind === "digital"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16v10H4V7Z"/><path d="M8 12h8"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>';
+    }
+
+    const body = document.createElement("span");
+    body.className = "global-listing-body";
+    const tags = document.createElement("span");
+    tags.className = "global-listing-tags";
+    const marketTag = document.createElement("span");
+    marketTag.className = "global-listing-tag";
+    marketTag.textContent = entry.kind === "digital" ? "Digital" : "Physical";
+    const modeTag = document.createElement("span");
+    modeTag.className = "global-listing-tag";
+    modeTag.textContent = entry.kind === "digital" && entry.item.saleMode === "auction" ? "Auction" : "Fixed price";
+    modeTag.classList.toggle("is-auction", modeTag.textContent === "Auction");
+    tags.append(marketTag, modeTag);
+
+    const name = document.createElement("span");
+    name.className = "global-listing-name";
+    name.textContent = entry.kind === "digital" ? entry.item.name : entry.listing.title;
+    const store = document.createElement("span");
+    store.className = "global-listing-store";
+    store.textContent = entry.kind === "digital" ? entry.seller.name : entry.listing.seller.storeName;
+    const price = document.createElement("span");
+    price.className = "global-listing-price";
+    if (entry.kind === "digital") {
+      const auction = normalizeAuction(entry.item.auction);
+      price.textContent = entry.item.saleMode === "auction" && auction.currentBidCents > 0
+        ? formatBid(auction)
+        : formatPrice(entry.item.usd);
+    } else {
+      price.textContent = new Intl.NumberFormat(currentLanguage || "id", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(entry.listing.priceIdr);
+    }
+    body.append(tags, name, store, price);
+    card.append(media, body);
+
+    const destination = entry.kind === "digital" ? `${entry.seller.name}'s digital store` : `${entry.listing.seller.storeName} in Physical Market`;
+    card.title = `Open ${destination}`;
+    card.setAttribute("aria-label", `${name.textContent}. Open ${destination}`);
+    card.addEventListener("click", () => {
+      if (entry.kind === "digital") {
+        viewSeller(entry.seller, entry.item.name);
+        return;
+      }
+      const sellerQuery = entry.listing.seller.storeName;
+      marketSearchValues.physical = sellerQuery;
+      activateMarketPage("physical");
+      window.dispatchEvent(new CustomEvent("fn-physical-search", { detail: { query: sellerQuery } }));
+    });
+    return card;
+  }
+
+  function renderGlobalDiscovery() {
+    const resultGrid = document.getElementById("globalResultGrid");
+    const title = document.getElementById("globalDiscoveryTitle");
+    const count = document.getElementById("globalDiscoveryCount");
+    if (!resultGrid || !title || !count) return;
+    const query = marketSearchValues.global;
+    const digitalEntries = marketplaceSellerList().flatMap((seller) =>
+      seller.items.map((item) => ({ kind: "digital", seller, item }))
+    );
+    const physicalEntries = physicalDiscoveryListings.map((listing) => ({ kind: "physical", listing }));
+    const matches = (entry) => entry.kind === "digital"
+      ? marketSearchMatches(query, entry.item.name, entry.item.type, entry.item.cat, entry.item.game, entry.seller.name)
+      : marketSearchMatches(query, entry.listing.title, entry.listing.description, entry.listing.category, entry.listing.area, entry.listing.seller.storeName, entry.listing.seller.displayName);
+    const combined = query.trim()
+      ? [...digitalEntries, ...physicalEntries].filter(matches)
+      : interleaveListings(digitalEntries, physicalEntries);
+    const visible = combined.slice(0, query.trim() ? 16 : 8);
+
+    title.textContent = query.trim() ? "Search results" : "Featured listings";
+    count.textContent = `${combined.length} ${combined.length === 1 ? "listing" : "listings"}`;
+    resultGrid.replaceChildren();
+    if (visible.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "global-discovery-empty";
+      empty.textContent = query.trim()
+        ? "No digital or physical listings match that search. Try a shorter spelling."
+        : "Featured listings will appear when sellers publish items.";
+      resultGrid.appendChild(empty);
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    visible.forEach((entry) => fragment.appendChild(globalListingCard(entry)));
+    resultGrid.appendChild(fragment);
+  }
+
+  function renderSellers() {
+    const sellerGrid = document.getElementById("sellerGrid");
+    const sellerCopy = document.getElementById("sellerCopy");
+    sellerGrid.replaceChildren();
+    renderGlobalDiscovery();
+
+    const sellers = marketplaceSellerList();
 
     if (marketplaceLoading && sellers.length === 0) {
       sellerCopy.textContent = "Loading marketplace stores...";
@@ -4997,12 +5256,13 @@
   const viewingBanner = document.getElementById("viewingBanner");
   const viewingText = document.getElementById("viewingText");
 
-  function viewSeller(seller) {
+  function viewSeller(seller, itemQuery = "") {
     if (seller.isCurrentUser) {
       backToMyStore();
       return;
     }
     currentViewSeller = seller;
+    marketSearchValues.market = itemQuery;
     viewingBanner.hidden = false;
     const sellerName = document.createElement("strong");
     sellerName.textContent = seller.name;
@@ -5020,6 +5280,7 @@
 
   function backToMyStore() {
     currentViewSeller = null;
+    marketSearchValues.market = "";
     viewingBanner.hidden = true;
     navItems.forEach((item) => item.classList.toggle("active", item.dataset.page === "global"));
     showPage("market");
@@ -5200,6 +5461,7 @@
     currentCurrency = e.target.value;
     localStorage.setItem(CURRENCY_KEY, currentCurrency);
     renderGrid(currentCategory);
+    renderGlobalDiscovery();
     renderTrades();
     renderInventory();
   });
@@ -5217,6 +5479,7 @@
       const sourceLabel = Array.isArray(data.sources) && data.sources.length ? data.sources.join(" + ") : "reference";
       status.textContent = data.date ? `${sourceLabel} rates from ${data.date}` : `Latest ${sourceLabel} rates`;
       renderGrid(currentCategory);
+      renderGlobalDiscovery();
       renderTrades();
       renderInventory();
     } catch {

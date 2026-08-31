@@ -32,6 +32,10 @@ function element(id) {
   return document.getElementById(id);
 }
 
+function searchMatches(query, ...values) {
+  return window.FraxbSearch?.matches(query, ...values) ?? values.join(" ").toLowerCase().includes(String(query || "").trim().toLowerCase());
+}
+
 function readCart() {
   try {
     const value = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
@@ -193,32 +197,24 @@ function renderAccount() {
   const addButton = element("addPhysicalListing");
   const accountButton = element("physicalAccountButton");
   const settingsRow = element("physicalAccountRow");
-  const siteButton = element("siteAccountButton");
-  const siteLabel = element("siteAccountLabel");
-  const topGoogleButton = element("topGoogleButton");
   const settingsSiteButton = element("settingsSiteAccountButton");
   const settingsSiteLabel = element("settingsSiteAccountLabel");
   const settingsGoogleButton = element("settingsGoogleButton");
+  const combinedGoogleMark = element("combinedGoogleMark");
   const siteStatus = element("siteAccountStatus");
   band.hidden = !account;
   addButton.hidden = !account;
   settingsRow.hidden = !account;
   accountButton.hidden = !account;
   accountButton.textContent = "Store settings";
-  if (siteButton) siteButton.hidden = !account;
-  if (topGoogleButton) topGoogleButton.hidden = Boolean(account);
   if (settingsSiteButton) settingsSiteButton.hidden = !account;
   if (settingsGoogleButton) settingsGoogleButton.hidden = Boolean(account);
-  if (siteLabel) siteLabel.textContent = account?.displayName || "Google account";
+  if (combinedGoogleMark) combinedGoogleMark.hidden = account?.signInMethod !== "google";
   if (settingsSiteLabel) settingsSiteLabel.textContent = "Store settings";
   if (settingsSiteButton) settingsSiteButton.title = "Open marketplace account settings";
-  if (siteButton) {
-    siteButton.title = account ? `Marketplace account: ${account.displayName}` : "Google marketplace account";
-    siteButton.setAttribute("aria-label", siteButton.title);
-  }
   if (siteStatus) {
     siteStatus.textContent = account
-      ? `Connected as ${account.displayName} with Google`
+      ? `Connected as ${account.displayName}`
       : googleClientId ? "Sign in with Google for physical store tools" : "Google sign-in setup is required";
   }
   if (!account) return;
@@ -304,11 +300,17 @@ function renderListings() {
     status.textContent = "Loading local listings...";
     return;
   }
-  const query = searchQuery.toLowerCase();
   const filtered = listings.filter((listing) => {
     if (category !== "all" && listing.category !== category) return false;
-    return !query || [listing.title, listing.description, listing.area, listing.seller.storeName]
-      .some((value) => value.toLowerCase().includes(query));
+    return searchMatches(
+      searchQuery,
+      listing.title,
+      listing.description,
+      listing.category,
+      listing.area,
+      listing.seller.storeName,
+      listing.seller.displayName,
+    );
   });
   status.textContent = `${filtered.length} local listing${filtered.length === 1 ? "" : "s"}.`;
   if (filtered.length === 0) {
@@ -336,6 +338,7 @@ async function loadListings() {
   } finally {
     listingsLoading = false;
     renderListings();
+    window.dispatchEvent(new CustomEvent("fn-physical-listings-change", { detail: { listings } }));
   }
 }
 
@@ -514,10 +517,10 @@ function renderCart() {
   cardButton.className = "physical-primary";
   cardButton.type = "button";
   cardButton.disabled = true;
-  cardButton.textContent = "Card checkout unavailable";
+  cardButton.textContent = "Secure checkout setup required";
   const note = document.createElement("p");
   note.className = "physical-payment-note";
-  note.textContent = "Orders are completed with each seller. Card checkout will activate only after seller payouts, refunds, and disputes are handled by a marketplace payment provider.";
+  note.textContent = "Real-money checkout will activate only through a verified marketplace payment provider. Fraxb never stores card numbers or online-banking credentials.";
   body.append(totalRow, cardButton, note);
 }
 
@@ -547,7 +550,7 @@ function loadGoogleLibrary() {
 }
 
 function googleButtonZones() {
-  return [element("topGoogleButton"), element("settingsGoogleButton")].filter(Boolean);
+  return [element("settingsGoogleButton")].filter(Boolean);
 }
 
 function showGoogleStatus(message, isError = false) {
@@ -602,8 +605,13 @@ async function handleGoogleCredential(response) {
 
 function bindEvents() {
   window.addEventListener("fn-physical-market-open", () => {
-    searchQuery = "";
+    searchQuery = document.querySelector(".search")?.value || "";
     if (!listings.length) void loadListings();
+    else renderListings();
+  });
+  window.addEventListener("fn-physical-search", (event) => {
+    searchQuery = String(event.detail?.query || "");
+    renderListings();
   });
   document.querySelectorAll("[data-close-physical]").forEach((button) => button.addEventListener("click", () => closeModal(element(button.dataset.closePhysical))));
   document.querySelectorAll(".bid-modal").forEach((modal) => modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(modal); }));
@@ -619,11 +627,6 @@ function bindEvents() {
     void renderGoogleButtons();
     if (!element("physicalCartModal").hidden) renderCart();
   });
-  document.querySelector(".search")?.addEventListener("input", (event) => {
-    if (document.querySelector('.page[data-page="physical"]')?.hidden) return;
-    searchQuery = event.target.value.trim();
-    renderListings();
-  });
   element("currencySelect")?.addEventListener("change", () => { renderListings(); if (!element("physicalCartModal").hidden) renderCart(); });
   element("physicalCategories").addEventListener("click", (event) => {
     const button = event.target.closest("[data-physical-cat]");
@@ -636,7 +639,6 @@ function bindEvents() {
     if (account) openProfile();
   }
   element("physicalAccountButton").addEventListener("click", openMarketplaceAccount);
-  element("siteAccountButton")?.addEventListener("click", openMarketplaceAccount);
   element("settingsSiteAccountButton")?.addEventListener("click", openMarketplaceAccount);
   element("physicalCartButton").addEventListener("click", () => { renderCart(); openModal(element("physicalCartModal")); });
   element("addPhysicalListing").addEventListener("click", () => { element("physicalListingError").hidden = true; openModal(element("physicalListingModal")); });
@@ -685,6 +687,7 @@ function bindEvents() {
       });
       const listing = normalizeListing(data.listing);
       if (listing) listings.unshift(listing);
+      window.dispatchEvent(new CustomEvent("fn-physical-listings-change", { detail: { listings } }));
       event.currentTarget.reset();
       element("physicalListingStock").value = "1";
       document.querySelector('input[name="physicalFulfillment"][value="pickup"]').checked = true;
