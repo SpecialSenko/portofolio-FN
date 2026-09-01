@@ -32,9 +32,12 @@ test("global, digital, and physical searches stay separate and route to stores",
   assert.match(html, /activePage === "physical" && marketStoreScope/);
   assert.match(html, /showPage\("market"\)/);
   assert.match(html, /\.physical-head \.market-mode-switch[\s\S]*?width: 168px/);
-  assert.match(html, /document\.getElementById\("inventoryBanner"\)\.hidden = name !== "inventory"/);
+  const inventoryPage = html.indexOf('<section class="page" data-page="inventory" hidden>');
+  const inventoryBanner = html.indexOf('id="inventoryBanner"');
+  const tradesPage = html.indexOf('<section class="page" data-page="trades" hidden>');
+  assert.ok(inventoryPage < inventoryBanner && inventoryBanner < tradesPage);
   assert.ok(html.indexOf('id="physicalGrid"') < html.indexOf('id="physicalSellerGrid"'));
-  assert.match(html, /sellerCardEl\(seller, \{ imageOnly: true \}\)/);
+  assert.doesNotMatch(html, /is-image-only|physical-profile-grid/);
   assert.ok(html.indexOf('id="physicalCartButton"') < html.indexOf('id="steamAuth"'));
   assert.match(physicalClient, /fn-physical-search/);
   assert.match(physicalClient, /fn-physical-store-scope/);

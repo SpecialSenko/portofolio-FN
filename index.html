@@ -957,21 +957,6 @@
   }
   .physical-store-directory { margin-top: 24px; }
   .physical-store-directory .seller-grid { margin-top: 10px; }
-  .physical-profile-grid {
-    grid-template-columns: repeat(auto-fill, 72px);
-    justify-content: start;
-    gap: 9px;
-  }
-  .seller-card.is-image-only {
-    width: 72px;
-    min-height: 72px;
-    justify-content: center;
-    padding: 10px;
-  }
-  .seller-card.is-image-only .seller-name,
-  .seller-card.is-image-only .seller-store-types,
-  .seller-card.is-image-only .seller-stats { display: none; }
-  .seller-card.is-image-only .seller-icon { width: 48px; height: 48px; }
   .physical-head-controls {
     display: flex;
     flex-direction: column;
@@ -2942,12 +2927,6 @@
     </header>
 
     <main class="content">
-      <div class="inv-banner" id="inventoryBanner">
-        <span class="inv-dot is-offline" id="inventoryStatusDot"></span>
-        <span id="inventorySummary">Connect Steam to scan your personal inventory.</span>
-        <a class="link" id="inventoryAction" href="/api/auth/steam/login">Connect Steam</a>
-      </div>
-
       <section class="page home-page" data-page="home">
         <p class="home-kicker" data-i18n="home.kicker">Fraxb marketplace</p>
         <h2 class="home-title" data-i18n="home.title">Welcome to Fraxb Marketplace</h2>
@@ -3034,6 +3013,11 @@
       </section>
 
       <section class="page" data-page="inventory" hidden>
+        <div class="inv-banner" id="inventoryBanner">
+          <span class="inv-dot is-offline" id="inventoryStatusDot"></span>
+          <span id="inventorySummary">Connect Steam to scan your personal inventory.</span>
+          <a class="link" id="inventoryAction" href="/api/auth/steam/login">Connect Steam</a>
+        </div>
         <h2 class="page-title" data-i18n="inventory.title">Your Inventory</h2>
         <p class="page-copy" id="inventoryCopy">Items from your connected Steam account.</p>
         <div class="inventory-games" id="inventoryGames" hidden>
@@ -3124,7 +3108,7 @@
             <h3 class="global-discovery-title" id="physicalStoresTitle">Seller profiles</h3>
             <span class="global-discovery-count" id="physicalSellerCopy">Loading stores...</span>
           </div>
-          <div class="seller-grid physical-profile-grid" id="physicalSellerGrid"></div>
+          <div class="seller-grid" id="physicalSellerGrid"></div>
         </section>
       </section>
 
@@ -3751,7 +3735,6 @@
     const showAdRail = ["global", "market", "physical"].includes(name);
     adRail.hidden = !showAdRail;
     adRail.closest(".main").classList.toggle("has-ad-rail", showAdRail);
-    document.getElementById("inventoryBanner").hidden = name !== "inventory";
     if (marketSearchInput) {
       const searchable = ["global", "market", "physical"].includes(name);
       const placeholders = {
@@ -5351,10 +5334,9 @@
     (profile.digitalSeller ? digitalButton : physicalButton).focus();
   }
 
-  function sellerCardEl(s, { imageOnly = false } = {}) {
+  function sellerCardEl(s) {
     const card = document.createElement("button");
     card.className = "seller-card";
-    card.classList.toggle("is-image-only", imageOnly);
     card.classList.toggle("is-owner", Boolean(s.isOwner));
     card.type = "button";
     card.title = `Choose ${s.name}'s storefront`;
@@ -5860,7 +5842,7 @@
       return;
     }
     const physicalFragment = document.createDocumentFragment();
-    physicalSellers.forEach((seller) => physicalFragment.appendChild(sellerCardEl(seller, { imageOnly: true })));
+    physicalSellers.forEach((seller) => physicalFragment.appendChild(sellerCardEl(seller)));
     physicalSellerGrid.appendChild(physicalFragment);
   }
 
