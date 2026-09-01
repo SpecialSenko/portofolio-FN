@@ -1,4 +1,5 @@
 import { createPhysicalSession, physicalSessionCookie, readPhysicalSession } from "./physical-session.js";
+import { readSession } from "./session.js";
 import { hashPhysicalPassword, verifyPhysicalPassword } from "./physical-password.js";
 import { googleSignInConfigured, verifyGoogleIdToken } from "./google-id-token.js";
 import {
@@ -8,8 +9,10 @@ import {
   getOrCreateGooglePhysicalAccount,
   getPhysicalAccountByEmail,
   getPhysicalAccountById,
+  linkPhysicalAccountToSteam,
   PhysicalAccountExistsError,
   PhysicalGoogleAccountConflictError,
+  PhysicalSteamAccountConflictError,
   PhysicalStorageUnavailableError,
   updatePhysicalProfile,
 } from "./physical-store.js";
@@ -103,6 +106,21 @@ export default async function handler(req, res) {
       sendJson(res, 200, { loggedIn: false });
       return;
     }
+    if (action === "linkSteam") {
+      const physicalSession = readPhysicalSession(req);
+      const steamSession = readSession(req.headers?.cookie || "");
+      if (!physicalSession || !steamSession) {
+        sendJson(res, 401, { error: "Connect both Steam and your local seller account first", code: "AUTH_REQUIRED" });
+        return;
+      }
+      const account = await linkPhysicalAccountToSteam(physicalSession.accountId, steamSession.steamid);
+      if (!account) {
+        sendJson(res, 401, { error: "Seller session expired", code: "AUTH_REQUIRED" });
+        return;
+      }
+      sendJson(res, 200, authStatus(account));
+      return;
+    }
     if (action === "profile") {
       const session = readPhysicalSession(req);
       if (!session) {
@@ -187,6 +205,10 @@ export default async function handler(req, res) {
     }
     if (error instanceof PhysicalGoogleAccountConflictError) {
       sendJson(res, 409, { error: error.message, code: "GOOGLE_ACCOUNT_CONFLICT" });
+      return;
+    }
+    if (error instanceof PhysicalSteamAccountConflictError) {
+      sendJson(res, 409, { error: error.message, code: "STEAM_ACCOUNT_CONFLICT" });
       return;
     }
     if (error instanceof PhysicalStorageUnavailableError) {

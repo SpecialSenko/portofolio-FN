@@ -99,6 +99,13 @@
   gap: 12px;
 }
 
+.physical-card[role="button"] { cursor: pointer; }
+.physical-card[role="button"]:focus-visible {
+  border-color: var(--nav-hover-border);
+  outline: 2px solid rgba(110, 168, 255, .45);
+  outline-offset: 2px;
+}
+
 .physical-card {
   min-width: 0;
   overflow: hidden;
@@ -273,6 +280,8 @@
 @media (max-width: 760px) {
   .physical-head,
   .physical-account-band { align-items: flex-start; flex-wrap: wrap; }
+  .physical-head-controls { width: 100%; align-items: stretch; }
+  .physical-head .market-mode-switch { width: min(100%, 168px); margin-left: auto; }
   .physical-actions { width: 100%; justify-content: flex-start; }
   .physical-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .physical-form-grid,

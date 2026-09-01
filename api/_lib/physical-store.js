@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const ACCOUNT_KEY_PREFIX = "fraxb:physical:account:";
 const EMAIL_KEY_PREFIX = "fraxb:physical:email:";
 const GOOGLE_KEY_PREFIX = "fraxb:physical:google:";
+const STEAM_KEY_PREFIX = "fraxb:physical:steam:";
 const LISTING_KEY_PREFIX = "fraxb:physical:listing:";
 const LISTING_INDEX_KEY = "fraxb:physical:listings";
 const PAYMENT_KEY_PREFIX = "fraxb:physical:payment:";
@@ -34,6 +35,13 @@ export class PhysicalGoogleAccountConflictError extends Error {
   constructor() {
     super("This email is already used by another seller account");
     this.name = "PhysicalGoogleAccountConflictError";
+  }
+}
+
+export class PhysicalSteamAccountConflictError extends Error {
+  constructor() {
+    super("This Steam account is already linked to another local seller account");
+    this.name = "PhysicalSteamAccountConflictError";
   }
 }
 
@@ -78,6 +86,11 @@ function normalizeGoogleSub(value) {
   return /^[A-Za-z0-9_-]{6,255}$/.test(sub) ? sub : "";
 }
 
+function normalizeSteamId(value) {
+  const steamid = String(value || "").trim();
+  return /^\d{17}$/.test(steamid) ? steamid : "";
+}
+
 function safeUrl(value, { image = false } = {}) {
   if (!value) return "";
   try {
@@ -112,6 +125,7 @@ function normalizeAccount(value) {
     email,
     passwordHash,
     googleSub,
+    steamid: normalizeSteamId(value?.steamid),
     displayName: cleanText(value?.displayName, "Local seller", 80),
     storeName: cleanText(value?.storeName, "Local store", 100),
     city: cleanText(value?.city, "", 80),
@@ -166,6 +180,7 @@ function publicAccount(account) {
     city: normalized.city,
     description: normalized.description,
     contactUrl: normalized.contactUrl,
+    steamid: normalized.steamid,
     isSupporter: Boolean(normalized.supporterUntil && normalized.supporterUntil > Date.now()),
     supporterUntil: normalized.supporterUntil,
     isVerified: isVerifiedBusiness(normalized),
@@ -228,13 +243,14 @@ async function readLocalData() {
           accounts: value.accounts || {},
           emailIndex: value.emailIndex || {},
           googleIndex: value.googleIndex || {},
+          steamIndex: value.steamIndex || {},
           listings: value.listings || {},
           payments: value.payments || {},
         }
-      : { accounts: {}, emailIndex: {}, googleIndex: {}, listings: {}, payments: {} };
+      : { accounts: {}, emailIndex: {}, googleIndex: {}, steamIndex: {}, listings: {}, payments: {} };
   } catch (error) {
     if (error?.code === "ENOENT" || error instanceof SyntaxError) {
-      return { accounts: {}, emailIndex: {}, googleIndex: {}, listings: {}, payments: {} };
+      return { accounts: {}, emailIndex: {}, googleIndex: {}, steamIndex: {}, listings: {}, payments: {} };
     }
     throw error;
   }
@@ -451,6 +467,43 @@ async function putAccount(value) {
     });
   }
   return account;
+}
+
+export async function linkPhysicalAccountToSteam(accountId, steamIdValue) {
+  const steamid = normalizeSteamId(steamIdValue);
+  if (!steamid) throw new TypeError("Invalid verified Steam account");
+  const account = await getPhysicalAccountById(accountId, { includeSecrets: true });
+  if (!account) return null;
+  if (account.steamid && account.steamid !== steamid) throw new PhysicalSteamAccountConflictError();
+  const linked = normalizeAccount({ ...account, steamid, updatedAt: Date.now() });
+  const mode = storageMode();
+  if (mode === "disabled" || mode === "unavailable") throw new PhysicalStorageUnavailableError();
+
+  if (mode === "redis") {
+    const result = await redisCommand([
+      "EVAL",
+      "local owner = redis.call('GET', KEYS[1]) if owner and owner ~= ARGV[1] then return 0 end redis.call('SET', KEYS[1], ARGV[1]) redis.call('SET', KEYS[2], ARGV[2]) return 1",
+      2,
+      `${STEAM_KEY_PREFIX}${steamid}`,
+      `${ACCOUNT_KEY_PREFIX}${linked.id}`,
+      linked.id,
+      JSON.stringify(linked),
+    ]);
+    if (Number(result) !== 1) throw new PhysicalSteamAccountConflictError();
+    return privateAccount(linked);
+  }
+
+  return withLocalWrite(async () => {
+    const data = await readLocalData();
+    const owner = data.steamIndex[steamid] || Object.values(data.accounts)
+      .map(normalizeAccount)
+      .find((candidate) => candidate?.steamid === steamid)?.id;
+    if (owner && owner !== linked.id) throw new PhysicalSteamAccountConflictError();
+    data.steamIndex[steamid] = linked.id;
+    data.accounts[linked.id] = linked;
+    await writeLocalData(data);
+    return privateAccount(linked);
+  });
 }
 
 export async function updatePhysicalProfile(accountId, changes) {

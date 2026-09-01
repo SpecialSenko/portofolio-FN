@@ -15,6 +15,12 @@ test("AdSense remains configuration-gated inside the advertisement rail", async 
   assert.match(client, /VITE_ADSENSE_CLIENT/);
   assert.match(client, /VITE_ADSENSE_SLOT/);
   assert.match(client, /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/);
+  assert.match(html, /adsbygoogle\.js\?client=ca-pub-6419232461977756/);
+  assert.match(html, /id="openImageAd"/);
+  assert.match(html, /id="openVideoAd"/);
+  assert.match(client, /VITE_SPONSORED_VIDEO_URL/);
+  assert.match(client, /watchedSeconds >= 30/);
+  assert.match(client, /fn-sponsored-ad-complete/);
   assert.match(client, /dataset\.fullWidthResponsive = "true"/);
   assert.match(envExample, /VITE_ADSENSE_CLIENT=/);
   assert.match(envExample, /VITE_ADSENSE_SLOT=/);

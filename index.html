@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="google-adsense-account" content="ca-pub-6419232461977756" />
 <title>fraxb - CS2 Market</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6419232461977756" crossorigin="anonymous"></script>
 <style>
   :root {
     --bg: #08090b;
@@ -950,10 +952,94 @@
     background: var(--nav-active-bg);
     color: var(--text);
   }
-  .physical-page > .market-mode-switch {
+  .physical-head .market-mode-switch {
     width: 168px;
-    margin: 12px 0 12px auto;
   }
+  .physical-store-directory { margin-top: 24px; }
+  .physical-store-directory .seller-grid { margin-top: 10px; }
+  .physical-profile-grid {
+    grid-template-columns: repeat(auto-fill, 72px);
+    justify-content: start;
+    gap: 9px;
+  }
+  .seller-card.is-image-only {
+    width: 72px;
+    min-height: 72px;
+    justify-content: center;
+    padding: 10px;
+  }
+  .seller-card.is-image-only .seller-name,
+  .seller-card.is-image-only .seller-store-types,
+  .seller-card.is-image-only .seller-stats { display: none; }
+  .seller-card.is-image-only .seller-icon { width: 48px; height: 48px; }
+  .physical-head-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 9px;
+  }
+  .seller-store-types {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  .seller-store-type {
+    padding: 2px 5px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--muted);
+    font-size: 7px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .seller-choice-dialog { width: min(440px, calc(100vw - 24px)); }
+  .seller-choice-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .seller-choice-avatar {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 900;
+  }
+  .seller-choice-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .seller-choice-copy { min-width: 0; }
+  .seller-choice-name { margin: 0; color: var(--text); font-size: 13px; font-weight: 900; }
+  .seller-choice-help { margin: 3px 0 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
+  .seller-choice-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .seller-choice-button {
+    min-width: 0;
+    min-height: 68px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .seller-choice-button:hover:not(:disabled) { border-color: var(--nav-hover-border); background: var(--nav-active-bg); }
+  .seller-choice-button:disabled { color: var(--muted); cursor: default; opacity: .55; }
+  .seller-choice-button strong { font-size: 11px; }
+  .seller-choice-button span { color: var(--muted); font-size: 9px; }
   .ad-rail {
     grid-column: 2;
     grid-row: 2;
@@ -1441,6 +1527,9 @@
     background: var(--panel-2);
     color: var(--text);
     text-decoration: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     transition: border-color .2s ease, transform .2s ease;
   }
   .referral-card:hover {
@@ -1529,6 +1618,36 @@
   }
   .ad-popover .referral-tag { margin-bottom: 5px; }
   .ad-popover .referral-desc { font-size: 10.5px; }
+  .ad-choice-card:disabled { cursor: default; opacity: .55; transform: none; }
+  .video-ad-player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #050607;
+  }
+  .video-ad-status { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.45; }
+  .feature-item-grid { display: grid; gap: 7px; }
+  .feature-item-choice {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .feature-item-choice:hover { border-color: var(--nav-hover-border); background: var(--nav-active-bg); }
+  .feature-item-kind { color: var(--muted); font-size: 8px; font-weight: 900; text-transform: uppercase; }
+  .feature-item-name { min-width: 0; overflow: hidden; font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+  .feature-item-action { color: #6effbd; font-size: 9px; font-weight: 900; }
   .twitch-popover {
     position: fixed;
     z-index: 72;
@@ -2963,14 +3082,16 @@
             <h2 class="page-title" data-i18n="physical.title">Local Market</h2>
             <p class="page-copy" data-i18n="physical.copy">Food, daily needs, services, and physical products available by area.</p>
           </div>
-          <div class="physical-actions">
-            <button class="back-btn" id="physicalAccountButton" type="button" hidden>Store settings</button>
-            <button class="physical-primary" id="addPhysicalListing" type="button" hidden>Add listing</button>
+          <div class="physical-head-controls">
+            <div class="market-mode-switch" role="group" aria-label="Marketplace type">
+              <button class="market-mode-button" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
+              <button class="market-mode-button active" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
+            </div>
+            <div class="physical-actions">
+              <button class="back-btn" id="physicalAccountButton" type="button" hidden>Store settings</button>
+              <button class="physical-primary" id="addPhysicalListing" type="button" hidden>Add listing</button>
+            </div>
           </div>
-        </div>
-        <div class="market-mode-switch" role="group" aria-label="Marketplace type">
-          <button class="market-mode-button" type="button" data-market-mode="global" data-i18n="market.digitalShort">Digital</button>
-          <button class="market-mode-button active" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
         </div>
         <div class="viewing-banner" id="physicalViewingBanner" hidden>
           <span id="physicalViewingText"></span>
@@ -2998,6 +3119,13 @@
         </div>
         <p class="page-copy" id="physicalMarketStatus">Loading local listings...</p>
         <div class="physical-grid" id="physicalGrid"></div>
+        <section class="physical-store-directory" aria-labelledby="physicalStoresTitle">
+          <div class="global-discovery-head">
+            <h3 class="global-discovery-title" id="physicalStoresTitle">Seller profiles</h3>
+            <span class="global-discovery-count" id="physicalSellerCopy">Loading stores...</span>
+          </div>
+          <div class="seller-grid physical-profile-grid" id="physicalSellerGrid"></div>
+        </section>
       </section>
 
       <section class="page blog-page" data-page="blog" hidden>
@@ -3186,33 +3314,55 @@
   <header class="ad-popover-header">
     <div class="ad-popover-heading">
       <h2 class="ad-popover-title" id="adPopoverTitle">Advertisement</h2>
-      <p class="ad-popover-subtitle">Public advertising placements</p>
+      <p class="ad-popover-subtitle">Choose an advertisement format</p>
     </div>
     <button class="icon-button ad-popover-close" id="closeAdPopover" type="button" title="Close advertising" aria-label="Close advertising">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
     </button>
   </header>
-  <div class="ad-panel">
-    <div class="ad-panel-head">
-      <span class="ad-chip">Featured ad</span>
-      <span class="ad-open">Open slot</span>
-    </div>
-    <p class="ad-title">Featured referral</p>
-    <p class="ad-copy">Primary placement for an approved referral partner.</p>
-  </div>
   <div class="referral-grid">
-    <article class="referral-card">
-      <span class="referral-tag">Available</span>
-      <p class="referral-name">Partner placement</p>
-      <p class="referral-desc">Compact public placement for a marketplace partner.</p>
-    </article>
-    <article class="referral-card">
-      <span class="referral-tag">Available</span>
-      <p class="referral-name">Marketplace sponsor</p>
-      <p class="referral-desc">Reserved for a clearly labeled sponsor or campaign.</p>
-    </article>
+    <button class="referral-card ad-choice-card" id="openImageAd" type="button">
+      <span class="referral-tag">Image</span>
+      <p class="referral-name">View image advertisement</p>
+      <p class="referral-desc">Open the current visual placement on the right side of the marketplace.</p>
+    </button>
+    <button class="referral-card ad-choice-card" id="openVideoAd" type="button">
+      <span class="referral-tag">30 seconds</span>
+      <p class="referral-name">Watch video advertisement</p>
+      <p class="referral-desc" id="videoAdAvailability">Checking for an active video...</p>
+    </button>
   </div>
 </aside>
+
+<div class="bid-modal" id="videoAdModal" role="dialog" aria-modal="true" aria-labelledby="videoAdTitle" hidden>
+  <section class="bid-dialog seller-choice-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="videoAdTitle">30-second advertisement</h2>
+      <button class="icon-button bid-dialog-close" id="closeVideoAd" type="button" title="Close" aria-label="Close video advertisement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="bid-dialog-body">
+      <video class="video-ad-player" id="videoAdPlayer" controls playsinline preload="metadata"></video>
+      <p class="video-ad-status" id="videoAdStatus">Watch 30 seconds of the active sponsor video.</p>
+    </div>
+  </section>
+</div>
+
+<div class="bid-modal" id="featureItemModal" role="dialog" aria-modal="true" aria-labelledby="featureItemTitle" hidden>
+  <section class="bid-dialog seller-choice-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="featureItemTitle">Choose an item to feature</h2>
+      <button class="icon-button bid-dialog-close" id="closeFeatureItem" type="button" title="Close" aria-label="Close item picker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="bid-dialog-body">
+      <p class="seller-choice-help">Select one of your active digital or physical listings.</p>
+      <div class="feature-item-grid" id="featureItemGrid"></div>
+    </div>
+  </section>
+</div>
 
 <div class="bid-modal" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountDialogTitle" hidden>
   <section class="bid-dialog account-dialog">
@@ -3243,6 +3393,30 @@
         <button class="settings-action account-provider-action" id="accountGoogleSettings" type="button" hidden>Store settings</button>
       </div>
       <p class="account-dialog-note">Steam verifies inventory ownership. Google verifies the email used for local seller tools. Fraxb never asks for either account password.</p>
+    </div>
+  </section>
+</div>
+
+<div class="bid-modal" id="sellerChoiceModal" role="dialog" aria-modal="true" aria-labelledby="sellerChoiceTitle" hidden>
+  <section class="bid-dialog seller-choice-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="sellerChoiceTitle">Choose storefront</h2>
+      <button class="icon-button bid-dialog-close" id="closeSellerChoice" type="button" title="Close" aria-label="Close storefront chooser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="bid-dialog-body">
+      <div class="seller-choice-profile">
+        <span class="seller-choice-avatar" id="sellerChoiceAvatar" aria-hidden="true"></span>
+        <div class="seller-choice-copy">
+          <p class="seller-choice-name" id="sellerChoiceName">Seller</p>
+          <p class="seller-choice-help">Open this seller's digital Steam items or physical local products.</p>
+        </div>
+      </div>
+      <div class="seller-choice-actions">
+        <button class="seller-choice-button" id="openSellerDigital" type="button"><strong>Digital</strong><span id="sellerDigitalCount">No listings</span></button>
+        <button class="seller-choice-button" id="openSellerPhysical" type="button"><strong>Physical</strong><span id="sellerPhysicalCount">No listings</span></button>
+      </div>
     </div>
   </section>
 </div>
@@ -3468,6 +3642,13 @@
   let physicalDiscoveryListings = [];
   const marketSearchValues = { global: "", market: "", physical: "" };
   let marketStoreScope = null;
+  let sellerChoiceProfile = null;
+  let sellerChoiceReturnFocus = null;
+  let sellerChoicePreviousOverflow = "";
+  const FEATURED_LISTINGS_KEY = "fraxb_featured_listings_v1";
+  let featureCredits = 0;
+  let featureReturnFocus = null;
+  let featurePreviousOverflow = "";
   let externalPriceTimer = null;
   let externalPriceRequestVersion = 0;
   let externalPriceState = { query: "", loading: false, error: "", results: [] };
@@ -3485,6 +3666,11 @@
   }
 
   function matchingDigitalSeller(scope) {
+    const steamid = String(scope?.steamid || "");
+    if (/^\d{17}$/.test(steamid)) {
+      const linked = marketplaceSellerList().find((seller) => seller.steamid === steamid);
+      if (linked) return linked;
+    }
     const names = [scope?.name, scope?.storeName, scope?.displayName]
       .map(normalizedStoreName)
       .filter(Boolean);
@@ -3493,11 +3679,13 @@
   }
 
   function digitalSellerScope(seller) {
+    const physicalSeller = physicalSellerList().find((candidate) => candidate.steamid === seller.steamid) || null;
     return {
       name: seller.name,
       displayName: seller.name,
-      storeName: seller.name,
-      physicalSellerId: "",
+      storeName: physicalSeller?.storeName || seller.name,
+      physicalSellerId: physicalSeller?.id || "",
+      steamid: seller.steamid,
       digitalSeller: seller,
     };
   }
@@ -3509,6 +3697,7 @@
       displayName: seller.displayName || seller.storeName || "Seller",
       storeName: seller.storeName || seller.displayName || "Seller",
       physicalSellerId: seller.id || "",
+      steamid: seller.steamid || "",
       digitalSeller: null,
     };
     scope.digitalSeller = matchingDigitalSeller(scope);
@@ -3526,6 +3715,7 @@
         displayName: marketStoreScope.displayName,
         storeName: marketStoreScope.storeName,
         sellerId: marketStoreScope.physicalSellerId,
+        steamid: marketStoreScope.steamid || "",
       } : null,
     }));
   }
@@ -3534,6 +3724,13 @@
     document.querySelectorAll("[data-market-mode]").forEach((button) => {
       const physical = page === "physical";
       button.classList.toggle("active", physical ? button.dataset.marketMode === "physical" : button.dataset.marketMode === "global");
+      const scoped = marketStoreScope && ["market", "physical"].includes(page);
+      const unavailable = scoped && (
+        (button.dataset.marketMode === "global" && !marketStoreScope.digitalSeller)
+        || (button.dataset.marketMode === "physical" && !marketStoreScope.physicalSellerId)
+      );
+      button.disabled = Boolean(unavailable);
+      button.title = unavailable ? `No ${button.dataset.marketMode === "global" ? "digital" : "physical"} storefront from this seller` : "";
     });
   }
 
@@ -3554,7 +3751,7 @@
     const showAdRail = ["global", "market", "physical"].includes(name);
     adRail.hidden = !showAdRail;
     adRail.closest(".main").classList.toggle("has-ad-rail", showAdRail);
-    document.getElementById("inventoryBanner").hidden = ["home", "physical", "blog"].includes(name);
+    document.getElementById("inventoryBanner").hidden = name !== "inventory";
     if (marketSearchInput) {
       const searchable = ["global", "market", "physical"].includes(name);
       const placeholders = {
@@ -3650,13 +3847,8 @@
     }
 
     if (activePage === "physical" && marketStoreScope) {
-      const scopedSeller = marketStoreScope.digitalSeller || matchingDigitalSeller(marketStoreScope) || {
-        name: marketStoreScope.name,
-        avatar: "",
-        items: [],
-        listed: 0,
-        isCurrentUser: false,
-      };
+      const scopedSeller = marketStoreScope.digitalSeller || matchingDigitalSeller(marketStoreScope);
+      if (!scopedSeller) return;
       marketStoreScope.digitalSeller = scopedSeller;
       currentViewSeller = scopedSeller;
       marketSearchValues.market = "";
@@ -3705,7 +3897,17 @@
 
   window.addEventListener("fn-physical-listings-change", (event) => {
     physicalDiscoveryListings = Array.isArray(event.detail?.listings) ? event.detail.listings : [];
-    if (activePageName() === "global") renderGlobalDiscovery();
+    if (marketStoreScope?.digitalSeller) {
+      marketStoreScope = { ...marketStoreScope, ...digitalSellerScope(marketStoreScope.digitalSeller) };
+      syncPhysicalScope();
+    }
+    renderSellers();
+    syncMarketModeButtons(activePageName());
+  });
+  window.addEventListener("fn-open-seller-choice", (event) => {
+    const sellerId = String(event.detail?.sellerId || "");
+    const profile = unifiedSellerProfiles().find((candidate) => candidate.physicalSeller?.id === sellerId);
+    if (profile) openSellerChoice(profile);
   });
 
   function setupSearchPicker({ selectId, inputId, menuId }) {
@@ -4148,6 +4350,11 @@
       activateMarketPage("global");
     }
     if (loggedIn && steamUser) steamUser = { ...steamUser, name, avatar };
+    window.fnSteamAccountState = {
+      loggedIn: Boolean(loggedIn),
+      steamid: loggedIn && /^\d{17}$/.test(String(steamUser?.steamid || "")) ? steamUser.steamid : "",
+    };
+    window.dispatchEvent(new CustomEvent("fn-steam-account-change", { detail: window.fnSteamAccountState }));
     if (connectBtn) connectBtn.hidden = false;
     updateUnifiedAccount();
   }
@@ -4218,6 +4425,7 @@
   window.addEventListener("fn-marketplace-account-change", (event) => {
     googleAccountState = event.detail?.loggedIn ? event.detail.account : null;
     updateUnifiedAccount();
+    renderSellers();
   });
 
   async function logoutAllAccounts() {
@@ -5021,12 +5229,135 @@
     };
   }
 
-  function sellerCardEl(s) {
+  function physicalSellerList() {
+    const sellers = new Map();
+    physicalDiscoveryListings.forEach((listing) => {
+      const seller = listing?.seller;
+      if (!seller?.id) return;
+      const existing = sellers.get(seller.id);
+      if (existing) existing.listed += 1;
+      else sellers.set(seller.id, { ...seller, listed: 1 });
+    });
+    return Array.from(sellers.values());
+  }
+
+  function unifiedSellerProfiles() {
+    const profiles = marketplaceSellerList().map((seller) => ({
+      id: `steam:${seller.steamid}`,
+      name: seller.name,
+      avatar: seller.avatar,
+      rating: seller.rating,
+      ratingCount: seller.ratingCount,
+      isAlt: seller.isAlt,
+      isOwner: seller.isOwner,
+      testerRole: seller.testerRole,
+      isCurrentUser: seller.isCurrentUser,
+      digitalSeller: seller,
+      physicalSeller: null,
+      digitalListed: seller.items.length,
+      physicalListed: 0,
+      listed: seller.items.length,
+    }));
+
+    physicalSellerList().forEach((seller) => {
+      const sellerNames = [seller.displayName, seller.storeName].map(normalizedStoreName).filter(Boolean);
+      let profile = /^\d{17}$/.test(String(seller.steamid || ""))
+        ? profiles.find((candidate) => candidate.digitalSeller?.steamid === seller.steamid)
+        : null;
+      if (!profile && sellerNames.length) {
+        profile = profiles.find((candidate) => sellerNames.includes(normalizedStoreName(candidate.name)));
+      }
+      if (!profile) {
+        profile = {
+          id: `physical:${seller.id}`,
+          name: seller.displayName || seller.storeName || "Local seller",
+          avatar: "",
+          rating: null,
+          ratingCount: 0,
+          isAlt: false,
+          isOwner: false,
+          testerRole: null,
+          isCurrentUser: false,
+          digitalSeller: null,
+          physicalSeller: null,
+          digitalListed: 0,
+          physicalListed: 0,
+          listed: 0,
+        };
+        profiles.push(profile);
+      }
+      profile.physicalSeller = seller;
+      profile.physicalListed = seller.listed;
+      profile.listed = profile.digitalListed + seller.listed;
+      profile.isCurrentUser ||= seller.id === googleAccountState?.id
+        || (seller.steamid && seller.steamid === steamUser?.steamid);
+    });
+    return profiles;
+  }
+
+  function physicalScopeFromProfile(profile) {
+    const seller = profile?.physicalSeller;
+    if (!seller) return null;
+    return {
+      name: profile.name,
+      displayName: seller.displayName || profile.name,
+      storeName: seller.storeName || profile.name,
+      physicalSellerId: seller.id,
+      steamid: seller.steamid || profile.digitalSeller?.steamid || "",
+      digitalSeller: profile.digitalSeller,
+    };
+  }
+
+  function closeSellerChoice() {
+    const modal = document.getElementById("sellerChoiceModal");
+    if (modal.hidden) return;
+    modal.hidden = true;
+    document.body.style.overflow = sellerChoicePreviousOverflow;
+    if (sellerChoiceReturnFocus instanceof HTMLElement && sellerChoiceReturnFocus.isConnected) sellerChoiceReturnFocus.focus();
+    sellerChoiceProfile = null;
+    sellerChoiceReturnFocus = null;
+  }
+
+  function openSellerChoice(profile) {
+    sellerChoiceProfile = profile;
+    sellerChoiceReturnFocus = document.activeElement;
+    sellerChoicePreviousOverflow = document.body.style.overflow;
+    const avatar = document.getElementById("sellerChoiceAvatar");
+    avatar.replaceChildren();
+    const avatarUrl = trustedSteamImageUrl(profile.avatar);
+    if (avatarUrl) {
+      const image = document.createElement("img");
+      image.src = avatarUrl;
+      image.alt = "";
+      image.decoding = "async";
+      avatar.appendChild(image);
+    } else {
+      avatar.textContent = initials(profile.name);
+    }
+    document.getElementById("sellerChoiceName").textContent = profile.name;
+    const digitalButton = document.getElementById("openSellerDigital");
+    const physicalButton = document.getElementById("openSellerPhysical");
+    digitalButton.disabled = !profile.digitalSeller;
+    physicalButton.disabled = !profile.physicalSeller;
+    document.getElementById("sellerDigitalCount").textContent = profile.digitalSeller
+      ? `${profile.digitalListed} Steam listing${profile.digitalListed === 1 ? "" : "s"}`
+      : "No digital storefront";
+    document.getElementById("sellerPhysicalCount").textContent = profile.physicalSeller
+      ? `${profile.physicalListed} local listing${profile.physicalListed === 1 ? "" : "s"}`
+      : "No physical storefront";
+    const modal = document.getElementById("sellerChoiceModal");
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    (profile.digitalSeller ? digitalButton : physicalButton).focus();
+  }
+
+  function sellerCardEl(s, { imageOnly = false } = {}) {
     const card = document.createElement("button");
     card.className = "seller-card";
+    card.classList.toggle("is-image-only", imageOnly);
     card.classList.toggle("is-owner", Boolean(s.isOwner));
     card.type = "button";
-    card.title = `Open ${s.name}'s store`;
+    card.title = `Choose ${s.name}'s storefront`;
 
     if (s.isOwner) {
       const crown = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -5076,6 +5407,21 @@
     name.className = "seller-name";
     name.textContent = s.name;
 
+    const storeTypes = document.createElement("div");
+    storeTypes.className = "seller-store-types";
+    if (s.digitalSeller) {
+      const digital = document.createElement("span");
+      digital.className = "seller-store-type";
+      digital.textContent = "Digital";
+      storeTypes.appendChild(digital);
+    }
+    if (s.physicalSeller) {
+      const physical = document.createElement("span");
+      physical.className = "seller-store-type";
+      physical.textContent = "Physical";
+      storeTypes.appendChild(physical);
+    }
+
     const stats = document.createElement("div");
     stats.className = "seller-stats";
     const accountValue = s.isCurrentUser ? "You" : (s.rating || "New");
@@ -5084,10 +5430,30 @@
       <div class="seller-stat"><span class="seller-stat-value">${escapeHtml(accountValue)}</span><span class="seller-stat-label">${accountLabel}</span></div>
       <div class="seller-stat"><span class="seller-stat-value">${s.listed}</span><span class="seller-stat-label">Listed</span></div>
     `;
-    card.append(icon, name, stats);
-    card.addEventListener("click", () => viewSeller(s));
+    card.append(icon, name, storeTypes, stats);
+    card.addEventListener("click", () => openSellerChoice(s));
     return card;
   }
+
+  document.getElementById("closeSellerChoice").addEventListener("click", closeSellerChoice);
+  document.getElementById("sellerChoiceModal").addEventListener("click", (event) => {
+    if (event.target.id === "sellerChoiceModal") closeSellerChoice();
+  });
+  document.getElementById("openSellerDigital").addEventListener("click", () => {
+    const seller = sellerChoiceProfile?.digitalSeller;
+    if (!seller) return;
+    closeSellerChoice();
+    viewSeller(seller);
+  });
+  document.getElementById("openSellerPhysical").addEventListener("click", () => {
+    const scope = physicalScopeFromProfile(sellerChoiceProfile);
+    if (!scope) return;
+    closeSellerChoice();
+    activateMarketPage("physical", { scope });
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !document.getElementById("sellerChoiceModal").hidden) closeSellerChoice();
+  });
 
   function interleaveListings(left, right) {
     const output = [];
@@ -5098,6 +5464,110 @@
     }
     return output;
   }
+
+  function featureKey(entry) {
+    return entry.kind === "digital"
+      ? `digital:${entry.seller.steamid}:${entry.item.assetid}`
+      : `physical:${entry.listing.id}`;
+  }
+
+  function featuredListingKeys() {
+    const now = Date.now();
+    try {
+      const stored = JSON.parse(localStorage.getItem(FEATURED_LISTINGS_KEY) || "[]");
+      const active = (Array.isArray(stored) ? stored : [])
+        .filter((entry) => typeof entry?.key === "string" && Number(entry.expiresAt) > now)
+        .slice(0, 20);
+      localStorage.setItem(FEATURED_LISTINGS_KEY, JSON.stringify(active));
+      return new Set(active.map((entry) => entry.key));
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveFeaturedListing(entry) {
+    const now = Date.now();
+    let active = [];
+    try {
+      active = JSON.parse(localStorage.getItem(FEATURED_LISTINGS_KEY) || "[]");
+    } catch {}
+    active = (Array.isArray(active) ? active : []).filter((item) => item?.key !== featureKey(entry) && Number(item?.expiresAt) > now);
+    active.unshift({ key: featureKey(entry), expiresAt: now + 60 * 60 * 1000 });
+    localStorage.setItem(FEATURED_LISTINGS_KEY, JSON.stringify(active.slice(0, 20)));
+  }
+
+  function ownFeatureEntries() {
+    const digital = marketplaceSellerList()
+      .filter((seller) => seller.isCurrentUser)
+      .flatMap((seller) => seller.items.map((item) => ({ kind: "digital", seller, item })));
+    const physical = physicalDiscoveryListings
+      .filter((listing) => listing.seller.id === googleAccountState?.id || (listing.seller.steamid && listing.seller.steamid === steamUser?.steamid))
+      .map((listing) => ({ kind: "physical", listing }));
+    return interleaveListings(digital, physical);
+  }
+
+  function closeFeatureItemPicker() {
+    const modal = document.getElementById("featureItemModal");
+    if (modal.hidden) return;
+    modal.hidden = true;
+    document.body.style.overflow = featurePreviousOverflow;
+    if (featureReturnFocus instanceof HTMLElement && featureReturnFocus.isConnected) featureReturnFocus.focus();
+    featureReturnFocus = null;
+  }
+
+  function openFeatureItemPicker() {
+    const modal = document.getElementById("featureItemModal");
+    const grid = document.getElementById("featureItemGrid");
+    featureReturnFocus = document.activeElement;
+    featurePreviousOverflow = document.body.style.overflow;
+    grid.replaceChildren();
+    const entries = ownFeatureEntries();
+    if (entries.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "List an item in your digital or physical store first.";
+      grid.appendChild(empty);
+    } else {
+      entries.forEach((entry) => {
+        const choice = document.createElement("button");
+        choice.className = "feature-item-choice";
+        choice.type = "button";
+        const kind = document.createElement("span");
+        kind.className = "feature-item-kind";
+        kind.textContent = entry.kind;
+        const name = document.createElement("span");
+        name.className = "feature-item-name";
+        name.textContent = entry.kind === "digital" ? entry.item.name : entry.listing.title;
+        const action = document.createElement("span");
+        action.className = "feature-item-action";
+        action.textContent = "Feature";
+        choice.append(kind, name, action);
+        choice.addEventListener("click", () => {
+          if (featureCredits < 1) return;
+          featureCredits -= 1;
+          saveFeaturedListing(entry);
+          closeFeatureItemPicker();
+          renderGlobalDiscovery();
+        });
+        grid.appendChild(choice);
+      });
+    }
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    (grid.querySelector("button") || document.getElementById("closeFeatureItem")).focus();
+  }
+
+  document.getElementById("closeFeatureItem").addEventListener("click", closeFeatureItemPicker);
+  document.getElementById("featureItemModal").addEventListener("click", (event) => {
+    if (event.target.id === "featureItemModal") closeFeatureItemPicker();
+  });
+  window.addEventListener("fn-sponsored-ad-complete", () => {
+    featureCredits += 1;
+    openFeatureItemPicker();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !document.getElementById("featureItemModal").hidden) closeFeatureItemPicker();
+  });
 
   function marketplaceSellerList() {
     const currentSeller = currentSteamSeller();
@@ -5310,6 +5780,7 @@
   }
 
   function renderGlobalDiscovery() {
+    const discovery = document.getElementById("globalDiscovery");
     const resultGrid = document.getElementById("globalResultGrid");
     const title = document.getElementById("globalDiscoveryTitle");
     const count = document.getElementById("globalDiscoveryCount");
@@ -5322,11 +5793,17 @@
     const matches = (entry) => entry.kind === "digital"
       ? marketSearchMatches(query, entry.item.name, entry.item.type, entry.item.cat, entry.item.game, entry.seller.name)
       : marketSearchMatches(query, entry.listing.title, entry.listing.description, entry.listing.category, entry.listing.area, entry.listing.seller.storeName, entry.listing.seller.displayName);
+    const featured = featuredListingKeys();
     const combined = query.trim()
       ? [...digitalEntries, ...physicalEntries].filter(matches)
-      : interleaveListings(digitalEntries, physicalEntries);
+      : interleaveListings(digitalEntries, physicalEntries).filter((entry) => featured.has(featureKey(entry)));
     const visible = combined.slice(0, query.trim() ? 16 : 8);
 
+    discovery.hidden = !query.trim() && visible.length === 0;
+    if (discovery.hidden) {
+      resultGrid.replaceChildren();
+      return;
+    }
     title.textContent = query.trim() ? "Search results" : "Featured listings";
     count.textContent = `${combined.length} ${combined.length === 1 ? "listing" : "listings"}`;
     resultGrid.replaceChildren();
@@ -5336,7 +5813,7 @@
       empty.className = "global-discovery-empty";
       empty.textContent = query.trim()
         ? "No Fraxb listings match that search. Try a shorter spelling."
-        : "Featured listings will appear when sellers publish items.";
+        : "Watch an active 30-second sponsor video, then choose one of your listings to feature.";
       resultGrid.appendChild(empty);
       return;
     }
@@ -5348,31 +5825,43 @@
   function renderSellers() {
     const sellerGrid = document.getElementById("sellerGrid");
     const sellerCopy = document.getElementById("sellerCopy");
+    const physicalSellerGrid = document.getElementById("physicalSellerGrid");
+    const physicalSellerCopy = document.getElementById("physicalSellerCopy");
     sellerGrid.replaceChildren();
+    physicalSellerGrid.replaceChildren();
     renderGlobalDiscovery();
 
-    const sellers = marketplaceSellerList();
+    const sellers = unifiedSellerProfiles();
+    const physicalSellers = sellers.filter((seller) => seller.physicalSeller);
 
     if (marketplaceLoading && sellers.length === 0) {
       sellerCopy.textContent = "Loading marketplace stores...";
       sellerGrid.innerHTML = '<p class="empty-state">Loading seller stores...</p>';
+      physicalSellerCopy.textContent = "Loading stores...";
+      physicalSellerGrid.innerHTML = '<p class="empty-state">Loading physical stores...</p>';
       return;
     }
     if (marketplaceError && sellers.length === 0) {
       sellerCopy.textContent = marketplaceError;
       sellerGrid.innerHTML = '<p class="empty-state">Seller stores are temporarily unavailable.</p>';
-      return;
-    }
-    if (sellers.length === 0) {
+    } else if (sellers.length === 0) {
       sellerCopy.textContent = "No public seller stores yet.";
-      sellerGrid.innerHTML = '<p class="empty-state">Connect Steam to create the first store.</p>';
-      return;
+      sellerGrid.innerHTML = '<p class="empty-state">Sign in to create the first seller profile.</p>';
+    } else {
+      sellerCopy.textContent = `${sellers.length} public seller profile${sellers.length === 1 ? "" : "s"}.`;
+      const fragment = document.createDocumentFragment();
+      sellers.forEach((seller) => fragment.appendChild(sellerCardEl(seller)));
+      sellerGrid.appendChild(fragment);
     }
 
-    sellerCopy.textContent = `${sellers.length} public seller store${sellers.length === 1 ? "" : "s"}.`;
-    const fragment = document.createDocumentFragment();
-    sellers.forEach((seller) => fragment.appendChild(sellerCardEl(seller)));
-    sellerGrid.appendChild(fragment);
+    physicalSellerCopy.textContent = `${physicalSellers.length} public physical store${physicalSellers.length === 1 ? "" : "s"}`;
+    if (physicalSellers.length === 0) {
+      physicalSellerGrid.innerHTML = '<p class="empty-state">No public physical stores have listings yet.</p>';
+      return;
+    }
+    const physicalFragment = document.createDocumentFragment();
+    physicalSellers.forEach((seller) => physicalFragment.appendChild(sellerCardEl(seller, { imageOnly: true })));
+    physicalSellerGrid.appendChild(physicalFragment);
   }
 
   function gameShortName(game) {
@@ -5581,7 +6070,7 @@
       dot.classList.add("is-error");
       summary.textContent = listingSyncError;
     } else if (inventoryLoaded) {
-      summary.textContent = `Inventory public - ${inventory.length} of ${inventoryTotal} ${selectedSteamGame.name} items loaded.`;
+      summary.textContent = `${listedItems.size} item${listedItems.size === 1 ? "" : "s"} listed in your digital store.`;
     } else {
       dot.classList.add("is-loading");
       summary.textContent = `Preparing ${steamUser.name}'s ${selectedSteamGame.name} inventory...`;

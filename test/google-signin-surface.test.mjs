@@ -59,7 +59,8 @@ test("Google marketplace sign-in is exposed site-wide and reports configuration 
     assert.doesNotMatch(client, /id="physicalPassword"/);
     assert.match(html, /url\("\/marketplace-hero\.webp"\)/);
     assert.match(html, /class="home-action" id="openRules"/);
-    assert.match(html, /\.physical-page > \.market-mode-switch[\s\S]*?width: 168px/);
+    assert.match(html, /\.physical-head \.market-mode-switch[\s\S]*?width: 168px/);
+    assert.match(html, /google-adsense-account" content="ca-pub-6419232461977756/);
   } finally {
     if (originalClientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
     else process.env.GOOGLE_CLIENT_ID = originalClientId;

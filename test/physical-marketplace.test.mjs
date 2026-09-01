@@ -6,6 +6,7 @@ import path from "node:path";
 import test from "node:test";
 
 import physicalHandler from "../api/physical.js";
+import { createSessionCookie } from "../api/_lib/session.js";
 
 process.env.SESSION_SECRET = "physical-marketplace-test-secret-with-enough-entropy";
 
@@ -114,6 +115,76 @@ test("physical seller accounts keep credentials private and publish account-boun
     });
     assert.equal(login.status, 200);
     assert.equal(login.body.account.storeName, "Daily Corner");
+  } finally {
+    if (original.nodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = original.nodeEnv;
+    if (original.dataFile === undefined) delete process.env.PHYSICAL_MARKETPLACE_DATA_FILE; else process.env.PHYSICAL_MARKETPLACE_DATA_FILE = original.dataFile;
+    if (original.disabled === undefined) delete process.env.MARKETPLACE_STORAGE_DISABLED; else process.env.MARKETPLACE_STORAGE_DISABLED = original.disabled;
+    if (original.kvUrl === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = original.kvUrl;
+    if (original.kvToken === undefined) delete process.env.KV_REST_API_TOKEN; else process.env.KV_REST_API_TOKEN = original.kvToken;
+    await fs.rm(temporaryDirectory, { recursive: true, force: true });
+  }
+});
+
+test("physical seller identity links only from verified Steam and seller sessions", async () => {
+  const temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "fraxb-physical-steam-link-"));
+  const original = {
+    nodeEnv: process.env.NODE_ENV,
+    dataFile: process.env.PHYSICAL_MARKETPLACE_DATA_FILE,
+    disabled: process.env.MARKETPLACE_STORAGE_DISABLED,
+    kvUrl: process.env.KV_REST_API_URL,
+    kvToken: process.env.KV_REST_API_TOKEN,
+  };
+  process.env.NODE_ENV = "development";
+  process.env.PHYSICAL_MARKETPLACE_DATA_FILE = path.join(temporaryDirectory, "physical.json");
+  delete process.env.MARKETPLACE_STORAGE_DISABLED;
+  delete process.env.KV_REST_API_URL;
+  delete process.env.KV_REST_API_TOKEN;
+
+  try {
+    const registration = await invoke(physicalHandler, {
+      method: "POST",
+      url: "/api/physical/auth",
+      body: {
+        action: "register",
+        email: "linked@example.com",
+        password: "correct horse battery staple",
+        displayName: "Linked Seller",
+        storeName: "Linked Store",
+        city: "Taipei",
+      },
+    });
+    const physicalCookie = cookieFrom(registration);
+    const withoutSteam = await invoke(physicalHandler, {
+      method: "POST",
+      url: "/api/physical/auth",
+      cookie: physicalCookie,
+      body: { action: "linkSteam", steamid: "76561198000000000" },
+    });
+    assert.equal(withoutSteam.status, 401);
+
+    const verifiedSteamId = "76561198123456789";
+    const steamCookie = createSessionCookie({
+      steamid: verifiedSteamId,
+      name: "Verified Steam Seller",
+      avatar: "",
+      issuedAt: Date.now(),
+    }).split(";")[0];
+    const linked = await invoke(physicalHandler, {
+      method: "POST",
+      url: "/api/physical/auth",
+      cookie: `${physicalCookie}; ${steamCookie}`,
+      body: { action: "linkSteam", steamid: "76561198000000000" },
+    });
+    assert.equal(linked.status, 200);
+    assert.equal(linked.body.account.steamid, verifiedSteamId);
+
+    const created = await invoke(physicalHandler, {
+      method: "POST",
+      url: "/api/physical/listings",
+      cookie: physicalCookie,
+      body: { title: "Linked item", category: "other", priceIdr: 50_000, stock: 1, fulfillment: ["shipping"] },
+    });
+    assert.equal(created.body.listing.seller.steamid, verifiedSteamId);
   } finally {
     if (original.nodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = original.nodeEnv;
     if (original.dataFile === undefined) delete process.env.PHYSICAL_MARKETPLACE_DATA_FILE; else process.env.PHYSICAL_MARKETPLACE_DATA_FILE = original.dataFile;

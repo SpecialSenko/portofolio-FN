@@ -17,8 +17,11 @@ let account = null;
 let paymentsConfigured = false;
 let googleClientId = "";
 let googleLibraryPromise = null;
+let steamAccountState = window.fnSteamAccountState || { loggedIn: false, steamid: "" };
+let steamLinkRequest = "";
 let listings = [];
 let listingsLoading = false;
+let listingsReloadRequested = false;
 let category = "all";
 let searchQuery = "";
 let storeScope = null;
@@ -123,6 +126,7 @@ function normalizeListing(value) {
       storeName: String(value?.seller?.storeName || "Local store").slice(0, 100),
       city: String(value?.seller?.city || "").slice(0, 80),
       contactUrl: safeHttpsUrl(value?.seller?.contactUrl),
+      steamid: /^\d{17}$/.test(String(value?.seller?.steamid || "")) ? String(value.seller.steamid) : "",
       isSupporter: Boolean(value?.seller?.isSupporter),
       isVerified: Boolean(value?.seller?.isVerified),
     },
@@ -207,9 +211,11 @@ function renderAccount() {
     detail: {
       loggedIn: Boolean(account),
       account: account ? {
+        id: account.id,
         displayName: account.displayName,
         storeName: account.storeName,
         signInMethod: account.signInMethod,
+        steamid: account.steamid || "",
       } : null,
     },
   }));
@@ -226,6 +232,19 @@ function renderAccount() {
 function listingCard(listing) {
   const card = document.createElement("article");
   card.className = "physical-card";
+  card.tabIndex = 0;
+  card.role = "button";
+  card.setAttribute("aria-label", `${listing.title}. Open ${listing.seller.storeName} profile`);
+  const openSellerProfile = (event) => {
+    if (event.target instanceof Element && event.target.closest("button, a, input, select, textarea")) return;
+    window.dispatchEvent(new CustomEvent("fn-open-seller-choice", { detail: { sellerId: listing.seller.id } }));
+  };
+  card.addEventListener("click", openSellerProfile);
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openSellerProfile(event);
+  });
   let image;
   if (listing.imageUrl) {
     image = document.createElement("img");
@@ -331,8 +350,11 @@ function renderListings() {
   grid.appendChild(fragment);
 }
 
-async function loadListings() {
-  if (listingsLoading) return;
+async function loadListings({ refreshAfterCurrent = false } = {}) {
+  if (listingsLoading) {
+    listingsReloadRequested ||= refreshAfterCurrent;
+    return;
+  }
   listingsLoading = true;
   renderListings();
   try {
@@ -345,6 +367,28 @@ async function loadListings() {
     listingsLoading = false;
     renderListings();
     window.dispatchEvent(new CustomEvent("fn-physical-listings-change", { detail: { listings } }));
+    if (listingsReloadRequested) {
+      listingsReloadRequested = false;
+      void loadListings();
+    }
+  }
+}
+
+async function maybeLinkSteamAccount() {
+  const steamid = String(steamAccountState?.steamid || "");
+  if (!account || !steamAccountState?.loggedIn || !/^\d{17}$/.test(steamid) || account.steamid === steamid) return;
+  if (account.steamid || steamLinkRequest === `${account.id}:${steamid}`) return;
+  steamLinkRequest = `${account.id}:${steamid}`;
+  try {
+    const data = await fetchJson("/api/physical/auth", {
+      method: "POST",
+      body: JSON.stringify({ action: "linkSteam" }),
+    });
+    account = data.account;
+    renderAccount();
+    await loadListings({ refreshAfterCurrent: true });
+  } catch {
+    // The account remains usable if another seller already owns the Steam link.
   }
 }
 
@@ -362,6 +406,7 @@ async function loadAuth() {
   renderAccount();
   renderListings();
   void renderGoogleButtons();
+  void maybeLinkSteamAccount();
 }
 
 async function loadRates() {
@@ -604,6 +649,7 @@ async function handleGoogleCredential(response) {
     paymentsConfigured = Boolean(data.paymentsConfigured);
     renderAccount();
     renderListings();
+    void maybeLinkSteamAccount();
   } catch (failure) {
     showGoogleStatus(failure.message || "Google sign-in failed", true);
   }
@@ -629,6 +675,13 @@ function bindEvents() {
     renderAccount();
     renderListings();
     void renderGoogleButtons();
+  });
+  window.addEventListener("fn-steam-account-change", (event) => {
+    steamAccountState = event.detail && typeof event.detail === "object"
+      ? event.detail
+      : { loggedIn: false, steamid: "" };
+    if (!steamAccountState.loggedIn) steamLinkRequest = "";
+    void maybeLinkSteamAccount();
   });
   document.querySelectorAll("[data-close-physical]").forEach((button) => button.addEventListener("click", () => closeModal(element(button.dataset.closePhysical))));
   document.querySelectorAll(".bid-modal").forEach((modal) => modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(modal); }));
