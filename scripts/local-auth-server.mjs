@@ -24,6 +24,7 @@ const routes = new Map([
   ["/api/currency", path.join(root, "api/currency.js")],
   ["/api/marketplace/stores", path.join(root, "api/marketplace/stores.js")],
   ["/api/marketplace/bids", path.join(root, "api/marketplace/bids.js")],
+  ["/api/marketplace/prices", path.join(root, "api/marketplace/prices.js")],
   ["/api/physical/auth", path.join(root, "api/physical.js")],
   ["/api/physical/listings", path.join(root, "api/physical.js")],
   ["/api/physical/supporter", path.join(root, "api/physical.js")],

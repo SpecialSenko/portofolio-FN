@@ -1264,6 +1264,27 @@
     color: var(--muted);
     font-size: 11px;
   }
+  .external-price-panel {
+    margin-top: 14px;
+    padding-top: 13px;
+    border-top: 1px solid var(--border);
+  }
+  .external-price-panel[hidden] { display: none; }
+  .external-price-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+  }
+  .external-price-title { margin: 0; font-size: 11px; font-weight: 800; }
+  .external-price-status { color: var(--muted); font-size: 8.5px; }
+  .external-price-card { text-decoration: none; }
+  .external-price-mark {
+    color: #53b5ff;
+    font-size: 11px;
+    font-weight: 900;
+  }
   .seller-owner-crown {
     position: absolute;
     z-index: 2;
@@ -1769,57 +1790,29 @@
     background: var(--panel-2);
   }
   .inventory-filter-summary { color: var(--muted); font-size: 9.5px; }
-  .inventory-filter-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    color: var(--text);
-    font-size: 9.5px;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-  }
-  .inventory-filter-toggle input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .inventory-toggle-track {
-    position: relative;
-    width: 30px;
-    height: 17px;
-    flex: 0 0 30px;
+  .inventory-view-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(82px, 1fr));
+    gap: 2px;
+    padding: 2px;
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: 6px;
     background: var(--panel);
-    transition: border-color .15s ease, background .15s ease;
   }
-  .inventory-toggle-track::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: transform .15s ease, background .15s ease;
+  .inventory-view-button {
+    min-height: 28px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 9.5px;
+    font-weight: 750;
+    cursor: pointer;
   }
-  .inventory-filter-toggle input:checked + .inventory-toggle-track {
-    border-color: #4dffb2;
-    background: rgba(77, 255, 178, .12);
-  }
-  .inventory-filter-toggle input:checked + .inventory-toggle-track::after {
-    transform: translateX(13px);
-    background: #4dffb2;
-  }
-  .inventory-filter-toggle input:focus-visible + .inventory-toggle-track {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+  .inventory-view-button.active { background: var(--nav-active-bg); color: var(--text); }
+  .inventory-view-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .inventory-games {
     position: relative;
     margin-top: 14px;
@@ -2881,6 +2874,13 @@
             <span class="global-discovery-count" id="globalDiscoveryCount"></span>
           </div>
           <div class="global-result-grid" id="globalResultGrid"></div>
+          <section class="external-price-panel" id="externalPricePanel" aria-live="polite" hidden>
+            <div class="external-price-head">
+              <h3 class="external-price-title">External prices</h3>
+              <span class="external-price-status" id="externalPriceStatus"></span>
+            </div>
+            <div class="global-result-grid" id="externalPriceGrid"></div>
+          </section>
         </section>
 
         <p class="page-copy" id="sellerCopy">Connect Steam to show your account on the market.</p>
@@ -2932,11 +2932,10 @@
         </div>
         <div class="inventory-filter-bar" id="inventoryFilterBar" hidden>
           <span class="inventory-filter-summary" id="inventoryFilterSummary"></span>
-          <label class="inventory-filter-toggle" title="Includes non-CS2 and non-tradable items">
-            <input id="showUnavailableInventory" type="checkbox">
-            <span class="inventory-toggle-track" aria-hidden="true"></span>
-            <span data-i18n="inventory.showUnavailable">Show unavailable</span>
-          </label>
+          <div class="inventory-view-switch" role="group" aria-label="Inventory availability">
+            <button class="inventory-view-button active" type="button" data-inventory-view="tradable" aria-pressed="true">Tradable</button>
+            <button class="inventory-view-button" type="button" data-inventory-view="all" aria-pressed="false">All items</button>
+          </div>
         </div>
         <div class="inv-list" id="invList"></div>
         <button class="back-btn" id="loadMoreInventory" type="button" hidden>Load more</button>
@@ -3469,6 +3468,9 @@
   let physicalDiscoveryListings = [];
   const marketSearchValues = { global: "", market: "", physical: "" };
   let marketStoreScope = null;
+  let externalPriceTimer = null;
+  let externalPriceRequestVersion = 0;
+  let externalPriceState = { query: "", loading: false, error: "", results: [] };
 
   function marketSearchMatches(query, ...values) {
     return window.FraxbSearch?.matches(query, ...values) ?? values.join(" ").toLowerCase().includes(String(query || "").trim().toLowerCase());
@@ -4031,7 +4033,7 @@
   let inventoryNext = null;
   let inventoryRequestVersion = 0;
   let showUnavailableInventoryItems = false;
-  const showUnavailableInventoryToggle = document.getElementById("showUnavailableInventory");
+  const inventoryViewButtons = Array.from(document.querySelectorAll("[data-inventory-view]"));
   const listedAssetIds = new Set();
   const listedItems = new Map();
   let listingSaveTimer = null;
@@ -4056,9 +4058,11 @@
   let gamePickerReturnFocus = null;
   const tierLabel = { normal: "Normal", stattrak: "StatTrak\u2122", holo: "Holo", "stattrak-holo": "StatTrak\u2122 Holo" };
 
-  showUnavailableInventoryToggle.addEventListener("change", () => {
-    showUnavailableInventoryItems = showUnavailableInventoryToggle.checked;
-    renderInventory();
+  inventoryViewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      showUnavailableInventoryItems = button.dataset.inventoryView === "all";
+      renderInventory();
+    });
   });
 
   const currencies = {
@@ -4163,7 +4167,6 @@
           inventoryRequestVersion += 1;
           inventory = [];
           showUnavailableInventoryItems = false;
-          showUnavailableInventoryToggle.checked = false;
           inventoryLoaded = false;
           inventoryPrivate = false;
           cs2InventoryPrivate = false;
@@ -4982,8 +4985,12 @@
 
     const availableItems = inventory.filter(isInventoryItemAvailable);
     const unavailableCount = inventory.length - availableItems.length;
-    filterBar.hidden = unavailableCount === 0;
-    showUnavailableInventoryToggle.checked = showUnavailableInventoryItems;
+    filterBar.hidden = !inventoryLoaded && inventory.length === 0;
+    inventoryViewButtons.forEach((button) => {
+      const active = button.dataset.inventoryView === (showUnavailableInventoryItems ? "all" : "tradable");
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
     filterSummary.textContent = showUnavailableInventoryItems
       ? `${availableItems.length} available, ${unavailableCount} unavailable shown.`
       : `${availableItems.length} available, ${unavailableCount} unavailable hidden.`;
@@ -5183,6 +5190,125 @@
     return card;
   }
 
+  function trustedExternalMarketUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return url.protocol === "https:" && (url.hostname === "skinport.com" || url.hostname.endsWith(".skinport.com")) ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function externalPriceCard(result) {
+    const link = document.createElement("a");
+    link.className = "global-listing-card external-price-card";
+    link.href = trustedExternalMarketUrl(result.url) || "https://skinport.com/market";
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.title = `Open ${result.name} on Skinport`;
+
+    const media = document.createElement("span");
+    media.className = "global-listing-media external-price-mark";
+    media.textContent = "SP";
+    const body = document.createElement("span");
+    body.className = "global-listing-body";
+    const tags = document.createElement("span");
+    tags.className = "global-listing-tags";
+    const externalTag = document.createElement("span");
+    externalTag.className = "global-listing-tag";
+    externalTag.textContent = "External";
+    const providerTag = document.createElement("span");
+    providerTag.className = "global-listing-tag";
+    providerTag.textContent = "Skinport";
+    tags.append(externalTag, providerTag);
+    const name = document.createElement("span");
+    name.className = "global-listing-name";
+    name.textContent = result.name;
+    const stock = document.createElement("span");
+    stock.className = "global-listing-store";
+    stock.textContent = `${result.quantity} available`;
+    const price = document.createElement("span");
+    price.className = "global-listing-price";
+    price.textContent = formatPrice(result.priceUsd);
+    body.append(tags, name, stock, price);
+    link.append(media, body);
+    return link;
+  }
+
+  function renderExternalPrices() {
+    const panel = document.getElementById("externalPricePanel");
+    const status = document.getElementById("externalPriceStatus");
+    const grid = document.getElementById("externalPriceGrid");
+    const query = marketSearchValues.global.trim();
+    panel.hidden = query.length < 2;
+    if (panel.hidden) return;
+    grid.replaceChildren();
+    if (externalPriceState.loading) {
+      status.textContent = "Checking Skinport...";
+      return;
+    }
+    if (externalPriceState.error) {
+      status.textContent = externalPriceState.error;
+      return;
+    }
+    status.textContent = `${externalPriceState.results.length} public result${externalPriceState.results.length === 1 ? "" : "s"}`;
+    if (externalPriceState.results.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "global-discovery-empty";
+      empty.textContent = "No external prices match this search.";
+      grid.appendChild(empty);
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    externalPriceState.results.forEach((result) => fragment.appendChild(externalPriceCard(result)));
+    grid.appendChild(fragment);
+  }
+
+  function queueExternalPriceSearch(rawQuery) {
+    const query = String(rawQuery || "").trim();
+    if (query.length < 2) {
+      clearTimeout(externalPriceTimer);
+      externalPriceRequestVersion += 1;
+      externalPriceState = { query: "", loading: false, error: "", results: [] };
+      renderExternalPrices();
+      return;
+    }
+    if (query === externalPriceState.query) {
+      renderExternalPrices();
+      return;
+    }
+
+    clearTimeout(externalPriceTimer);
+    const requestVersion = ++externalPriceRequestVersion;
+    externalPriceState = { query, loading: true, error: "", results: [] };
+    renderExternalPrices();
+    externalPriceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/marketplace/prices?query=${encodeURIComponent(query)}`, {
+          headers: { Accept: "application/json" },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "External prices are unavailable");
+        if (requestVersion !== externalPriceRequestVersion) return;
+        externalPriceState = {
+          query,
+          loading: false,
+          error: "",
+          results: (Array.isArray(data.results) ? data.results : []).map((result) => ({
+            name: String(result.name || "External item").slice(0, 180),
+            priceUsd: Number(result.priceUsd),
+            quantity: Math.max(0, Number.parseInt(result.quantity || "0", 10) || 0),
+            url: trustedExternalMarketUrl(result.url),
+          })).filter((result) => result.url && Number.isFinite(result.priceUsd) && result.priceUsd >= 0),
+        };
+      } catch (error) {
+        if (requestVersion !== externalPriceRequestVersion) return;
+        externalPriceState = { query, loading: false, error: error?.message || "External prices are unavailable", results: [] };
+      }
+      renderExternalPrices();
+    }, 350);
+  }
+
   function renderGlobalDiscovery() {
     const resultGrid = document.getElementById("globalResultGrid");
     const title = document.getElementById("globalDiscoveryTitle");
@@ -5204,11 +5330,12 @@
     title.textContent = query.trim() ? "Search results" : "Featured listings";
     count.textContent = `${combined.length} ${combined.length === 1 ? "listing" : "listings"}`;
     resultGrid.replaceChildren();
+    queueExternalPriceSearch(query);
     if (visible.length === 0) {
       const empty = document.createElement("p");
       empty.className = "global-discovery-empty";
       empty.textContent = query.trim()
-        ? "No digital or physical listings match that search. Try a shorter spelling."
+        ? "No Fraxb listings match that search. Try a shorter spelling."
         : "Featured listings will appear when sellers publish items.";
       resultGrid.appendChild(empty);
       return;
@@ -5596,7 +5723,6 @@
     inventoryTotal = 0;
     inventoryNext = null;
     showUnavailableInventoryItems = false;
-    showUnavailableInventoryToggle.checked = false;
     listedAssetIds.clear();
     listedItems.clear();
     resetListingSyncState();
