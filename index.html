@@ -604,6 +604,7 @@
     background: #0d1014;
   }
   .media-viewer-title {
+    flex: 1;
     min-width: 0;
     overflow: hidden;
     color: #f5f7fa;
@@ -620,7 +621,8 @@
     padding: 12px;
   }
   .media-viewer-content img,
-  .media-viewer-content iframe {
+  .media-viewer-content iframe,
+  .media-viewer-content video {
     display: block;
     max-width: 100%;
     max-height: 100%;
@@ -631,6 +633,20 @@
   .media-viewer-content iframe {
     width: 100%;
     height: 100%;
+  }
+  .media-viewer-content video { width: min(100%, 1100px); }
+  .media-viewer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #596270;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
   }
 
   .blog-page {
@@ -833,6 +849,17 @@
   .blog-portfolio-meta { margin: 0; color: var(--muted); font-size: 10px; }
   .blog-portfolio-stage { min-height: 260px; }
   .blog-portfolio-stage .film-rail { padding-top: 12px; }
+  .portfolio-video-form { margin: 12px 0 2px; }
+  .portfolio-video-form[hidden] { display: none; }
+  .portfolio-video-form .blog-form-grid { grid-template-columns: minmax(160px, .7fr) minmax(260px, 1.3fr); }
+  .video-cover {
+    height: 174px;
+    display: grid;
+    place-items: center;
+    background: #090b0e;
+    color: #f4f6f8;
+  }
+  .video-cover svg { width: 42px; height: 42px; }
   .blog-portfolio-footer {
     display: flex;
     align-items: center;
@@ -2854,6 +2881,7 @@
     .blog-new-post { min-width: 34px; padding: 7px; }
     .blog-new-post span { display: none; }
     .blog-form-grid { grid-template-columns: 1fr; }
+    .portfolio-video-form .blog-form-grid { grid-template-columns: 1fr; }
     .blog-field-full { grid-column: auto; }
     .blog-grid { grid-template-columns: 1fr; }
     .settings-action { width: 100%; }
@@ -3077,10 +3105,6 @@
             </div>
           </div>
         </div>
-        <div class="viewing-banner" id="physicalViewingBanner" hidden>
-          <span id="physicalViewingText"></span>
-          <button class="back-btn" id="viewAllPhysicalStores" type="button">All physical stores</button>
-        </div>
         <div class="physical-account-band" id="physicalAccountBand" hidden>
           <span class="physical-account-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>
@@ -3117,7 +3141,7 @@
           <span class="blog-monogram" aria-hidden="true">FN</span>
           <div class="blog-heading">
             <h2 class="blog-title" data-i18n="blog.title">FN Blog</h2>
-            <p class="blog-subtitle" data-i18n="blog.copy">Fraxb projects, personal updates, pictures, game work, and certificates.</p>
+            <p class="blog-subtitle" data-i18n="blog.copy">Fraxb projects, personal updates, pictures, game work, certificates, and videos.</p>
           </div>
           <button class="blog-new-post" id="blogComposeToggle" type="button" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -3130,6 +3154,7 @@
           <button class="blog-tab" type="button" role="tab" aria-selected="false" data-blog-tab="pictures">Pictures</button>
           <button class="blog-tab" type="button" role="tab" aria-selected="false" data-blog-tab="games">Game work</button>
           <button class="blog-tab" type="button" role="tab" aria-selected="false" data-blog-tab="certificates">Certificates</button>
+          <button class="blog-tab" type="button" role="tab" aria-selected="false" data-blog-tab="videos">Videos</button>
         </div>
 
         <div class="blog-posts-view" id="blogPostsView">
@@ -3176,6 +3201,23 @@
             <h3 class="blog-portfolio-title" id="blogPortfolioTitle">Portfolio</h3>
             <p class="blog-portfolio-meta" id="portfolioMeta">Loading original work...</p>
           </div>
+          <form class="blog-composer portfolio-video-form" id="portfolioVideoForm" hidden>
+            <h3 class="blog-composer-title">Add portfolio video</h3>
+            <div class="blog-form-grid">
+              <div class="blog-field">
+                <label for="portfolioVideoTitle">Title</label>
+                <input id="portfolioVideoTitle" name="title" type="text" maxlength="120" required>
+              </div>
+              <div class="blog-field">
+                <label for="portfolioVideoUrl">Video link</label>
+                <input id="portfolioVideoUrl" name="videoUrl" type="url" inputmode="url" maxlength="1000" placeholder="https://youtube.com/..." required>
+              </div>
+            </div>
+            <div class="blog-composer-actions">
+              <p class="blog-form-error" id="portfolioVideoError" role="alert" hidden></p>
+              <button class="blog-publish" id="portfolioVideoSubmit" type="submit">Add video</button>
+            </div>
+          </form>
           <div class="blog-portfolio-stage" id="portfolioStage" aria-label="Portfolio files">
             <div class="film-rail" id="portfolioRail"></div>
           </div>
@@ -3534,6 +3576,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
         <span class="media-viewer-title" id="mediaViewerTitle"></span>
+        <button class="icon-button" id="deletePortfolioVideo" type="button" title="Delete video" aria-label="Delete video" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+        </button>
       </div>
       <div class="media-viewer-content" id="mediaViewerContent"></div>
     </div>
@@ -3573,7 +3618,7 @@
       "market.protection": "交易保護", "market.protectionCopy": "刊登與出價會記錄在此。付款前請確認每筆 Steam 交易；本站目前不保管資金。",
       "category.all": "全部", "category.rifles": "步槍", "category.pistols": "手槍", "category.knives": "刀具", "category.gloves": "手套", "category.stickers": "貼紙", "category.charms": "吊飾", "category.cases": "武器箱",
       "inventory.title": "你的庫存", "inventory.showUnavailable": "顯示不可用商品", "trades.title": "交易", "trades.copy": "已連接 Steam 帳戶的私人交易紀錄。",
-      "physical.title": "在地市場", "physical.copy": "依地區尋找餐點、日用品、服務與實體商品。", "blog.title": "FN 部落格", "blog.copy": "Fraxb 的專案、個人更新、圖片、遊戲作品與證書。",
+      "physical.title": "在地市場", "physical.copy": "依地區尋找餐點、日用品、服務與實體商品。", "blog.title": "FN 部落格", "blog.copy": "Fraxb 的專案、個人更新、圖片、遊戲作品、證書與影片。",
       "settings.title": "設定", "settings.currency": "貨幣", "settings.language": "語言", "settings.languageHelp": "變更市場介面語言", "settings.marketAccount": "市場帳戶", "settings.marketAccountHelp": "使用 Google 或電子郵件管理實體商店", "settings.signIn": "登入", "common.noResults": "找不到符合的選項",
       "listing.setPrice": "設定商品價格", "listing.fixed": "固定價格", "listing.auction": "競標", "listing.helpFixed": "買家會看到單一固定售價", "listing.helpAuction": "買家自行決定出價金額", "listing.price": "價格（USD）", "listing.startingPrice": "起標價（USD）", "listing.hintFixed": "買家會以所選貨幣看到此固定價格。", "listing.hintAuction": "首次出價必須達到此金額，後續出價必須更高。", "listing.startAuction": "開始競標", "listing.listSale": "刊登出售", "listing.save": "儲存刊登", "listing.startingBid": "起標價", "listing.fixedPrice": "固定價格", "listing.bid": "出價", "listing.bids": "次出價", "listing.buy": "購買", "listing.connect": "連接", "listing.yourItem": "你的商品", "listing.noBids": "尚無出價", "listing.list": "刊登", "listing.listed": "已刊登", "listing.mixedPrices": "多種價格", "common.cancel": "取消",
     },
@@ -3689,10 +3734,6 @@
   }
 
   function syncPhysicalScope() {
-    const banner = document.getElementById("physicalViewingBanner");
-    const text = document.getElementById("physicalViewingText");
-    if (banner) banner.hidden = !marketStoreScope;
-    if (text) text.textContent = marketStoreScope ? `Viewing ${marketStoreScope.name}'s physical store` : "";
     window.dispatchEvent(new CustomEvent("fn-physical-store-scope", {
       detail: marketStoreScope ? {
         name: marketStoreScope.name,
@@ -3854,11 +3895,6 @@
   });
   document.querySelectorAll("[data-home-market]").forEach((button) => {
     button.addEventListener("click", () => activateMarketPage(button.dataset.homeMarket));
-  });
-  document.getElementById("viewAllPhysicalStores").addEventListener("click", () => {
-    marketStoreScope = null;
-    marketSearchValues.physical = "";
-    showPage("physical");
   });
   document.getElementById("homeButton").addEventListener("click", () => {
     hideAdPopover();
@@ -6477,6 +6513,7 @@
   let blogCanManage = false;
   let blogPersistent = true;
   let blogError = "";
+  let activeBlogTab = "posts";
 
   function safeExternalUrl(value) {
     if (!value) return "";
@@ -6555,7 +6592,8 @@
   }
 
   function renderBlogPosts() {
-    blogComposeToggle.hidden = !blogCanManage;
+    const visiblePosts = blogPosts.filter((post) => post.category !== "video");
+    blogComposeToggle.hidden = !blogCanManage || activeBlogTab !== "posts";
     if (!blogCanManage) blogComposer.hidden = true;
     blogGrid.replaceChildren();
 
@@ -6568,12 +6606,12 @@
       return;
     }
 
-    blogStatus.textContent = blogPosts.length
-      ? `${blogPosts.length} public post${blogPosts.length === 1 ? "" : "s"}.`
+    blogStatus.textContent = visiblePosts.length
+      ? `${visiblePosts.length} public post${visiblePosts.length === 1 ? "" : "s"}.`
       : blogCanManage && !blogPersistent
         ? "Persistent blog storage is not configured."
         : "No posts published yet.";
-    if (blogPosts.length === 0) {
+    if (visiblePosts.length === 0) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
       empty.textContent = "The FN journal is ready for its first post.";
@@ -6581,7 +6619,7 @@
       return;
     }
     const fragment = document.createDocumentFragment();
-    blogPosts.forEach((post) => fragment.appendChild(blogPostElement(post)));
+    visiblePosts.forEach((post) => fragment.appendChild(blogPostElement(post)));
     blogGrid.appendChild(fragment);
   }
 
@@ -6670,6 +6708,7 @@
       blogError = error?.message || "The post could not be removed";
     }
     renderBlogPosts();
+    if (portfolioManifest && portfolioCollection === "videos") renderPortfolioCollection();
   }
 
   blogComposeToggle.addEventListener("click", () => setBlogComposer(blogComposer.hidden));
@@ -6683,21 +6722,63 @@
   const mediaViewer = document.getElementById("mediaViewer");
   const mediaViewerTitle = document.getElementById("mediaViewerTitle");
   const mediaViewerContent = document.getElementById("mediaViewerContent");
+  const portfolioVideoForm = document.getElementById("portfolioVideoForm");
+  const portfolioVideoError = document.getElementById("portfolioVideoError");
+  const portfolioVideoSubmit = document.getElementById("portfolioVideoSubmit");
+  const deletePortfolioVideo = document.getElementById("deletePortfolioVideo");
   const PORTFOLIO_BATCH_SIZE = 24;
   let portfolioManifest = null;
   let portfolioCollection = "pictures";
   let portfolioVisibleCount = PORTFOLIO_BATCH_SIZE;
   let mediaViewerReturnFocus = null;
   let mediaViewerPreviousOverflow = "";
+  let activeMediaViewerItem = null;
 
   const portfolioLabels = {
     pictures: "Picture",
     games: "Game work",
     certificates: "Certificate",
+    videos: "Video",
   };
 
   function safePortfolioPath(value) {
     return typeof value === "string" && value.startsWith("/portfolio/") ? value : "";
+  }
+
+  function portfolioVideoSource(value) {
+    const href = safeExternalUrl(value);
+    if (!href) return null;
+    const url = new URL(href);
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+    let videoId = "";
+    if (hostname === "youtu.be") videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+    if (["youtube.com", "m.youtube.com", "youtube-nocookie.com"].includes(hostname)) {
+      videoId = url.searchParams.get("v") || url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/)?.[1] || "";
+    }
+    if (/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+      return {
+        type: "iframe",
+        src: `https://www.youtube-nocookie.com/embed/${videoId}`,
+        thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      };
+    }
+    if (hostname === "vimeo.com" || hostname.endsWith(".vimeo.com")) {
+      const vimeoId = url.pathname.split("/").find((part) => /^\d{6,12}$/.test(part)) || "";
+      if (vimeoId) return { type: "iframe", src: `https://player.vimeo.com/video/${vimeoId}`, thumbnail: "" };
+    }
+    if (/\.(?:mp4|webm|ogg)$/i.test(url.pathname)) return { type: "video", src: href, thumbnail: "" };
+    return { type: "link", src: href, thumbnail: "" };
+  }
+
+  function portfolioItems(collection) {
+    if (collection !== "videos") return portfolioManifest?.[collection] || [];
+    return blogPosts
+      .filter((post) => post.category === "video" && portfolioVideoSource(post.videoUrl))
+      .map((post) => ({ id: post.id, title: post.title, src: post.videoUrl, createdAt: post.createdAt }));
+  }
+
+  function syncPortfolioVideoControls() {
+    portfolioVideoForm.hidden = portfolioCollection !== "videos" || !blogCanManage;
   }
 
   async function loadPortfolioManifest() {
@@ -6714,12 +6795,39 @@
   }
 
   function openPortfolioItem(item, collection) {
-    const src = safePortfolioPath(item.src);
+    const src = collection === "videos" ? safeExternalUrl(item.src) : safePortfolioPath(item.src);
     if (!src) return;
 
     mediaViewerTitle.textContent = item.title || portfolioLabels[collection];
     mediaViewerContent.replaceChildren();
-    if (collection === "certificates") {
+    if (collection === "videos") {
+      const source = portfolioVideoSource(src);
+      if (!source) return;
+      if (source.type === "iframe") {
+        const frame = document.createElement("iframe");
+        frame.src = source.src;
+        frame.title = item.title || "Portfolio video";
+        frame.allow = "accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen";
+        frame.allowFullscreen = true;
+        frame.referrerPolicy = "strict-origin-when-cross-origin";
+        mediaViewerContent.appendChild(frame);
+      } else if (source.type === "video") {
+        const video = document.createElement("video");
+        video.src = source.src;
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        mediaViewerContent.appendChild(video);
+      } else {
+        const link = document.createElement("a");
+        link.className = "media-viewer-link";
+        link.href = source.src;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Open video";
+        mediaViewerContent.appendChild(link);
+      }
+    } else if (collection === "certificates") {
       const frame = document.createElement("iframe");
       frame.src = `${src}#toolbar=1&navpanes=0&view=FitH`;
       frame.title = item.title || "Certificate";
@@ -6731,6 +6839,8 @@
       image.decoding = "async";
       mediaViewerContent.appendChild(image);
     }
+    activeMediaViewerItem = { item, collection };
+    deletePortfolioVideo.hidden = collection !== "videos" || !blogCanManage;
     mediaViewerReturnFocus = document.activeElement;
     mediaViewerPreviousOverflow = document.body.style.overflow;
     mediaViewer.hidden = false;
@@ -6744,8 +6854,25 @@
     frame.className = "film-frame";
     frame.title = item.title || portfolioLabels[collection];
 
-    const src = safePortfolioPath(item.src);
-    if (collection === "certificates") {
+    const src = collection === "videos" ? safeExternalUrl(item.src) : safePortfolioPath(item.src);
+    if (collection === "videos") {
+      const source = portfolioVideoSource(src);
+      if (source?.thumbnail) {
+        const image = document.createElement("img");
+        image.className = "film-image";
+        image.src = source.thumbnail;
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.referrerPolicy = "no-referrer";
+        frame.appendChild(image);
+      } else {
+        const cover = document.createElement("span");
+        cover.className = "video-cover";
+        cover.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4V8Z"/></svg>';
+        frame.appendChild(cover);
+      }
+    } else if (collection === "certificates") {
       const thumbnail = safePortfolioPath(item.thumbnail);
       if (thumbnail) {
         const image = document.createElement("img");
@@ -6787,7 +6914,7 @@
 
   function renderPortfolioCollection({ append = false } = {}) {
     if (!portfolioManifest) return;
-    const items = portfolioManifest[portfolioCollection] || [];
+    const items = portfolioItems(portfolioCollection);
     const visibleItems = items.slice(0, portfolioVisibleCount);
     const renderedCount = append ? portfolioRail.querySelectorAll(".film-frame").length : 0;
     if (!append) portfolioRail.replaceChildren();
@@ -6810,6 +6937,7 @@
     portfolioCount.textContent = items.length ? `${visibleItems.length} of ${items.length}` : "0 items";
     loadMorePortfolio.hidden = visibleItems.length >= items.length;
     loadMorePortfolio.textContent = `Load more (${items.length - visibleItems.length} remaining)`;
+    syncPortfolioVideoControls();
   }
 
   async function showPortfolioCollection(collection) {
@@ -6823,8 +6951,10 @@
       pictures: "Pictures",
       games: "Game work",
       certificates: "Certificates",
+      videos: "Videos",
     }[collection] || "Portfolio";
     try {
+      if (collection === "videos") await loadBlogPosts();
       await loadPortfolioManifest();
       renderPortfolioCollection();
     } catch (error) {
@@ -6838,6 +6968,8 @@
   function closeMediaViewer() {
     mediaViewer.hidden = true;
     mediaViewerContent.replaceChildren();
+    deletePortfolioVideo.hidden = true;
+    activeMediaViewerItem = null;
     document.body.style.overflow = mediaViewerPreviousOverflow;
     if (mediaViewerReturnFocus instanceof HTMLElement && mediaViewerReturnFocus.isConnected) {
       mediaViewerReturnFocus.focus();
@@ -6845,13 +6977,64 @@
     mediaViewerReturnFocus = null;
   }
 
+  async function publishPortfolioVideo(event) {
+    event.preventDefault();
+    if (!blogCanManage) return;
+    const fields = new FormData(portfolioVideoForm);
+    const title = String(fields.get("title") || "").trim();
+    const videoUrl = safeExternalUrl(fields.get("videoUrl"));
+    portfolioVideoError.hidden = true;
+    portfolioVideoError.textContent = "";
+    if (!title || !videoUrl || !portfolioVideoSource(videoUrl)) {
+      portfolioVideoError.textContent = "Enter a title and a valid HTTPS video link.";
+      portfolioVideoError.hidden = false;
+      return;
+    }
+    portfolioVideoSubmit.disabled = true;
+    portfolioVideoSubmit.textContent = "Adding...";
+    try {
+      const response = await fetch("/api/blog", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          body: "Portfolio video",
+          category: "video",
+          videoUrl,
+          linkUrl: videoUrl,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "The video could not be added");
+      blogPosts = Array.isArray(data.posts) ? data.posts : blogPosts;
+      portfolioVideoForm.reset();
+      renderPortfolioCollection();
+    } catch (error) {
+      portfolioVideoError.textContent = error?.message || "The video could not be added";
+      portfolioVideoError.hidden = false;
+    } finally {
+      portfolioVideoSubmit.disabled = false;
+      portfolioVideoSubmit.textContent = "Add video";
+    }
+  }
+
   document.getElementById("closeMediaViewer").addEventListener("click", closeMediaViewer);
+  deletePortfolioVideo.addEventListener("click", () => {
+    const id = activeMediaViewerItem?.collection === "videos" ? activeMediaViewerItem.item?.id : "";
+    const post = blogPosts.find((candidate) => candidate.id === id && candidate.category === "video");
+    if (!post) return;
+    closeMediaViewer();
+    void deleteBlogPost(post);
+  });
+  portfolioVideoForm.addEventListener("submit", publishPortfolioVideo);
   mediaViewer.addEventListener("click", (event) => {
     if (event.target === mediaViewer) closeMediaViewer();
   });
   document.querySelectorAll("[data-blog-tab]").forEach((tab) => {
     tab.addEventListener("click", () => {
       const name = tab.dataset.blogTab;
+      activeBlogTab = name;
       document.querySelectorAll("[data-blog-tab]").forEach((candidate) => {
         const active = candidate === tab;
         candidate.classList.toggle("active", active);
@@ -6859,7 +7042,12 @@
       });
       blogPostsView.hidden = name !== "posts";
       blogPortfolioView.hidden = name === "posts";
-      if (name === "posts") void loadBlogPosts();
+      blogComposeToggle.hidden = !blogCanManage || name !== "posts";
+      if (name !== "posts") setBlogComposer(false);
+      if (name === "posts") {
+        renderBlogPosts();
+        void loadBlogPosts();
+      }
       else void showPortfolioCollection(name);
     });
   });

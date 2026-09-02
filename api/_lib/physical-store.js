@@ -13,6 +13,7 @@ const PAYMENT_KEY_PREFIX = "fraxb:physical:payment:";
 const AUTH_RATE_KEY_PREFIX = "fraxb:physical:auth-rate:";
 const MAX_LISTINGS = 200;
 const STORAGE_TIMEOUT_MS = 4_000;
+export const PHYSICAL_ACCOUNT_DELETE_DELAY_MS = 3 * 24 * 60 * 60 * 1_000;
 const defaultLocalFile = fileURLToPath(new URL("../../.data/physical-marketplace.json", import.meta.url));
 let localWriteQueue = Promise.resolve();
 const localAuthAttempts = new Map();
@@ -120,6 +121,12 @@ function normalizeAccount(value) {
   const supporterUntil = Number(value?.supporterUntil);
   const createdAt = Number(value?.createdAt);
   const updatedAt = Number(value?.updatedAt);
+  const deletionRequestedAt = Number(value?.deletionRequestedAt);
+  const deletionScheduledFor = Number(value?.deletionScheduledFor);
+  const deletionPending = Number.isFinite(deletionRequestedAt)
+    && Number.isFinite(deletionScheduledFor)
+    && deletionRequestedAt >= 0
+    && deletionScheduledFor > deletionRequestedAt;
   return {
     id,
     email,
@@ -133,6 +140,8 @@ function normalizeAccount(value) {
     contactUrl: safeUrl(value?.contactUrl),
     supporterUntil: Number.isFinite(supporterUntil) ? supporterUntil : null,
     supporterPlan: ["week", "month", "year"].includes(value?.supporterPlan) ? value.supporterPlan : null,
+    deletionRequestedAt: deletionPending ? deletionRequestedAt : null,
+    deletionScheduledFor: deletionPending ? deletionScheduledFor : null,
     createdAt: Number.isFinite(createdAt) ? createdAt : Date.now(),
     updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now(),
   };
@@ -172,7 +181,7 @@ function normalizeListing(value) {
 
 function publicAccount(account) {
   const normalized = normalizeAccount(account);
-  if (!normalized) return null;
+  if (!normalized || (normalized.deletionScheduledFor && normalized.deletionScheduledFor <= Date.now())) return null;
   return {
     id: normalized.id,
     displayName: normalized.displayName,
@@ -196,6 +205,8 @@ function privateAccount(account) {
         email: normalized.email,
         supporterPlan: normalized.supporterPlan,
         signInMethod: normalized.googleSub ? "google" : "password",
+        deletionRequestedAt: normalized.deletionRequestedAt,
+        deletionScheduledFor: normalized.deletionScheduledFor,
       }
     : null;
 }
@@ -346,13 +357,17 @@ export async function getOrCreateGooglePhysicalAccount(identity) {
 
   if (mode === "redis") {
     const existingGoogleId = await redisCommand(["GET", `${GOOGLE_KEY_PREFIX}${googleLookupKey}`]);
-    if (existingGoogleId) return getPhysicalAccountById(existingGoogleId);
+    if (existingGoogleId) {
+      const existing = await getPhysicalAccountById(existingGoogleId);
+      if (existing) return existing;
+      return getOrCreateGooglePhysicalAccount(identity);
+    }
 
     const existingEmailId = await redisCommand(["GET", `${EMAIL_KEY_PREFIX}${emailLookupKey}`]);
     if (existingEmailId) {
       if (!identity.authoritativeEmail) throw new PhysicalGoogleAccountConflictError();
       const existing = await getPhysicalAccountById(existingEmailId, { includeSecrets: true });
-      if (!existing) throw new TypeError("Invalid physical seller account");
+      if (!existing) return getOrCreateGooglePhysicalAccount(identity);
       if (existing.googleSub && existing.googleSub !== sub) throw new PhysicalGoogleAccountConflictError();
       const linked = normalizeAccount({ ...existing, googleSub: sub, updatedAt: Date.now() });
       const result = await redisCommand([
@@ -391,6 +406,15 @@ export async function getOrCreateGooglePhysicalAccount(identity) {
     return privateAccount(account);
   }
 
+  const localSnapshot = await readLocalData();
+  const localGoogleAccountId = localSnapshot.googleIndex[googleLookupKey];
+  if (localGoogleAccountId) {
+    const existing = await getPhysicalAccountById(localGoogleAccountId);
+    if (existing) return existing;
+  }
+  const localEmailAccountId = localSnapshot.emailIndex[emailLookupKey];
+  if (localEmailAccountId) await getPhysicalAccountById(localEmailAccountId);
+
   return withLocalWrite(async () => {
     const data = await readLocalData();
     const googleAccountId = data.googleIndex[googleLookupKey];
@@ -424,7 +448,7 @@ export async function getOrCreateGooglePhysicalAccount(identity) {
   });
 }
 
-export async function getPhysicalAccountById(accountId, { includeSecrets = false } = {}) {
+async function readStoredPhysicalAccount(accountId) {
   const id = String(accountId || "");
   if (!/^[a-f0-9-]{36}$/.test(id)) return null;
   const mode = storageMode();
@@ -438,7 +462,16 @@ export async function getPhysicalAccountById(accountId, { includeSecrets = false
   } catch {
     account = null;
   }
+  return account;
+}
+
+export async function getPhysicalAccountById(accountId, { includeSecrets = false } = {}) {
+  const account = await readStoredPhysicalAccount(accountId);
   if (!account) return null;
+  if (account.deletionScheduledFor && account.deletionScheduledFor <= Date.now()) {
+    await permanentlyDeletePhysicalAccount(account.id, { account });
+    return null;
+  }
   return includeSecrets ? account : privateAccount(account);
 }
 
@@ -467,6 +500,82 @@ async function putAccount(value) {
     });
   }
   return account;
+}
+
+export async function schedulePhysicalAccountDeletion(accountId, { now = Date.now() } = {}) {
+  const account = await getPhysicalAccountById(accountId, { includeSecrets: true });
+  if (!account) return null;
+  if (account.deletionScheduledFor) return privateAccount(account);
+  const requestedAt = Number.isFinite(now) ? now : Date.now();
+  const updated = await putAccount({
+    ...account,
+    deletionRequestedAt: requestedAt,
+    deletionScheduledFor: requestedAt + PHYSICAL_ACCOUNT_DELETE_DELAY_MS,
+    updatedAt: Date.now(),
+  });
+  return privateAccount(updated);
+}
+
+export async function cancelPhysicalAccountDeletion(accountId) {
+  const account = await getPhysicalAccountById(accountId, { includeSecrets: true });
+  if (!account) return null;
+  const updated = await putAccount({
+    ...account,
+    deletionRequestedAt: null,
+    deletionScheduledFor: null,
+    updatedAt: Date.now(),
+  });
+  return privateAccount(updated);
+}
+
+export async function permanentlyDeletePhysicalAccount(accountId, { account: knownAccount = null } = {}) {
+  const account = normalizeAccount(knownAccount) || await readStoredPhysicalAccount(accountId);
+  if (!account) return false;
+  const mode = storageMode();
+  if (mode === "disabled" || mode === "unavailable") throw new PhysicalStorageUnavailableError();
+
+  if (mode === "redis") {
+    const ids = await redisCommand(["ZRANGE", LISTING_INDEX_KEY, 0, -1]);
+    const listingIds = [];
+    if (Array.isArray(ids) && ids.length) {
+      const values = await redisCommand(["MGET", ...ids.map((id) => `${LISTING_KEY_PREFIX}${id}`)]);
+      ids.forEach((id, index) => {
+        try {
+          if (normalizeListing(JSON.parse(values[index] || "null"))?.sellerId === account.id) listingIds.push(id);
+        } catch {}
+      });
+    }
+    const deleteOwnedIndex = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0";
+    const commands = [
+      ["DEL", `${ACCOUNT_KEY_PREFIX}${account.id}`],
+      ["EVAL", deleteOwnedIndex, 1, `${EMAIL_KEY_PREFIX}${emailKey(account.email)}`, account.id],
+    ];
+    if (account.googleSub) commands.push(["EVAL", deleteOwnedIndex, 1, `${GOOGLE_KEY_PREFIX}${googleKey(account.googleSub)}`, account.id]);
+    if (account.steamid) commands.push(["EVAL", deleteOwnedIndex, 1, `${STEAM_KEY_PREFIX}${account.steamid}`, account.id]);
+    if (listingIds.length) {
+      commands.push(["DEL", ...listingIds.map((id) => `${LISTING_KEY_PREFIX}${id}`)]);
+      commands.push(["ZREM", LISTING_INDEX_KEY, ...listingIds]);
+    }
+    await redisPipeline(commands);
+    return true;
+  }
+
+  return withLocalWrite(async () => {
+    const data = await readLocalData();
+    delete data.accounts[account.id];
+    const emailLookupKey = emailKey(account.email);
+    if (data.emailIndex[emailLookupKey] === account.id) delete data.emailIndex[emailLookupKey];
+    if (account.googleSub) {
+      const googleLookupKey = googleKey(account.googleSub);
+      if (data.googleIndex[googleLookupKey] === account.id) delete data.googleIndex[googleLookupKey];
+    }
+    if (account.steamid && data.steamIndex[account.steamid] === account.id) delete data.steamIndex[account.steamid];
+    Object.entries(data.listings).forEach(([id, listing]) => {
+      if (normalizeListing(listing)?.sellerId === account.id) delete data.listings[id];
+    });
+    await writeLocalData(data);
+    return true;
+  });
 }
 
 export async function linkPhysicalAccountToSteam(accountId, steamIdValue) {
@@ -545,21 +654,28 @@ export async function listPhysicalListings() {
     .slice(0, MAX_LISTINGS);
   const sellerIds = [...new Set(listings.map((listing) => listing.sellerId))];
   const accounts = new Map();
+  const dueAccounts = [];
   if (mode === "redis" && sellerIds.length) {
     const values = await redisCommand(["MGET", ...sellerIds.map((id) => `${ACCOUNT_KEY_PREFIX}${id}`)]);
     sellerIds.forEach((id, index) => {
       try {
         const account = normalizeAccount(JSON.parse(values[index] || "null"));
-        if (account) accounts.set(id, publicAccount(account));
+        if (account?.deletionScheduledFor && account.deletionScheduledFor <= Date.now()) dueAccounts.push(account);
+        else if (account) accounts.set(id, publicAccount(account));
       } catch {}
     });
   } else {
     const data = await readLocalData();
     sellerIds.forEach((id) => {
-      const account = publicAccount(data.accounts[id]);
-      if (account) accounts.set(id, account);
+      const storedAccount = normalizeAccount(data.accounts[id]);
+      if (storedAccount?.deletionScheduledFor && storedAccount.deletionScheduledFor <= Date.now()) dueAccounts.push(storedAccount);
+      else {
+        const account = publicAccount(storedAccount);
+        if (account) accounts.set(id, account);
+      }
     });
   }
+  for (const account of dueAccounts) await permanentlyDeletePhysicalAccount(account.id, { account });
   return listings
     .map((listing) => ({ ...listing, seller: accounts.get(listing.sellerId) || null }))
     .filter((listing) => listing.seller);

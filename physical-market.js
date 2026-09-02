@@ -145,6 +145,14 @@ function installDialogs() {
           <label class="physical-field is-wide"><span>City</span><input class="physical-input" id="physicalProfileCity" maxlength="80" required></label>
           <label class="physical-field is-wide"><span>Description</span><textarea class="physical-textarea" id="physicalProfileDescription" maxlength="300"></textarea></label>
           <label class="physical-field is-wide"><span>Order/contact link</span><input class="physical-input" id="physicalProfileContact" type="url" inputmode="url" maxlength="800" placeholder="https://..."></label>
+          <section class="physical-danger-zone is-wide" aria-labelledby="physicalDeletionTitle">
+            <div>
+              <h3 id="physicalDeletionTitle">Delete store and account</h3>
+              <p id="physicalDeletionStatus">Deletion starts after a 3-day waiting period and removes this local store and its physical listings.</p>
+            </div>
+            <button class="physical-danger-button" id="physicalDeleteStore" type="button">Schedule deletion</button>
+            <button class="physical-secondary" id="physicalCancelDeletion" type="button" hidden>Cancel deletion</button>
+          </section>
           <p class="bid-error is-wide" id="physicalProfileError" role="alert" hidden></p>
           <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalProfileModal" type="button">Cancel</button><button class="bid-submit" id="physicalProfileSubmit" type="submit">Save store</button></div>
         </form>
@@ -231,10 +239,11 @@ function renderAccount() {
 
 function listingCard(listing) {
   const card = document.createElement("article");
-  card.className = "physical-card";
+  card.className = "physical-card is-image-only";
   card.tabIndex = 0;
   card.role = "button";
   card.setAttribute("aria-label", `${listing.title}. Open ${listing.seller.storeName} profile`);
+  card.title = `${listing.title} - open ${listing.seller.storeName}`;
   const openSellerProfile = (event) => {
     if (event.target instanceof Element && event.target.closest("button, a, input, select, textarea")) return;
     window.dispatchEvent(new CustomEvent("fn-open-seller-choice", { detail: { sellerId: listing.seller.id } }));
@@ -257,52 +266,7 @@ function listingCard(listing) {
     image.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>';
   }
   image.className = "physical-card-image";
-
-  const body = document.createElement("div");
-  body.className = "physical-card-body";
-  const top = document.createElement("div");
-  top.className = "physical-card-top";
-  const title = document.createElement("h3");
-  title.className = "physical-card-title";
-  title.textContent = listing.title;
-  const priceBox = document.createElement("div");
-  const price = document.createElement("div");
-  price.className = "physical-card-price";
-  price.textContent = formatIdr(listing.priceIdr);
-  const converted = document.createElement("p");
-  converted.className = "physical-card-converted";
-  converted.textContent = convertedPrice(listing.priceIdr);
-  priceBox.append(price, converted);
-  top.append(title, priceBox);
-  const description = document.createElement("p");
-  description.className = "physical-card-desc";
-  description.textContent = listing.description || CATEGORY_LABELS[listing.category];
-  const store = document.createElement("p");
-  store.className = "physical-card-store";
-  store.textContent = listing.seller.storeName;
-  const area = document.createElement("p");
-  area.className = "physical-card-area";
-  area.textContent = listing.area || listing.seller.city || "Area not specified";
-  const tags = document.createElement("div");
-  tags.className = "physical-card-tags";
-  if (listing.seller.isVerified) tags.appendChild(badge("Verified business", "is-verified"));
-  if (listing.seller.isSupporter) tags.appendChild(badge("Supporter", "is-supporter"));
-  listing.fulfillment.forEach((value) => tags.appendChild(badge(FULFILLMENT_LABELS[value])));
-  const actions = document.createElement("div");
-  actions.className = "physical-card-actions";
-  const stock = document.createElement("span");
-  stock.className = "physical-stock";
-  stock.textContent = `${listing.stock.toLocaleString()} in stock`;
-  const add = document.createElement("button");
-  add.className = "physical-primary";
-  add.type = "button";
-  const ownListing = listing.seller.id === account?.id;
-  add.disabled = ownListing || listing.stock < 1;
-  add.textContent = ownListing ? "Your listing" : listing.stock < 1 ? "Unavailable" : "Add to cart";
-  if (!add.disabled) add.addEventListener("click", () => addToCart(listing, add));
-  actions.append(stock, add);
-  body.append(top, description, store, area, tags, actions);
-  card.append(image, body);
+  card.appendChild(image);
   return card;
 }
 
@@ -583,7 +547,22 @@ function openProfile() {
   element("physicalProfileDescription").value = account.description || "";
   element("physicalProfileContact").value = account.contactUrl || "";
   element("physicalProfileError").hidden = true;
+  renderDeletionControls();
   openModal(element("physicalProfileModal"));
+}
+
+function renderDeletionControls() {
+  const status = element("physicalDeletionStatus");
+  const scheduleButton = element("physicalDeleteStore");
+  const cancelButton = element("physicalCancelDeletion");
+  if (!status || !scheduleButton || !cancelButton) return;
+  const scheduledFor = Number(account?.deletionScheduledFor);
+  const pending = Number.isFinite(scheduledFor) && scheduledFor > Date.now();
+  scheduleButton.hidden = pending;
+  cancelButton.hidden = !pending;
+  status.textContent = pending
+    ? `Deletion is scheduled for ${new Date(scheduledFor).toLocaleString()}. You can cancel it before then.`
+    : "Deletion starts after a 3-day waiting period and removes this local store and its physical listings. Your external Steam and Google accounts are not deleted.";
 }
 
 function loadGoogleLibrary() {
@@ -740,6 +719,49 @@ function bindEvents() {
       error.hidden = false;
     } finally {
       submit.disabled = false;
+    }
+  });
+
+  element("physicalDeleteStore").addEventListener("click", async () => {
+    if (!window.confirm("Schedule permanent deletion of this local store and seller account in 3 days? You can cancel before the deadline.")) return;
+    const button = element("physicalDeleteStore");
+    const error = element("physicalProfileError");
+    button.disabled = true;
+    error.hidden = true;
+    try {
+      const data = await fetchJson("/api/physical/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "scheduleDeletion" }),
+      });
+      account = data.account;
+      renderAccount();
+      renderDeletionControls();
+    } catch (failure) {
+      error.textContent = failure.message || "Account deletion could not be scheduled";
+      error.hidden = false;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  element("physicalCancelDeletion").addEventListener("click", async () => {
+    const button = element("physicalCancelDeletion");
+    const error = element("physicalProfileError");
+    button.disabled = true;
+    error.hidden = true;
+    try {
+      const data = await fetchJson("/api/physical/auth", {
+        method: "POST",
+        body: JSON.stringify({ action: "cancelDeletion" }),
+      });
+      account = data.account;
+      renderAccount();
+      renderDeletionControls();
+    } catch (failure) {
+      error.textContent = failure.message || "Account deletion could not be cancelled";
+      error.hidden = false;
+    } finally {
+      button.disabled = false;
     }
   });
 

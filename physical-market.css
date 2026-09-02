@@ -95,7 +95,7 @@
 
 .physical-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 220px));
   gap: 12px;
 }
 
@@ -114,6 +114,17 @@
   background: var(--panel-2);
 }
 
+.physical-card.is-image-only {
+  aspect-ratio: 16 / 9;
+  transition: border-color .15s ease, transform .15s ease;
+}
+
+.physical-card.is-image-only:hover,
+.physical-card.is-image-only:focus-visible {
+  border-color: var(--nav-hover-border);
+  transform: translateY(-1px);
+}
+
 .physical-card-image {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -123,6 +134,11 @@
   border-bottom: 1px solid var(--border);
   background: var(--panel);
   color: var(--muted);
+}
+
+.physical-card.is-image-only .physical-card-image {
+  height: 100%;
+  border-bottom: 0;
 }
 
 .physical-card-image svg { width: 28px; height: 28px; }
@@ -147,6 +163,32 @@
 .physical-card-tags { margin: 9px 0; gap: 4px; }
 .physical-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .physical-stock { color: var(--muted); font-size: 9px; }
+
+.physical-danger-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 107, 107, .34);
+}
+.physical-danger-zone > div { min-width: 0; margin-right: auto; }
+.physical-danger-zone h3 { margin: 0; color: #ff9a9a; font-size: 11px; }
+.physical-danger-zone p { margin: 4px 0 0; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
+.physical-danger-button {
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid #d35d5d;
+  border-radius: 5px;
+  background: transparent;
+  color: #ff9a9a;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.physical-danger-button:hover { background: rgba(255, 107, 107, .08); }
 
 .physical-primary,
 .physical-secondary {
@@ -283,9 +325,11 @@
   .physical-head-controls { width: 100%; align-items: stretch; }
   .physical-head .market-mode-switch { width: min(100%, 168px); margin-left: auto; }
   .physical-actions { width: 100%; justify-content: flex-start; }
-  .physical-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .physical-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); }
   .physical-form-grid,
   .supporter-plans { grid-template-columns: 1fr; }
+  .physical-danger-zone { align-items: stretch; flex-direction: column; }
+  .physical-danger-zone > div { margin-right: 0; }
   .physical-cart-line { grid-template-columns: minmax(0, 1fr) auto; }
   .physical-cart-subtotal { min-width: 0; }
 }

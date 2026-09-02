@@ -6,7 +6,7 @@ const BLOG_KEY = "fraxb:blog:posts";
 const MAX_POSTS = 100;
 const STORAGE_TIMEOUT_MS = 4_000;
 const defaultLocalFile = fileURLToPath(new URL("../../.data/blog.json", import.meta.url));
-const categories = new Set(["update", "project", "journal"]);
+const categories = new Set(["update", "project", "journal", "video"]);
 let localWriteQueue = Promise.resolve();
 
 export class BlogStorageUnavailableError extends Error {
@@ -76,6 +76,7 @@ export function normalizeBlogPost(value) {
     category: categories.has(value?.category) ? value.category : "update",
     imageUrl: safeHttpsUrl(value?.imageUrl),
     linkUrl: safeHttpsUrl(value?.linkUrl),
+    videoUrl: safeHttpsUrl(value?.videoUrl),
     createdAt,
   };
 }

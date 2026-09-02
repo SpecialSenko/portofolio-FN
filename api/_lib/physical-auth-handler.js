@@ -4,6 +4,7 @@ import { hashPhysicalPassword, verifyPhysicalPassword } from "./physical-passwor
 import { googleSignInConfigured, verifyGoogleIdToken } from "./google-id-token.js";
 import {
   clearPhysicalAuthAttempts,
+  cancelPhysicalAccountDeletion,
   consumePhysicalAuthAttempt,
   createPhysicalAccount,
   getOrCreateGooglePhysicalAccount,
@@ -14,6 +15,7 @@ import {
   PhysicalGoogleAccountConflictError,
   PhysicalSteamAccountConflictError,
   PhysicalStorageUnavailableError,
+  schedulePhysicalAccountDeletion,
   updatePhysicalProfile,
 } from "./physical-store.js";
 
@@ -86,6 +88,7 @@ export default async function handler(req, res) {
     try {
       const session = readPhysicalSession(req);
       const account = session ? await getPhysicalAccountById(session.accountId) : null;
+      if (session && !account) res.setHeader("Set-Cookie", physicalSessionCookie("", { clear: true }));
       sendJson(res, 200, authStatus(account));
     } catch {
       sendJson(res, 200, authStatus());
@@ -104,6 +107,23 @@ export default async function handler(req, res) {
     if (action === "logout") {
       res.setHeader("Set-Cookie", physicalSessionCookie("", { clear: true }));
       sendJson(res, 200, { loggedIn: false });
+      return;
+    }
+    if (action === "scheduleDeletion" || action === "cancelDeletion") {
+      const session = readPhysicalSession(req);
+      if (!session) {
+        sendJson(res, 401, { error: "Sign in to manage account deletion", code: "AUTH_REQUIRED" });
+        return;
+      }
+      const account = action === "scheduleDeletion"
+        ? await schedulePhysicalAccountDeletion(session.accountId)
+        : await cancelPhysicalAccountDeletion(session.accountId);
+      if (!account) {
+        res.setHeader("Set-Cookie", physicalSessionCookie("", { clear: true }));
+        sendJson(res, 401, { error: "Seller account is no longer available", code: "AUTH_REQUIRED" });
+        return;
+      }
+      sendJson(res, 200, authStatus(account));
       return;
     }
     if (action === "linkSteam") {

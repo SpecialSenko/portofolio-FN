@@ -102,6 +102,7 @@ export default async function handler(req, res) {
         category: body?.category,
         imageUrl: body?.imageUrl,
         linkUrl: body?.linkUrl,
+        videoUrl: body?.videoUrl,
         createdAt: Date.now(),
       });
       if (!post) {

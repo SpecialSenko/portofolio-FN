@@ -82,6 +82,7 @@ test("FN blog is public and only its Steam owner can create or remove posts", as
         category: "project",
         imageUrl: "javascript:alert(1)",
         linkUrl: "https://example.com/project",
+        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       },
     });
     assert.equal(created.status, 201);
@@ -89,6 +90,7 @@ test("FN blog is public and only its Steam owner can create or remove posts", as
     assert.equal(created.body.post.category, "project");
     assert.equal(created.body.post.imageUrl, "");
     assert.equal(created.body.post.linkUrl, "https://example.com/project");
+    assert.equal(created.body.post.videoUrl, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
     const ownerBlog = await invoke({ cookie: sessionCookie(ownerSteamId) });
     assert.equal(ownerBlog.status, 200);
@@ -154,6 +156,7 @@ test("FN blog persistence uses server-only Upstash credentials", async () => {
       category: "update",
       imageUrl: "",
       linkUrl: "",
+      videoUrl: "http://example.com/unsafe.mp4",
       createdAt: 100,
     };
     await saveBlogPosts([post]);
@@ -161,6 +164,7 @@ test("FN blog persistence uses server-only Upstash credentials", async () => {
 
     assert.equal(posts.length, 1);
     assert.equal(posts[0].title, "Stored FN post");
+    assert.equal(posts[0].videoUrl, "");
     assert.equal(calls[0].url, "https://example.upstash.io");
     assert.equal(calls[0].authorization, "Bearer server-only-blog-token");
     assert.deepEqual(calls[0].command.slice(0, 2), ["SET", "fraxb:blog:posts"]);
