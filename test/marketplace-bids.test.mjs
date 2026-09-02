@@ -7,6 +7,7 @@ import test from "node:test";
 import {
   listMarketplaceStores,
   saveMarketplaceListings,
+  saveMarketplaceBidBudget,
   upsertMarketplaceProfile,
 } from "../api/_lib/marketplace-store.js";
 import { createSessionCookie } from "../api/_lib/session.js";
@@ -79,9 +80,26 @@ test("open marketplace auctions accept only higher session-bound bids", async ()
   try {
     await upsertMarketplaceProfile({ steamid: sellerSteamId, name: "Auction Seller", avatar: "" });
     await saveMarketplaceListings({ steamid: sellerSteamId, name: "Auction Seller", avatar: "" }, [listing, fixedListing]);
+    await saveMarketplaceBidBudget(sellerSteamId, 1_000);
+    await saveMarketplaceBidBudget(bidderSteamId, 1_000);
+    await saveMarketplaceBidBudget("76561198000000033", 1_000);
 
     const anonymous = await invoke({ body: { sellerSteamId, assetid: "7001", amountCents: 500 } });
     assert.equal(anonymous.status, 401);
+
+    const missingBudget = await invoke({
+      cookie: sessionCookie("76561198000000034", "No Budget"),
+      body: { sellerSteamId, assetid: "7001", amountCents: 500 },
+    });
+    assert.equal(missingBudget.status, 409);
+    assert.equal(missingBudget.body.code, "BUDGET_REQUIRED");
+
+    const overBudget = await invoke({
+      cookie: sessionCookie(bidderSteamId, "Bidder"),
+      body: { sellerSteamId, assetid: "7001", amountCents: 1_001 },
+    });
+    assert.equal(overBudget.status, 409);
+    assert.equal(overBudget.body.code, "BUDGET_EXCEEDED");
 
     const tamperedBidder = await invoke({
       cookie: sessionCookie(bidderSteamId, "Bidder"),

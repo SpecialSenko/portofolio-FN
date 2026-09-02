@@ -216,6 +216,7 @@
 .physical-modal { width: min(590px, 100%); }
 .physical-cart-modal { width: min(720px, 100%); }
 .physical-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.physical-form-grid[hidden] { display: none; }
 .physical-form-grid .is-wide { grid-column: 1 / -1; }
 .physical-field { display: grid; gap: 6px; }
 .physical-field > span { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }

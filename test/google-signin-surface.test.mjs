@@ -53,10 +53,12 @@ test("Google marketplace sign-in is exposed site-wide and reports configuration 
     assert.match(client, /google\.accounts\.id\.renderButton/);
     assert.match(client, /googleButtonZones/);
     assert.match(client, /fn-marketplace-account-change/);
+    assert.match(html, /id="accountEmailAction"/);
+    assert.match(client, /id="physicalEmailAuthForm"/);
+    assert.match(client, /id="physicalPassword"/);
+    assert.match(client, /action: emailAuthMode/);
     assert.doesNotMatch(html, /id="physicalLogoutButton"/);
     assert.doesNotMatch(html, /id="logoutBtn"/);
-    assert.doesNotMatch(client, /id="physicalAuthForm"/);
-    assert.doesNotMatch(client, /id="physicalPassword"/);
     assert.match(html, /url\("\/marketplace-hero\.webp"\)/);
     assert.match(html, /class="home-action" id="openRules"/);
     assert.match(html, /\.physical-head \.market-mode-switch[\s\S]*?width: 168px/);

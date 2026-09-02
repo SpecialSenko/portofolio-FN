@@ -4,8 +4,10 @@ import { fileURLToPath } from "node:url";
 
 const STORE_INDEX_KEY = "fraxb:marketplace:stores";
 const STORE_KEY_PREFIX = "fraxb:marketplace:store:";
+const BID_BUDGET_KEY_PREFIX = "fraxb:marketplace:bid-budget:";
 const MAX_STORES = 100;
 const MAX_LISTINGS = 100;
+export const MAX_BID_BUDGET_CENTS = 100_000_000;
 const STORAGE_TIMEOUT_MS = 4_000;
 const TESTER_ROLES = new Map([
   ["76561199181595673", "first"],
@@ -201,8 +203,11 @@ async function readLocalData() {
   try {
     const value = JSON.parse(await fs.readFile(localFilePath(), "utf8"));
     return value && typeof value === "object" && value.stores && typeof value.stores === "object"
-      ? value
-      : { stores: {} };
+      ? {
+          ...value,
+          bidBudgets: value.bidBudgets && typeof value.bidBudgets === "object" ? value.bidBudgets : {},
+        }
+      : { stores: {}, bidBudgets: {} };
   } catch (error) {
     if (error?.code === "ENOENT" || error instanceof SyntaxError) return { stores: {} };
     throw error;
@@ -262,6 +267,54 @@ async function putStore(store) {
 
 export function marketplaceStorageMode() {
   return storageMode();
+}
+
+function normalizeBidBudget(value) {
+  const amountCents = Number(value?.amountCents);
+  const updatedAt = Number(value?.updatedAt);
+  return {
+    amountCents: Number.isSafeInteger(amountCents) && amountCents >= 0 && amountCents <= MAX_BID_BUDGET_CENTS
+      ? amountCents
+      : 0,
+    updatedAt: Number.isFinite(updatedAt) ? updatedAt : null,
+  };
+}
+
+export async function getMarketplaceBidBudget(steamid) {
+  if (!/^\d{17}$/.test(String(steamid || ""))) return normalizeBidBudget(null);
+  const mode = storageMode();
+  if (mode === "disabled" || mode === "unavailable") throw new MarketplaceStorageUnavailableError();
+  if (mode === "redis") {
+    const raw = await redisCommand(["GET", `${BID_BUDGET_KEY_PREFIX}${steamid}`]);
+    try {
+      return normalizeBidBudget(JSON.parse(raw || "null"));
+    } catch {
+      return normalizeBidBudget(null);
+    }
+  }
+  const data = await readLocalData();
+  return normalizeBidBudget(data.bidBudgets?.[steamid]);
+}
+
+export async function saveMarketplaceBidBudget(steamid, amountCents) {
+  if (!/^\d{17}$/.test(String(steamid || ""))) throw new TypeError("Invalid Steam account");
+  if (!Number.isSafeInteger(amountCents) || amountCents < 0 || amountCents > MAX_BID_BUDGET_CENTS) {
+    throw new TypeError("Bid budget must be between $0 and $1,000,000.00");
+  }
+  const budget = normalizeBidBudget({ amountCents, updatedAt: Date.now() });
+  const mode = storageMode();
+  if (mode === "disabled" || mode === "unavailable") throw new MarketplaceStorageUnavailableError();
+  if (mode === "redis") {
+    await redisCommand(["SET", `${BID_BUDGET_KEY_PREFIX}${steamid}`, JSON.stringify(budget)]);
+    return budget;
+  }
+  return withLocalWrite(async () => {
+    const data = await readLocalData();
+    data.bidBudgets ||= {};
+    data.bidBudgets[steamid] = budget;
+    await writeLocalData(data);
+    return budget;
+  });
 }
 
 export async function listMarketplaceStores() {

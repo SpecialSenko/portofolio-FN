@@ -1,4 +1,5 @@
 import {
+  getMarketplaceBidBudget,
   MarketplaceBidError,
   MarketplaceStorageUnavailableError,
   placeMarketplaceBid,
@@ -71,6 +72,19 @@ export default async function handler(req, res) {
   try {
     const body = await readJsonBody(req);
     const bid = parseBid(body);
+    const budget = await getMarketplaceBidBudget(session.steamid);
+    if (budget.amountCents < 1) {
+      sendJson(res, 409, { error: "Set a bid budget before placing bids", code: "BUDGET_REQUIRED", budget });
+      return;
+    }
+    if (bid.amountCents > budget.amountCents) {
+      sendJson(res, 409, {
+        error: "This bid is higher than your saved bid budget",
+        code: "BUDGET_EXCEEDED",
+        budget,
+      });
+      return;
+    }
     const auction = await placeMarketplaceBid({ ...bid, bidder: session });
     sendJson(res, 200, {
       sellerSteamId: bid.sellerSteamId,

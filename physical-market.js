@@ -17,6 +17,7 @@ let account = null;
 let paymentsConfigured = false;
 let googleClientId = "";
 let googleLibraryPromise = null;
+let emailAuthMode = "login";
 let steamAccountState = window.fnSteamAccountState || { loggedIn: false, steamid: "" };
 let steamLinkRequest = "";
 let listings = [];
@@ -136,6 +137,27 @@ function normalizeListing(value) {
 function installDialogs() {
   const host = document.createElement("div");
   host.innerHTML = `
+    <div class="bid-modal" id="physicalEmailAuthModal" role="dialog" aria-modal="true" aria-labelledby="physicalEmailAuthTitle" hidden>
+      <section class="bid-dialog physical-modal">
+        <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalEmailAuthTitle">Continue with email</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalEmailAuthModal" type="button" title="Close" aria-label="Close email sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+        <form class="bid-dialog-body physical-form-grid" id="physicalEmailAuthForm">
+          <div class="email-auth-tabs is-wide" role="tablist" aria-label="Email account action">
+            <button class="email-auth-tab is-active" type="button" role="tab" aria-selected="true" data-email-auth-mode="login">Sign in</button>
+            <button class="email-auth-tab" type="button" role="tab" aria-selected="false" data-email-auth-mode="register">Create account</button>
+          </div>
+          <label class="physical-field is-wide"><span>Email</span><input class="physical-input" id="physicalEmail" name="email" type="email" autocomplete="email" maxlength="254" required></label>
+          <label class="physical-field is-wide"><span>Password</span><input class="physical-input" id="physicalPassword" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required></label>
+          <div class="physical-form-grid is-wide" id="physicalEmailRegistration" hidden>
+            <label class="physical-field"><span>Your name</span><input class="physical-input" id="physicalRegisterName" maxlength="80"></label>
+            <label class="physical-field"><span>Store name</span><input class="physical-input" id="physicalRegisterStore" maxlength="100"></label>
+            <label class="physical-field is-wide"><span>City</span><input class="physical-input" id="physicalRegisterCity" maxlength="80"></label>
+          </div>
+          <p class="account-dialog-note is-wide">This is a separate Fraxb email account. Google passwords are never accepted here.</p>
+          <p class="bid-error is-wide" id="physicalEmailAuthError" role="alert" hidden></p>
+          <div class="bid-dialog-actions is-wide"><button class="bid-cancel" data-close-physical="physicalEmailAuthModal" type="button">Cancel</button><button class="bid-submit" id="physicalEmailAuthSubmit" type="submit">Sign in</button></div>
+        </form>
+      </section>
+    </div>
     <div class="bid-modal" id="physicalProfileModal" role="dialog" aria-modal="true" aria-labelledby="physicalProfileTitle" hidden>
       <section class="bid-dialog physical-modal">
         <header class="bid-dialog-header"><h2 class="bid-dialog-title" id="physicalProfileTitle">Store settings</h2><button class="icon-button bid-dialog-close" data-close-physical="physicalProfileModal" type="button" title="Close" aria-label="Close store settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
@@ -222,6 +244,7 @@ function renderAccount() {
         id: account.id,
         displayName: account.displayName,
         storeName: account.storeName,
+        email: account.email,
         signInMethod: account.signInMethod,
         steamid: account.steamid || "",
       } : null,
@@ -599,7 +622,7 @@ async function renderGoogleButtons() {
   zones.forEach((zone) => zone.replaceChildren());
   if (account) return;
   if (!googleClientId) {
-    showGoogleStatus("Google setup required");
+    showGoogleStatus("Google Client ID required");
     return;
   }
   try {
@@ -634,7 +657,67 @@ async function handleGoogleCredential(response) {
   }
 }
 
+function setEmailAuthMode(mode) {
+  emailAuthMode = mode === "register" ? "register" : "login";
+  const registration = element("physicalEmailRegistration");
+  const isRegistration = emailAuthMode === "register";
+  registration.hidden = !isRegistration;
+  ["physicalRegisterName", "physicalRegisterStore", "physicalRegisterCity"].forEach((id) => {
+    element(id).required = isRegistration;
+  });
+  const passwordInput = element("physicalPassword");
+  passwordInput.autocomplete = isRegistration ? "new-password" : "current-password";
+  element("physicalEmailAuthTitle").textContent = isRegistration ? "Create email account" : "Sign in with email";
+  element("physicalEmailAuthSubmit").textContent = isRegistration ? "Create account" : "Sign in";
+  document.querySelectorAll("[data-email-auth-mode]").forEach((button) => {
+    const active = button.dataset.emailAuthMode === emailAuthMode;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+}
+
+function openEmailAuth() {
+  const form = element("physicalEmailAuthForm");
+  form.reset();
+  element("physicalEmailAuthError").hidden = true;
+  setEmailAuthMode("login");
+  openModal(element("physicalEmailAuthModal"));
+}
+
+async function submitEmailAuth(event) {
+  event.preventDefault();
+  const submit = element("physicalEmailAuthSubmit");
+  const error = element("physicalEmailAuthError");
+  submit.disabled = true;
+  error.hidden = true;
+  try {
+    const body = {
+      action: emailAuthMode,
+      email: element("physicalEmail").value,
+      password: element("physicalPassword").value,
+    };
+    if (emailAuthMode === "register") {
+      body.displayName = element("physicalRegisterName").value;
+      body.storeName = element("physicalRegisterStore").value;
+      body.city = element("physicalRegisterCity").value;
+    }
+    const data = await fetchJson("/api/physical/auth", { method: "POST", body: JSON.stringify(body) });
+    account = data.account;
+    paymentsConfigured = Boolean(data.paymentsConfigured);
+    closeModal(element("physicalEmailAuthModal"));
+    renderAccount();
+    renderListings();
+    void maybeLinkSteamAccount();
+  } catch (failure) {
+    error.textContent = failure.message || "Email sign in failed";
+    error.hidden = false;
+  } finally {
+    submit.disabled = false;
+  }
+}
+
 function bindEvents() {
+  window.addEventListener("fn-open-email-auth", openEmailAuth);
   window.addEventListener("fn-physical-market-open", () => {
     searchQuery = document.querySelector(".search")?.value || "";
     if (!listings.length) void loadListings();
@@ -663,6 +746,8 @@ function bindEvents() {
     void maybeLinkSteamAccount();
   });
   document.querySelectorAll("[data-close-physical]").forEach((button) => button.addEventListener("click", () => closeModal(element(button.dataset.closePhysical))));
+  document.querySelectorAll("[data-email-auth-mode]").forEach((button) => button.addEventListener("click", () => setEmailAuthMode(button.dataset.emailAuthMode)));
+  element("physicalEmailAuthForm").addEventListener("submit", submitEmailAuth);
   document.querySelectorAll(".bid-modal").forEach((modal) => modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(modal); }));
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeModal(document.querySelector(".bid-modal:not([hidden])"));

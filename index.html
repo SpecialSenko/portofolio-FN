@@ -312,6 +312,16 @@
   }
   .combined-google-mark[hidden] { display: none; }
   .topbar .steam-connect { margin-left: 0; }
+  .topbar-budget {
+    margin-left: auto;
+    max-width: 170px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .topbar-budget svg { width: 15px; height: 15px; flex: 0 0 15px; }
+  .topbar-budget-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .steam-connect {
     min-width: 112px;
     max-width: min(230px, 28vw);
@@ -2354,7 +2364,32 @@
   .account-provider-name { margin: 0; font-size: 11px; font-weight: 800; }
   .account-provider-status { margin: 2px 0 0; color: var(--muted); font-size: 10px; line-height: 1.35; }
   .account-provider-action { margin-left: 0; border: 1px solid var(--border); }
+  .account-provider-action[hidden] { display: none; }
   .account-dialog-note { margin: 2px 0 0; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
+  .google-brand-mark { border: 0; background: #fff; }
+  .google-brand-mark svg { width: 20px; height: 20px; }
+  .email-auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel);
+  }
+  .email-auth-tab {
+    min-height: 30px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .email-auth-tab.is-active { background: var(--nav-active-bg); color: var(--text); }
+  .budget-note { margin: 0; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
   .inv-price:hover,
   .inv-price:focus-visible { border-color: var(--nav-hover-border); color: var(--accent); }
   .inv-price.is-unpriced { color: #f6c85f; }
@@ -2727,6 +2762,7 @@
     .topbar h1 { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
     .search { min-width: 120px; max-width: 280px; }
     .topbar-cart { padding-inline: 8px; }
+    .topbar-budget { max-width: 135px; padding-inline: 8px; }
     .ad-rail { padding: 14px 10px 20px 0; }
     .ad-rail-inner { padding: 8px; }
     .global-result-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
@@ -2799,17 +2835,16 @@
       padding: 14px 16px;
       gap: 10px;
     }
-    .topbar h1 {
-      width: calc(100% - 48px);
-    }
+    .topbar h1 { width: auto; flex: 1 1 100px; }
     .search {
-      order: 3;
+      order: 4;
       flex-basis: 100%;
       max-width: none;
     }
     .steam-btn {
       margin-left: 0;
     }
+    .topbar-budget { margin-left: 0; max-width: 112px; }
     .content {
       padding: 16px 14px 28px;
     }
@@ -2939,6 +2974,10 @@
     <header class="topbar">
       <h1 id="pageTitle">Fraxb</h1>
       <input class="search" type="search" maxlength="120" autocomplete="off" placeholder="Search marketplace..." aria-label="Search marketplace" />
+      <button class="back-btn topbar-budget" id="bidBudgetButton" type="button" aria-label="Manage bid budget">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h15a2 2 0 0 1 2 2v9H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h13v3"/><path d="M16 12h5v4h-5a2 2 0 1 1 0-4Z"/></svg>
+        <span class="topbar-budget-value" id="bidBudgetLabel">Bid budget</span>
+      </button>
       <button class="back-btn physical-cart-trigger topbar-cart" id="physicalCartButton" type="button" aria-label="Open physical cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L20.5 8H6.1"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg>
         Cart <span class="physical-cart-count" id="physicalCartCount" hidden>0</span>
@@ -3410,15 +3449,27 @@
         <button class="steam-btn account-provider-action" id="accountSteamConnect" type="button">Connect Steam</button>
       </div>
       <div class="account-provider-row">
-        <span class="account-provider-icon google-mark" aria-hidden="true">G</span>
+        <span class="account-provider-icon google-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path fill="#4285f4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"/><path fill="#34a853" d="M12 22c2.7 0 4.97-.9 6.62-2.43l-3.24-2.54c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z"/><path fill="#fbbc05" d="M6.39 13.86A6 6 0 0 1 6.07 12c0-.65.11-1.27.32-1.86V7.52H3.04A10 10 0 0 0 2 12c0 1.61.38 3.14 1.04 4.48l3.35-2.62Z"/><path fill="#ea4335" d="M12 6.01c1.47 0 2.78.5 3.82 1.49l2.87-2.87A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.96 5.52l3.35 2.62C7.18 7.77 9.39 6.01 12 6.01Z"/></svg>
+        </span>
         <div>
           <p class="account-provider-name">Google</p>
-          <p class="account-provider-status" id="accountGoogleStatus">Not connected</p>
+          <p class="account-provider-status" id="accountGoogleStatus">Official Google sign-in</p>
         </div>
         <div class="google-button-host" id="accountGoogleButton" aria-label="Sign in with Google"></div>
         <button class="settings-action account-provider-action" id="accountGoogleSettings" type="button" hidden>Store settings</button>
       </div>
-      <p class="account-dialog-note">Steam verifies inventory ownership. Google verifies the email used for local seller tools. Fraxb never asks for either account password.</p>
+      <div class="account-provider-row">
+        <span class="account-provider-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        </span>
+        <div>
+          <p class="account-provider-name">Email</p>
+          <p class="account-provider-status" id="accountEmailStatus">Separate email account</p>
+        </div>
+        <button class="settings-action account-provider-action" id="accountEmailAction" type="button">Continue with email</button>
+      </div>
+      <p class="account-dialog-note">Steam verifies digital inventory. Google uses Google's official sign-in, while email and password remain a separate Fraxb seller account. One logout signs out every connected Fraxb session.</p>
     </div>
   </section>
 </div>
@@ -3530,6 +3581,30 @@
   </section>
 </div>
 
+<div class="bid-modal" id="bidBudgetModal" role="dialog" aria-modal="true" aria-labelledby="bidBudgetTitle" hidden>
+  <section class="bid-dialog">
+    <header class="bid-dialog-header">
+      <h2 class="bid-dialog-title" id="bidBudgetTitle">Bid budget</h2>
+      <button class="icon-button bid-dialog-close" id="closeBidBudget" type="button" title="Close bid budget" aria-label="Close bid budget">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <form class="bid-dialog-body" id="bidBudgetForm">
+      <label class="bid-field-label" for="bidBudgetAmount">Maximum bid per item</label>
+      <div class="bid-input-wrap">
+        <span class="bid-input-prefix" id="bidBudgetCurrency">USD</span>
+        <input class="bid-input" id="bidBudgetAmount" name="bidBudgetAmount" type="number" inputmode="decimal" min="0" step="0.01" required>
+      </div>
+      <p class="budget-note">This cap prevents bids above the amount you choose. It is not a wallet balance, payment authorization, or money held by Fraxb.</p>
+      <p class="bid-error" id="bidBudgetError" role="alert" hidden></p>
+      <div class="bid-dialog-actions">
+        <button class="bid-cancel" id="cancelBidBudget" type="button">Cancel</button>
+        <button class="bid-submit" id="saveBidBudget" type="submit">Save budget</button>
+      </div>
+    </form>
+  </section>
+</div>
+
 <div class="bid-modal" id="bidModal" role="dialog" aria-modal="true" aria-labelledby="bidDialogTitle" hidden>
   <section class="bid-dialog">
     <header class="bid-dialog-header">
@@ -3559,6 +3634,7 @@
         <input class="bid-input" id="bidAmount" name="bidAmount" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" required>
       </div>
       <p class="bid-minimum" id="bidMinimum"></p>
+      <p class="bid-minimum" id="bidBudgetHint"></p>
       <p class="bid-error" id="bidError" role="alert" hidden></p>
       <div class="bid-dialog-actions">
         <button class="bid-cancel" id="cancelBid" type="button" data-i18n="common.cancel">Cancel</button>
@@ -4300,30 +4376,156 @@
   const accountModal = document.getElementById("accountModal");
   const accountSteamConnect = document.getElementById("accountSteamConnect");
   const unifiedAccountAction = document.getElementById("unifiedAccountAction");
+  const bidBudgetButton = document.getElementById("bidBudgetButton");
+  const bidBudgetLabel = document.getElementById("bidBudgetLabel");
+  const bidBudgetModal = document.getElementById("bidBudgetModal");
+  const bidBudgetForm = document.getElementById("bidBudgetForm");
+  const bidBudgetAmount = document.getElementById("bidBudgetAmount");
+  const bidBudgetError = document.getElementById("bidBudgetError");
   let steamLoggedIn = false;
-  let googleAccountState = null;
+  let marketplaceAccountState = null;
+  let bidBudgetCents = 0;
+  let bidBudgetLoaded = false;
+  let bidBudgetReturnFocus = null;
   let accountReturnFocus = null;
 
+  function updateBidBudgetButton() {
+    if (!bidBudgetLabel || !bidBudgetButton) return;
+    if (!steamLoggedIn) bidBudgetLabel.textContent = "Bid budget";
+    else if (!bidBudgetLoaded) bidBudgetLabel.textContent = "Loading...";
+    else bidBudgetLabel.textContent = bidBudgetCents > 0 ? formatPrice(bidBudgetCents / 100) : "Set budget";
+    bidBudgetButton.title = bidBudgetCents > 0
+      ? `Maximum bid per item: ${formatPrice(bidBudgetCents / 100)}`
+      : "Set your maximum bid per item";
+  }
+
+  async function loadBidBudget() {
+    if (!steamLoggedIn) {
+      bidBudgetCents = 0;
+      bidBudgetLoaded = false;
+      updateBidBudgetButton();
+      return;
+    }
+    bidBudgetLoaded = false;
+    updateBidBudgetButton();
+    try {
+      const response = await fetch("/api/marketplace/budget", {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Bid budget is unavailable");
+      bidBudgetCents = Math.max(0, Number.parseInt(data.budget?.amountCents || "0", 10) || 0);
+      bidBudgetLoaded = true;
+    } catch {
+      bidBudgetCents = 0;
+      bidBudgetLoaded = false;
+    }
+    updateBidBudgetButton();
+  }
+
+  function fillBidBudgetInput() {
+    const rate = currencies[currentCurrency]?.rate || 1;
+    const converted = (bidBudgetCents / 100) * rate;
+    document.getElementById("bidBudgetCurrency").textContent = currentCurrency;
+    bidBudgetAmount.step = ["IDR", "JPY", "KRW"].includes(currentCurrency) ? "1" : "0.01";
+    bidBudgetAmount.max = String(1_000_000 * rate);
+    bidBudgetAmount.value = bidBudgetCents > 0
+      ? converted.toFixed(["IDR", "JPY", "KRW"].includes(currentCurrency) ? 0 : 2)
+      : "";
+  }
+
+  function openBidBudgetModal() {
+    if (!steamLoggedIn) {
+      window.location.href = "/api/auth/steam/login";
+      return;
+    }
+    bidBudgetReturnFocus = document.activeElement;
+    bidBudgetError.hidden = true;
+    fillBidBudgetInput();
+    bidBudgetModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => bidBudgetAmount.focus());
+  }
+
+  function closeBidBudgetModal() {
+    if (bidBudgetModal.hidden) return;
+    bidBudgetModal.hidden = true;
+    document.body.style.overflow = "";
+    if (bidBudgetReturnFocus instanceof HTMLElement && bidBudgetReturnFocus.isConnected) bidBudgetReturnFocus.focus();
+    bidBudgetReturnFocus = null;
+  }
+
+  async function saveBidBudget(event) {
+    event.preventDefault();
+    const rate = currencies[currentCurrency]?.rate || 1;
+    const amountCents = Math.round((Number(bidBudgetAmount.value) / rate) * 100);
+    if (!Number.isSafeInteger(amountCents) || amountCents < 0 || amountCents > 100_000_000) {
+      bidBudgetError.textContent = "Enter a budget between $0 and $1,000,000 USD.";
+      bidBudgetError.hidden = false;
+      return;
+    }
+    const saveButton = document.getElementById("saveBidBudget");
+    saveButton.disabled = true;
+    bidBudgetError.hidden = true;
+    try {
+      const response = await fetch("/api/marketplace/budget", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ amountCents }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        closeBidBudgetModal();
+        window.location.href = "/api/auth/steam/login";
+        return;
+      }
+      if (!response.ok) throw new Error(data.error || "Bid budget could not be saved");
+      bidBudgetCents = Math.max(0, Number.parseInt(data.budget?.amountCents || "0", 10) || 0);
+      bidBudgetLoaded = true;
+      updateBidBudgetButton();
+      if (!document.getElementById("bidModal").hidden) updateBidDialogValues();
+      closeBidBudgetModal();
+    } catch (error) {
+      bidBudgetError.textContent = error?.message || "Bid budget could not be saved";
+      bidBudgetError.hidden = false;
+    } finally {
+      saveButton.disabled = false;
+    }
+  }
+
   function updateUnifiedAccount() {
-    const connected = steamLoggedIn || Boolean(googleAccountState);
-    const accountName = steamUser?.name || googleAccountState?.displayName || "Account";
+    const connected = steamLoggedIn || Boolean(marketplaceAccountState);
+    const accountName = steamUser?.name || marketplaceAccountState?.displayName || "Account";
     const steamStatus = document.getElementById("accountSteamStatus");
     const googleStatus = document.getElementById("accountGoogleStatus");
     const googleSettings = document.getElementById("accountGoogleSettings");
+    const emailStatus = document.getElementById("accountEmailStatus");
+    const emailAction = document.getElementById("accountEmailAction");
     const settingsStatus = document.getElementById("unifiedAccountStatus");
     const connectedServices = [];
+    const googleConnected = marketplaceAccountState?.signInMethod === "google";
+    const emailConnected = marketplaceAccountState?.signInMethod === "password";
+    const sellerIdentity = marketplaceAccountState?.email || marketplaceAccountState?.displayName || "seller account";
 
     if (steamLoggedIn) connectedServices.push(`Steam as ${steamUser?.name || "Steam User"}`);
-    if (googleAccountState) connectedServices.push(`Google as ${googleAccountState.displayName || "Google user"}`);
+    if (googleConnected) connectedServices.push(`Google as ${sellerIdentity}`);
+    if (emailConnected) connectedServices.push(`Email as ${sellerIdentity}`);
     if (steamStatus) steamStatus.textContent = steamLoggedIn ? `Connected as ${steamUser?.name || "Steam User"}` : "Not connected";
-    if (googleStatus) googleStatus.textContent = googleAccountState ? `Connected as ${googleAccountState.displayName || "Google user"}` : "Not connected";
+    if (googleStatus) googleStatus.textContent = googleConnected ? `Connected as ${sellerIdentity}` : "Official Google sign-in";
+    if (emailStatus) emailStatus.textContent = emailConnected ? `Connected as ${sellerIdentity}` : "Separate email account";
     if (settingsStatus) settingsStatus.textContent = connectedServices.length ? connectedServices.join(" and ") : "Not signed in";
     if (unifiedAccountAction) unifiedAccountAction.textContent = connected ? "Log out all" : "Sign in";
     if (accountSteamConnect) {
       accountSteamConnect.textContent = steamLoggedIn ? "Connected" : "Connect Steam";
       accountSteamConnect.disabled = steamLoggedIn;
     }
-    if (googleSettings) googleSettings.hidden = !googleAccountState;
+    if (googleSettings) googleSettings.hidden = !googleConnected;
+    if (emailAction) {
+      emailAction.hidden = Boolean(marketplaceAccountState) && !emailConnected;
+      emailAction.textContent = emailConnected ? "Store settings" : "Continue with email";
+    }
 
     const connectIcon = document.getElementById("steamConnectIcon");
     const connectAvatar = document.getElementById("steamConnectAvatar");
@@ -4357,6 +4559,10 @@
 
   function setSteamButton(loggedIn, name = "Steam User", avatar = "") {
     steamLoggedIn = loggedIn;
+    if (!loggedIn) {
+      bidBudgetCents = 0;
+      bidBudgetLoaded = false;
+    }
     const privateNavItems = document.querySelectorAll(
       '[data-nav][data-page="inventory"], [data-nav][data-page="trades"]',
     );
@@ -4376,6 +4582,7 @@
     window.dispatchEvent(new CustomEvent("fn-steam-account-change", { detail: window.fnSteamAccountState }));
     if (connectBtn) connectBtn.hidden = false;
     updateUnifiedAccount();
+    updateBidBudgetButton();
   }
 
   async function refreshSteamAuth() {
@@ -4415,6 +4622,7 @@
           avatar: data.avatar || "",
         };
         setSteamButton(true, data.name || "Steam User", data.avatar || "");
+        await loadBidBudget();
         await loadMarketplaceStores({ hydrateOwnStore: true });
         renderGameSelector();
         renderTrades();
@@ -4434,6 +4642,11 @@
   }
 
   connectBtn?.addEventListener("click", openAccountModal);
+  bidBudgetButton.addEventListener("click", openBidBudgetModal);
+  bidBudgetForm.addEventListener("submit", saveBidBudget);
+  document.getElementById("closeBidBudget").addEventListener("click", closeBidBudgetModal);
+  document.getElementById("cancelBidBudget").addEventListener("click", closeBidBudgetModal);
+  bidBudgetModal.addEventListener("click", (event) => { if (event.target === bidBudgetModal) closeBidBudgetModal(); });
   document.getElementById("closeAccountModal").addEventListener("click", closeAccountModal);
   accountModal.addEventListener("click", (event) => { if (event.target === accountModal) closeAccountModal(); });
   accountSteamConnect.addEventListener("click", () => { window.location.href = "/api/auth/steam/login"; });
@@ -4441,20 +4654,28 @@
     closeAccountModal();
     window.dispatchEvent(new CustomEvent("fn-open-physical-profile"));
   });
+  document.getElementById("accountEmailAction").addEventListener("click", () => {
+    closeAccountModal();
+    if (marketplaceAccountState?.signInMethod === "password") {
+      window.dispatchEvent(new CustomEvent("fn-open-physical-profile"));
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("fn-open-email-auth"));
+  });
   window.addEventListener("fn-marketplace-account-change", (event) => {
-    googleAccountState = event.detail?.loggedIn ? event.detail.account : null;
+    marketplaceAccountState = event.detail?.loggedIn ? event.detail.account : null;
     updateUnifiedAccount();
     renderSellers();
   });
 
   async function logoutAllAccounts() {
-    if (!confirm("Log out of Steam and Google on Fraxb?")) return;
+    if (!confirm("Log out of every connected Fraxb account?")) return;
     unifiedAccountAction.disabled = true;
     await Promise.allSettled([
       fetch("/api/auth/me", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json" } }),
       fetch("/api/physical/auth", { method: "POST", credentials: "same-origin", headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ action: "logout" }) }),
     ]);
-    googleAccountState = null;
+    marketplaceAccountState = null;
     setSteamButton(false);
     clearSteamAccountState();
     window.dispatchEvent(new CustomEvent("fn-marketplace-logout-all"));
@@ -4464,7 +4685,7 @@
   }
 
   unifiedAccountAction.addEventListener("click", () => {
-    if (steamLoggedIn || googleAccountState) void logoutAllAccounts();
+    if (steamLoggedIn || marketplaceAccountState) void logoutAllAccounts();
     else openAccountModal();
   });
   window.addEventListener("keydown", (event) => {
@@ -4855,6 +5076,12 @@
     bidAmountInput.min = minimumUsd;
     bidAmountInput.value = minimumUsd;
     document.getElementById("bidMinimum").textContent = `Minimum bid: $${minimumUsd}`;
+    const budgetHint = document.getElementById("bidBudgetHint");
+    if (!bidBudgetLoaded) budgetHint.textContent = "Bid budget is unavailable. Open the budget control beside Cart.";
+    else if (bidBudgetCents < 1) budgetHint.textContent = "Set a bid budget before placing a bid.";
+    else budgetHint.textContent = `Your maximum bid: ${formatPrice(bidBudgetCents / 100)}`;
+    bidAmountInput.max = bidBudgetCents > 0 ? (bidBudgetCents / 100).toFixed(2) : "0";
+    submitBidButton.disabled = !bidBudgetLoaded || bidBudgetCents < minimumCents;
   }
 
   function openBidModal(item, seller) {
@@ -4911,6 +5138,16 @@
       bidError.hidden = false;
       return;
     }
+    if (!bidBudgetLoaded || bidBudgetCents < 1) {
+      bidError.textContent = "Set your bid budget using the amount beside Cart first.";
+      bidError.hidden = false;
+      return;
+    }
+    if (amountCents > bidBudgetCents) {
+      bidError.textContent = `This is above your ${formatPrice(bidBudgetCents / 100)} bid budget.`;
+      bidError.hidden = false;
+      return;
+    }
 
     const sellerSteamId = activeBidSeller.steamid;
     const assetid = activeBidItem.assetid;
@@ -4934,6 +5171,12 @@
         return;
       }
       if (!response.ok) {
+        if (["BUDGET_REQUIRED", "BUDGET_EXCEEDED"].includes(data.code)) {
+          bidBudgetCents = Math.max(0, Number.parseInt(data.budget?.amountCents || "0", 10) || 0);
+          bidBudgetLoaded = true;
+          updateBidBudgetButton();
+          updateBidDialogValues();
+        }
         if (data.code === "BID_TOO_LOW" && Number.isFinite(data.currentBidCents)) {
           const minimumUsd = ((data.currentBidCents + 1) / 100).toFixed(2);
           document.getElementById("bidCurrentValue").textContent = formatPrice(data.currentBidCents / 100);
@@ -4952,7 +5195,10 @@
       }
     } finally {
       bidSubmitting = false;
-      submitBidButton.disabled = false;
+      const minimumCents = activeBidItem
+        ? Math.max(normalizeAuction(activeBidItem.auction).currentBidCents + 1, normalizePriceCents(activeBidItem.priceCents) || 1)
+        : 1;
+      submitBidButton.disabled = !bidBudgetLoaded || bidBudgetCents < minimumCents;
       submitBidButton.textContent = "Place bid";
     }
   }
@@ -5308,7 +5554,7 @@
       profile.physicalSeller = seller;
       profile.physicalListed = seller.listed;
       profile.listed = profile.digitalListed + seller.listed;
-      profile.isCurrentUser ||= seller.id === googleAccountState?.id
+      profile.isCurrentUser ||= seller.id === marketplaceAccountState?.id
         || (seller.steamid && seller.steamid === steamUser?.steamid);
     });
     return profiles;
@@ -5519,7 +5765,7 @@
       .filter((seller) => seller.isCurrentUser)
       .flatMap((seller) => seller.items.map((item) => ({ kind: "digital", seller, item })));
     const physical = physicalDiscoveryListings
-      .filter((listing) => listing.seller.id === googleAccountState?.id || (listing.seller.steamid && listing.seller.steamid === steamUser?.steamid))
+      .filter((listing) => listing.seller.id === marketplaceAccountState?.id || (listing.seller.steamid && listing.seller.steamid === steamUser?.steamid))
       .map((listing) => ({ kind: "physical", listing }));
     return interleaveListings(digital, physical);
   }
@@ -6476,6 +6722,9 @@
     renderGlobalDiscovery();
     renderTrades();
     renderInventory();
+    updateBidBudgetButton();
+    if (!bidBudgetModal.hidden) fillBidBudgetInput();
+    if (!bidModal.hidden) updateBidDialogValues();
   });
 
   async function loadCurrencyRates() {
@@ -6494,6 +6743,8 @@
       renderGlobalDiscovery();
       renderTrades();
       renderInventory();
+      updateBidBudgetButton();
+      if (!bidBudgetModal.hidden) fillBidBudgetInput();
     } catch {
       status.textContent = "Reference rates temporarily unavailable";
     }
