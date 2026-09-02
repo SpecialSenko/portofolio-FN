@@ -228,13 +228,13 @@ function closeModal(modal) {
 }
 
 function renderAccount() {
-  const band = element("physicalAccountBand");
   const addButton = element("addPhysicalListing");
   const accountButton = element("physicalAccountButton");
+  const supporterButton = element("openSupporterPlans");
   const accountGoogleButton = element("accountGoogleButton");
-  band.hidden = !account || Boolean(storeScope);
   addButton.hidden = !account || Boolean(storeScope);
   accountButton.hidden = !account || Boolean(storeScope);
+  supporterButton.hidden = !account || Boolean(storeScope);
   accountButton.textContent = "Store settings";
   if (accountGoogleButton) accountGoogleButton.hidden = Boolean(account);
   window.dispatchEvent(new CustomEvent("fn-marketplace-account-change", {
@@ -250,14 +250,6 @@ function renderAccount() {
       } : null,
     },
   }));
-  if (!account) return;
-  element("physicalStoreName").textContent = account.storeName;
-  element("physicalStoreMeta").textContent = [account.city, account.description].filter(Boolean).join(" - ") || account.email;
-  const badges = element("physicalAccountBadges");
-  badges.replaceChildren();
-  if (account.isVerified) badges.appendChild(badge("Verified business", "is-verified"));
-  if (account.isSupporter) badges.appendChild(badge("Supporter", "is-supporter"));
-  if (account.signInMethod === "google") badges.appendChild(badge("Google account"));
 }
 
 function listingCard(listing) {

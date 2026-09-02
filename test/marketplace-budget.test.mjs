@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { createSessionCookie } from "../api/_lib/session.js";
-import budgetHandler from "../api/marketplace/budget.js";
+import budgetHandler from "../api/marketplace/bids.js";
 
 process.env.SESSION_SECRET = "marketplace-budget-test-secret-with-enough-entropy";
 
@@ -25,7 +25,7 @@ function sessionCookie(steamid = "76561198000000041") {
 }
 
 async function invoke({ method = "GET", cookie = "", body } = {}) {
-  const req = { method, url: "/api/marketplace/budget", headers: { cookie }, body };
+  const req = { method, url: "/api/marketplace/bids", headers: { cookie }, body };
   const res = responseRecorder();
   await budgetHandler(req, res);
   return { status: res.statusCode, headers: res.headers, body: JSON.parse(res.body) };

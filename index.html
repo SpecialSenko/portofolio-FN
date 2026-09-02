@@ -992,7 +992,7 @@
   .physical-head .market-mode-switch {
     width: 168px;
   }
-  .physical-store-directory { margin-top: 24px; }
+  .physical-store-directory { margin: 0 0 22px; }
   .physical-store-directory .seller-grid { margin-top: 10px; }
   .physical-head-controls {
     display: flex;
@@ -3139,22 +3139,19 @@
               <button class="market-mode-button active" type="button" data-market-mode="physical" data-i18n="market.physicalShort">Physical</button>
             </div>
             <div class="physical-actions">
+              <button class="back-btn" id="openSupporterPlans" type="button" hidden>Supporter plans</button>
               <button class="back-btn" id="physicalAccountButton" type="button" hidden>Store settings</button>
               <button class="physical-primary" id="addPhysicalListing" type="button" hidden>Add listing</button>
             </div>
           </div>
         </div>
-        <div class="physical-account-band" id="physicalAccountBand" hidden>
-          <span class="physical-account-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10h16v10H4V10Z"/><path d="M3 10 5 4h14l2 6M8 20v-6h4v6"/></svg>
-          </span>
-          <div class="physical-account-copy">
-            <p class="physical-account-name" id="physicalStoreName">Your local store</p>
-            <p class="physical-account-meta" id="physicalStoreMeta"></p>
+        <section class="physical-store-directory" aria-labelledby="physicalStoresTitle">
+          <div class="global-discovery-head">
+            <h3 class="global-discovery-title" id="physicalStoresTitle">Seller profiles</h3>
+            <span class="global-discovery-count" id="physicalSellerCopy">Loading stores...</span>
           </div>
-          <div class="physical-badges" id="physicalAccountBadges"></div>
-          <button class="back-btn" id="openSupporterPlans" type="button">Supporter plans</button>
-        </div>
+          <div class="seller-grid" id="physicalSellerGrid"></div>
+        </section>
         <div class="cat-tabs" id="physicalCategories" aria-label="Local product categories">
           <button class="cat-tab active" type="button" data-physical-cat="all">All</button>
           <button class="cat-tab" type="button" data-physical-cat="food">Food</button>
@@ -3166,13 +3163,6 @@
         </div>
         <p class="page-copy" id="physicalMarketStatus">Loading local listings...</p>
         <div class="physical-grid" id="physicalGrid"></div>
-        <section class="physical-store-directory" aria-labelledby="physicalStoresTitle">
-          <div class="global-discovery-head">
-            <h3 class="global-discovery-title" id="physicalStoresTitle">Seller profiles</h3>
-            <span class="global-discovery-count" id="physicalSellerCopy">Loading stores...</span>
-          </div>
-          <div class="seller-grid" id="physicalSellerGrid"></div>
-        </section>
       </section>
 
       <section class="page blog-page" data-page="blog" hidden>
@@ -4409,7 +4399,7 @@
     bidBudgetLoaded = false;
     updateBidBudgetButton();
     try {
-      const response = await fetch("/api/marketplace/budget", {
+      const response = await fetch("/api/marketplace/bids", {
         credentials: "same-origin",
         headers: { Accept: "application/json" },
       });
@@ -4469,7 +4459,7 @@
     saveButton.disabled = true;
     bidBudgetError.hidden = true;
     try {
-      const response = await fetch("/api/marketplace/budget", {
+      const response = await fetch("/api/marketplace/bids", {
         method: "PUT",
         credentials: "same-origin",
         headers: { Accept: "application/json", "Content-Type": "application/json" },

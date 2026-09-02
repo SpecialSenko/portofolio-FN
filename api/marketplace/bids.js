@@ -1,8 +1,10 @@
 import {
   getMarketplaceBidBudget,
+  MAX_BID_BUDGET_CENTS,
   MarketplaceBidError,
   MarketplaceStorageUnavailableError,
   placeMarketplaceBid,
+  saveMarketplaceBidBudget,
 } from "../_lib/marketplace-store.js";
 import { readSession } from "../_lib/session.js";
 
@@ -58,18 +60,38 @@ function parseBid(body) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    sendJson(res, 405, { error: "Method not allowed" }, { Allow: "POST" });
-    return;
-  }
-
   const session = readSession(req.headers.cookie || null);
   if (!session) {
-    sendJson(res, 401, { error: "Connect Steam to place a bid", code: "AUTH_REQUIRED" });
+    sendJson(res, 401, {
+      error: req.method === "POST" ? "Connect Steam to place a bid" : "Connect Steam to manage your bid budget",
+      code: "AUTH_REQUIRED",
+    });
     return;
   }
 
   try {
+    if (req.method === "GET") {
+      sendJson(res, 200, { budget: await getMarketplaceBidBudget(session.steamid) });
+      return;
+    }
+    if (req.method === "PUT") {
+      const body = await readJsonBody(req);
+      if (body?.steamid !== undefined) {
+        sendJson(res, 400, { error: "Budget account is selected from the signed session", code: "SESSION_ACCOUNT_ONLY" });
+        return;
+      }
+      const amountCents = Number(body?.amountCents);
+      if (!Number.isSafeInteger(amountCents) || amountCents < 0 || amountCents > MAX_BID_BUDGET_CENTS) {
+        sendJson(res, 400, { error: "Bid budget must be between $0 and $1,000,000.00", code: "INVALID_BUDGET" });
+        return;
+      }
+      sendJson(res, 200, { budget: await saveMarketplaceBidBudget(session.steamid, amountCents) });
+      return;
+    }
+    if (req.method !== "POST") {
+      sendJson(res, 405, { error: "Method not allowed" }, { Allow: "GET, POST, PUT" });
+      return;
+    }
     const body = await readJsonBody(req);
     const bid = parseBid(body);
     const budget = await getMarketplaceBidBudget(session.steamid);
@@ -100,7 +122,7 @@ export default async function handler(req, res) {
       sendJson(res, 413, { error: error.message, code: "BODY_TOO_LARGE" });
       return;
     }
-    if (["SESSION_ACCOUNT_ONLY", "INVALID_BID"].includes(error?.code)) {
+    if (["SESSION_ACCOUNT_ONLY", "INVALID_BID", "INVALID_BUDGET"].includes(error?.code)) {
       sendJson(res, 400, { error: error.message, code: error.code });
       return;
     }

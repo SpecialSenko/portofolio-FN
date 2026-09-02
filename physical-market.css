@@ -40,33 +40,6 @@
 
 .physical-cart-count[hidden] { display: none; }
 
-.physical-account-band {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 11px 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.physical-account-mark {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--panel-2);
-  color: var(--text);
-}
-
-.physical-account-mark svg { width: 17px; height: 17px; }
-.physical-account-copy { min-width: 0; flex: 1; }
-.physical-account-name { margin: 0; font-size: 12px; font-weight: 800; }
-.physical-account-meta { margin: 3px 0 0; color: var(--muted); font-size: 10.5px; }
-
 .physical-badge {
   display: inline-flex;
   align-items: center;
@@ -321,8 +294,7 @@
 }
 
 @media (max-width: 760px) {
-  .physical-head,
-  .physical-account-band { align-items: flex-start; flex-wrap: wrap; }
+  .physical-head { align-items: flex-start; flex-wrap: wrap; }
   .physical-head-controls { width: 100%; align-items: stretch; }
   .physical-head .market-mode-switch { width: min(100%, 168px); margin-left: auto; }
   .physical-actions { width: 100%; justify-content: flex-start; }

@@ -36,7 +36,8 @@ test("global, digital, and physical searches stay separate and route to stores",
   const inventoryBanner = html.indexOf('id="inventoryBanner"');
   const tradesPage = html.indexOf('<section class="page" data-page="trades" hidden>');
   assert.ok(inventoryPage < inventoryBanner && inventoryBanner < tradesPage);
-  assert.ok(html.indexOf('id="physicalGrid"') < html.indexOf('id="physicalSellerGrid"'));
+  assert.ok(html.indexOf('id="physicalSellerGrid"') < html.indexOf('id="physicalGrid"'));
+  assert.doesNotMatch(html, /id="physicalAccountBand"/);
   assert.doesNotMatch(html, /physical-profile-grid/);
   assert.doesNotMatch(html, /viewAllPhysicalStores|All physical stores/);
   assert.ok(html.indexOf('id="physicalCartButton"') < html.indexOf('id="steamAuth"'));
